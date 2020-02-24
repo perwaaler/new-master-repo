@@ -1,4 +1,4 @@
-% code for computing and plotting empirical vs model 1uantiles
+% code for computing and plotting empirical vs model Quantiles
 
 k=7
 pp = (1:100)/101;                                                   % select percentiles
