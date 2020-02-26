@@ -3,16 +3,18 @@
 % estimate P(collision). Data_matrix  can be either danger_FEA, DAFEA, X,
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
+%%
+load('data_500enc_r_safe.mat')
 %% Initial plots
 data_type = 1;
-data_matrix = all_data{2,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
+data_matrix = all_data{38,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values
 min_data = data_matrix(find(min(data_matrix,[],2)<Inf),:);
 min_data = min(min_data,[],2)
 
 % find minimum and maximum thresholds based on amount of data to be used
-u_minmax = find_threshold(min_data, 0.05, 0.8)
+u_minmax = find_threshold(min_data, 0.15, 0.8)
 u_l = u_minmax(1);
 u_u = u_minmax(2);
 
@@ -23,7 +25,7 @@ title('untransformed data')
 % transforms
 p = 2;
 transinv = @(x)1./(3 + x).^p;
-transex = @(x)exp(-0.6*(x - 2));
+transex = @(x)exp(-0.8*(x - 0));
 transneg = @(x) -x;
 
 % choose transform to use
@@ -207,7 +209,7 @@ plot(U, param_save(2,:))
 title('xi_{est}')
 hold on
 if compute_ci == 1
-    plot(U,ci_xi_u)
+    plot(U,ci_xi_u,'.')
 end
 
 subplot(223)
@@ -218,21 +220,22 @@ if min(param_save(2,:))<0
     title('upper endpoint estimates')
 end
 subplot(224)
-if logit==1
-    plot(U,log10(pc))
-    title('log(p_{est})')
-    if compute_ci == 1
-        hold on
-        %plot(U,ci_p_nea_u)
-    end
-else
-    plot(U,pc)
-    title('p_{est}')
-    if compute_ci == 1
-        hold on
-        %plot(U,ci_p_nea_u)
-    end
-end
+% if logit==1
+%     plot(U,log10(pc))
+%     title('log(p_{est})')
+%     if compute_ci == 1
+%         hold on
+%         %plot(U,ci_p_nea_u)
+%     end
+% else
+%     plot(U,pc)
+%     title('p_{est}')
+%     if compute_ci == 1
+%         hold on
+%         %plot(U,ci_p_nea_u)
+%     end
+% end
+thr_autofind(ci_xi_u, param_save(2,:),m)
 
 %% estimating p(collision type i)
 p_interactive = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N; % probability of encounter being interactive

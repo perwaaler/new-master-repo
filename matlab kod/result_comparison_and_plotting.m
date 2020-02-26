@@ -37,6 +37,7 @@ b = plot(success_rate_danger_FEA,'b')
 plot(ci_success_danger_FEA,'--','color','b')
 legend([a b],'DAFEA','dangerFEA')
 title('success rate, p_exp = 0.6')
+
 subplot(212)
 a = plot(fail_rate_DAFEA,'r');hold on
 plot(ci_fail_DAFEA,'--','color','r')

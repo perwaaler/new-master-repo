@@ -1,8 +1,7 @@
 % simulation of encounters between two vehicles.
-clear all
 n = 1;                                  % number of encounter-samples desired           
 all_data = cell(n, 8) ;                 % collects data from each encounter-sample
-adress = string('DAFEA, X, danger_FEA, danger_max_EA, n pure coll., n impure coll., p_ea, p_nea')
+adress = "DAFEA, X, danger_FEA, danger_max_EA, n pure coll., n impure coll., p_ea, p_nea"
 N = 5*10^5;                                % number of encounters
 r = 0.06;                               % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
@@ -11,7 +10,7 @@ compute_X = 1;
 plotting = 1;                              % set to one if plots of encounters are wanted
 
  for kk = 1:n
-kk
+kk %#ok<*NOPTS>
 
 pause_length = 2^-5;
 
@@ -23,6 +22,7 @@ b = 0.2/2;
 % parameters for the gamma distribution for the initial steps
 step_mean = 0.13;
 step_var = 0.005;
+
 % parametes as fcn of mean and variance
 a_init = step_mean^2/step_var;
 b_init = step_var/step_mean;
@@ -216,20 +216,20 @@ sum(enc_type==2);   % print to keep track of number of pure collisions
 end
 
 % remove all elements/rows corresponding to encounters with no EA
-danger_FEA = danger_FEA(find(danger_FEA<Inf));
+danger_FEA = danger_FEA(danger_FEA<Inf);
 X = DAFEA;
-DAFEA(find(enc_type==1),:) = [];
-danger_max_EA(find(enc_type==1),:) = [];
+DAFEA(enc_type==1,:) = [];
+danger_max_EA(enc_type==1,:) = [];
 
 danger_max_EA = min(danger_max_EA')'; % find most dangerous moment during attempt to avoid collision
-danger_max_nodetec = danger_max_nodetec( find(isnan(danger_max_nodetec)==0) );
+danger_max_nodetec = danger_max_nodetec( isnan(danger_max_nodetec==0) );
 
 %%%%%%% Compute minimum ttc for all encounters where there was no evasive action
 if compute_ttc == 1 & compute_X ==1
     
 N_enc_type1 = sum(enc_type==1);
-A_NEA = A_save(find(enc_type==1),:);
-B_NEA = B_save(find(enc_type==1),:);
+A_NEA = A_save(enc_type==1,:);
+B_NEA = B_save(enc_type==1,:);
 diff_NEA = A_NEA - B_NEA;
 real_diff_NEA = real(diff_NEA);
 norm_diff_NEA = sqrt(conj(diff_NEA).*diff_NEA);
@@ -262,11 +262,11 @@ for i=1:N_enc_type1
                     end
                     ttc_dist(j,k) = ttc;
                     if ttc<0
-                        TTC = 0
-                        AA = A0
-                        BB = B0
-                        step0 = stepsize
-                        theta0 = theta
+                        TTC = 0;
+                        AA = A0;
+                        BB = B0;
+                        step0 = stepsize;
+                        theta0 = theta;
                     end
                 
                 end
@@ -278,7 +278,7 @@ for i=1:N_enc_type1
     end
 end
      
- X(find(enc_type==1),:) = ttc_dist_save;   % vector that contains ttc-data from all encounters.
+ X(enc_type==1,:) = ttc_dist_save;   % vector that contains ttc-data from all encounters.
 end
 
 if n>1

@@ -1,0 +1,5 @@
+function tri_fcn = triangle_fcn(x,d,p)
+tri_fcn = zeros(1,length(x));
+tri_fcn(abs(x)<d/2) = abs(x/d);
+tri_fcn(x>=0) = 1-x(x>=0)/d;
+end
