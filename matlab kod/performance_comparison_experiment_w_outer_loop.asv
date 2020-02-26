@@ -4,7 +4,7 @@
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 load 'data_500_enc_id4'
-safety_level = 2;
+safety_level = 1;
 data_type = 1;
 
 if safety_level == 2
@@ -50,7 +50,7 @@ qq_pause = 0.0;
 stability_pause = 0.0
 
     for jj=1:J
-    
+    jj
     p_interactive = all_data{jj,end-1};
     p_ea = all_data{jj,end};
     
@@ -344,8 +344,8 @@ if select_trans == 1
 elseif select_trans == 2
     save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc),'hit_rate')
     save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc), 'pc_save_matrix')
-    save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex, safety_level, Nenc), 'p_c_save_matrix')
-    save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex, safety_level, Nenc), 'param_save_matrix')
+    save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc), 'p_c_save_matrix')
+    save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc), 'param_save_matrix')
 elseif select_trans == 3
     save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_inv, d_inv, safety_level, Nenc),'hit_rate')
     save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'pc_save_matrix')

@@ -4,7 +4,7 @@
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 load 'data_500_enc_id4'
-safety_level = 2;
+safety_level = 1;
 data_type = 1;
 
 if safety_level == 2
