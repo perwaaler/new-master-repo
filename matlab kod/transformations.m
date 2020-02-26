@@ -6,8 +6,8 @@
 %%
 load('data_500enc_r_safe.mat')
 %% Initial plots
-data_type = 1;
-data_matrix = all_data{38,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
+data_type = 1;  
+data_matrix = all_data{51,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values
 min_data = data_matrix(find(min(data_matrix,[],2)<Inf),:);
@@ -19,7 +19,7 @@ u_l = u_minmax(1);
 u_u = u_minmax(2);
 
 clf;plot(min_data,'.'); hold on; plot(ones(1,length(min_data))*u_l); plot(ones(1,length(min_data))*u_u)
-ylim([-1,30])
+%ylim([-1,100])
 title('untransformed data')
 %% transforming data and plotting transformed data and thresholds
 % transforms
