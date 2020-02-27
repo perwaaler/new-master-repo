@@ -6,33 +6,33 @@
 % data_type=3 --> danger_max_EA
 
 
-data_type = 2
+data_type = 2;
 L = size(all_data,1);
 m = 10;                                                                % number of thresholds used for estimation
 ue_save_matrix = zeros(L,m);
 param_save_matrix = zeros(L,m);
 pc_save_matrix = zeros(L,m);
 p_c_save_matrix = zeros(L,m);
-p_interactive_matrix = all_data{:,7}
-p_ea_matrix = all_data{:,8}
+p_interactive_matrix = all_data{:,7};
+p_ea_matrix = all_data{:,8};
 
 
 % transformation parameters
 select_trans = 3;
-p_ex = 0.7;
+p_ex = 0.6;
 p_inv = 3;
 
 d_inv = 3;
 
 % plotting options
-compute_ci = 0;                                       % set equal to one if confidence intervals for xi are desired
+compute_ci = 1;                                       % set equal to one if confidence intervals for xi are desired
 qqplot = 0;
 save_plot = 0;
 
 % pausing options
-pause_trans = 0.8;
+pause_trans = 0.0;
 qq_pause = 0.0;
-stability_pause = 0.5
+stability_pause = 4;
 
 for l=1:L
 % generate sample of encounters
@@ -45,7 +45,7 @@ min_data = data_matrix(find(min(data_matrix,[],2)<Inf),:);
 min_data = min(min_data,[],2);
 
 % find minimum and maximum thresholds based on amount of data to be used
-u_minmax = find_threshold(min_data, 0.04, 0.5);
+u_minmax = find_threshold(min_data, 0.15, 0.5);
 u_l = u_minmax(1);
 u_u = u_minmax(2);
 
@@ -103,7 +103,7 @@ ci_xi_u = zeros(2,m)*nan;                                      % collects 95% ci
 ci_p_nea_u = zeros(2,m)*nan;
 
 param_save = zeros(2,m);
-pc = zeros(1,m)*nan;                                    % collects estimated collision probability for each threshold
+pc = zeros(1,m)*nan;                                       % collects estimated collision probability for each threshold
 ue_save = zeros(1,m)*nan;                                  % collects estimated upper endpoint
 max_data = max(max(trans_data));                           % largest observed value
 negL = @(par, exceed_data,u) -sum( log(gppdf(exceed_data,par(2),par(1),u)) );  %negative log likelihood fcn.
@@ -246,11 +246,11 @@ if compute_ci == 1
     plot(U,ci_sigma_u)
 end
 subplot(222)
-plot(U, param_save(2,:))
+plot(1:10   , param_save(2,:))
 title('xi_{est}')
 hold on
 if compute_ci == 1
-    plot(U,ci_xi_u)
+    plot(1:10,ci_xi_u)
 end
 
 subplot(223)
