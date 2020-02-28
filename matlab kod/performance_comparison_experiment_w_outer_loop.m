@@ -4,49 +4,7 @@
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 
-<<<<<<< HEAD
-for ii=(1:5)*2
-ii
-m = 10; 
-
-
-J = size(all_data,1);
-                                                           % number of thresholds used for estimation
-% what fraction of the data to use
-upper_fraction = 0.7;
-lower_fraction = 0.1;
-
-% transformation parameters
-select_trans = 2;
-p_ex = ii/10;
-p_inv = 3;
-d_inv = 3
-
-% plotting options
-compute_ci = 0;                                       % set equal to one if confidence intervals for xi are desired
-qqplot = 0;
-save_plot = 0;
-
-% arrays for saving data                                                         
-ue_save_matrix = zeros(J,m);
-param_save_matrix = zeros(J,m);
-pc_save_matrix = zeros(J,m);
-p_c_save_matrix = zeros(J,m);
-p_interactive_matrix = all_data{:,7};
-p_ea_matrix = all_data{:,8};
-
-% pausing options
-pause_trans = 0.0;
-qq_pause = 0.0;
-stability_pause = 0.0
-
-    for jj=1:J
-    jj
-    p_interactive = all_data{jj,end-1};
-    p_ea = all_data{jj,end};
-=======
 for safety_level=1:2
->>>>>>> 707b94f077223a6050e7c77b88f3bdc208df2a23
     
     data_type = 1;          % select which severity measure to use
     
