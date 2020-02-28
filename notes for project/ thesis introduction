@@ -1,0 +1,34 @@
+Traffic security research is a field that investigates matters of traffic safety, such as determining the factors that influence rates of accidents and
+finding methods and models that allows for making accurate traffic predictions. A central problem is to find reliable ways to estimate the [ref] rate of collision in a
+given traffic location. This turns out to be a challenging problem, primarily due to the fact that collisions are so rare [ref] - a problem which is exacerbated
+by the fact that these sometimes go unreported []. Even if it was practically feasible to collect sufficient amounts of crash data to produce a reliable estimate
+of the collision-rate, this reactive approach runs contrary to the main purpose of traffic security research, which is to prevent accidents before they occur.
+As such, there is a need to be able to evaluate traffic safety levels based on events that are less extreme. Research [ref] has established that there is a
+relationship between rates of traffic conflicts and rates of traffic collisions, and that the factors that lead to such events are similar[ref]. This suggests
+that it should be possible to infer the rates of collision based on observations of conflicts via some form of extrapolation method. Over recent years there has
+been a growing interest in using Extreme value theory (EVT) for such extrapolation purposes[ref] - a method made possible by the the fact that there seems to
+be continuity across the spectrum of traffic events of varying levels of severity [ref]. It requires few modeling assumptions, and is supported rigorous
+mathematical theory [1].
+
+Application of EVT to traffic safety is made possible by assigning in an objective way a value to each conflict [1] that indicates its level of danger, based on what is
+called a severity measure or safety surrogate measure. After a sufficient number of conflicts have been observed, and data has been collected, EVT is used to
+model the tail of the distribution generating the data, which corresponds to the most extreme traffic events.
+
+The selection of severity measure is an important part of the estimation process, both for practical and theoretical reasons. Two commonly used severity measure are
+time-to-collision (TTC) and post-encroachment-time (PET), both of which provide a snapshot of the degree of danger at a particular moment in time during an
+encounter. TTC is defined as the time it would take for two road users to collide under the assumption that they continue moving with constant velocity. PET is
+defined as the time it takes from time t0 for one road user to first intersect with the the path of motion of the other [ref]. A drawback with PET is that it
+it fails to capture the severity of the situation when a collision is avoided by a road user hitting the brakes, since this road user would then have to first
+accelerate after stopping before crossing the path of the other road user, resulting in a deceptively high PET value.
+
+
+TTC does not suffer this drawback, but has instead a disadvantage in that it assigns severity level in a somewhat
+unrealistic way, as road users in many interesting situations do not habitually continue forward with constant motion. For instance, in an intersection people will
+often decelerate out of habit, and have a certain trajectory in mind that they are expecting to follow. Furthermore, TTC can miss-identify certain situations
+as non-dangerous when the road users are not on collision course. For instance, if two road users pass each other in an intersection with high constant velocities
+and miss each other only by a few centimeters(for instance as a consequence of not seeing each other), we would classify that as a highly dangerous encounter as
+only a small modification of intended behavior would result in a devastating outcome. Despite this intuition, TTC would indicate no danger whatsoever, since they
+were technically never on collision course.
+
+One way to modify the notion of TTC to remedy this drawback, is to assign severity level in probabilistic manner. In the article
+[2008 - Probabilistic Frame],  Saunier and Sayed suggests taking the approach of assigning the severity level of 

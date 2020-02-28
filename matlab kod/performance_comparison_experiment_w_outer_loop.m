@@ -34,7 +34,7 @@ for safety_level=1:2
         d_inv = 3;
 
         % plotting options
-        compute_ci = 0;                                       % set equal to one if confidence intervals for xi are desired
+        compute_ci = 1;                                       % set equal to one if confidence intervals for xi are desired
         qqplot = 0;
         save_plot = 0;
 

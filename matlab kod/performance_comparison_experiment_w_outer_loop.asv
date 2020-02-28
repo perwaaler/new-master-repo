@@ -15,7 +15,7 @@ for safety_level=1:2
         load data_500enc_r_unsafe.mat
     end
 
-
+    %%%%% loop over different transformation parameters %%%%%
     for ii=(1:5)*2
         ii
         m = 10; 
@@ -24,8 +24,8 @@ for safety_level=1:2
         J = size(all_data,1);              
                                                                    % number of thresholds used for estimation
         % what fraction of the data to use
-        upper_fraction = 0.7;
-        lower_fraction = 0.1;
+        upper_fraction = 0.8;
+        lower_fraction = 0.15;
 
         % transformation parameters
         select_trans = 2;
@@ -34,7 +34,7 @@ for safety_level=1:2
         d_inv = 3;
 
         % plotting options
-        compute_ci = 0;                                       % set equal to one if confidence intervals for xi are desired
+        compute_ci = 1;                                       % set equal to one if confidence intervals for xi are desired
         qqplot = 0;
         save_plot = 0;
 
@@ -52,7 +52,8 @@ for safety_level=1:2
         pause_trans = 0.0;
         qq_pause = 0.0;
         stability_pause = 0.0
-
+        
+            %%%%% loop over each all sets of encounters %%%%%
             for jj=1:J
             jj
             p_interactive = all_data{jj,end-1};
@@ -308,7 +309,7 @@ for safety_level=1:2
             param_save_matrix(jj,:) = param_save(1,:) + 1i*param_save(2,:);
             ue_save_matrix(jj,:) = ue_save;
             pc_save_matrix(jj,:) = pc;
-            ci_xi_u_matrix(jj) = ci_xi_u;
+            ci_xi_u_matrix{jj,1} = ci_xi_u;
             pause(stability_pause)
 
 
@@ -327,7 +328,7 @@ for safety_level=1:2
             end
 
             % this estimaor gives P(C, EA) when p_nea is based on maximum
-            % or minimum danger leve
+            % or minimum severity level over attempt to avoid collision
             if data_type == 5 || data_type == 7
                 p_c = pc*p_ea
             end
