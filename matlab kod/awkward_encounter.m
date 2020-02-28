@@ -13,19 +13,19 @@ b = 0.2/2;
 
 % parameters relating to detection probability, pd = exp(-s*(D + d)^p)
 d = .60;
-s = 0.35;   % decrease to make it harder to detect
+s = 0.35;  % decrease to make it harder to detect
 p = 1.3;   % increase to make it unlikelier to detect for large d, but more likely for small d
 plot(linspace(0,10,100),exp(-s*(linspace(0,10,100)+d).^p))
 
 % Collision Avoidance Parameters: Parameter-Modification Factor = exp( -s*((x + d)/k)^-p )
-d_ca1 = 0.1;        % increase to reduce PMF
+d_ca1 = 0.1;    % increase to reduce PMF
 k_ca1 = 1.4;    % increase to decrease modification for x<k-d and reduce modification for x>k-d
-p_ca1 = 1.6;    % increases effect of avoidance modifier when 
+p_ca1 = 1.6;    % increases effect of avoidance modifier when
 s_ca1 = 0.2
 
-d_ca2 = 0.1;        % increase to reduce PMF
+d_ca2 = 0.1;    % increase to reduce PMF
 k_ca2 = 2.6;    % increase to decrease modification for x<k-d and reduce modification for x>k-d
-p_ca2 = 1.8;    % increases effect of avoidance modifier when 
+p_ca2 = 1.8;    % increases effect of avoidance modifier when
 s_ca2 = 2
 
 theta_range = pi/4; % range of the distribution of stepangles
@@ -34,10 +34,10 @@ r = 0.5; % collision radius of each person
 xinit = 10;
 sigma = 0.3;
 N=50;
-danger_FEA = zeros(1,N);         % danger index at time of first evasive action
-danger_CR = zeros(1,N);          % danger index at time of conflict resolution
-danger_nodetec = zeros(1,N); % highest index of danger for non-detection encounters
-enc_type = zeros(1,N);      % vector containing encounter type of each encounter
+danger_FEA = zeros(1,N);          % danger index at time of first evasive action
+danger_CR = zeros(1,N);           % danger index at time of conflict resolution
+danger_nodetec = zeros(1,N);      % highest index of danger for non-detection encounters
+enc_type = zeros(1,N);            % vector containing encounter type of each encounter
 for i=1:N
 % initiation
 A_real = -xinit;
@@ -47,7 +47,7 @@ B_im = normrnd(0,sigma);
 A = A_real+1i*A_im;
 B = B_real+1i*B_im;
 % data collection variables
-detection_status = 0; 
+detection_status = 0;
 encounter_classifier = 1; % 1 --> (no detection, no crash), -1 --> (detection, no crash) 2 --> (no detection, crash), -2 --> (detection, crash)
 danger_vec = []; % collects the danger index associated with each timestep
 detec_vec = [];    % interaction vector, 1 --> detection at timeframe, 0 --> no detection at timeframe
@@ -128,13 +128,13 @@ detec_vec = [];    % interaction vector, 1 --> detection at timeframe, 0 --> no 
                 hold off
                 pause(pause_length)
             end
-            if norm(A-B) < 2*r 
+            if norm(A-B) < 2*r
                 hold on
                 title("collision")
                 hold off
                 detec_vec(length(detec_vec) + 1) = 1;
                 danger_index = norm(A-B) - 2*r;
-                danger_vec(length(danger_vec) + 1) = danger_index; 
+                danger_vec(length(danger_vec) + 1) = danger_index;
                 encounter_classifier = 2;
                 break
             end
@@ -147,7 +147,7 @@ detec_vec = [];    % interaction vector, 1 --> detection at timeframe, 0 --> no 
         danger_nodetec(i) = min(danger_vec);
     else
         danger_FEA(i) = detec_dangerind(1);
-        danger_CR(i) = detec_dangerind(end);    
+        danger_CR(i) = detec_dangerind(end);
     end
 
 end
@@ -174,12 +174,12 @@ plot(linspace(0,10,100),exp(-s*(linspace(0,10,100)+d).^p))
 % Collision Avoidance Parameters: Parameter-Modification Factor = exp( -s*((x + d)/k)^-p )
 d_ca1 = 0.1;        % increase to reduce PMF
 k_ca1 = 1.4;    % increase to decrease modification for x<k-d and reduce modification for x>k-d
-p_ca1 = 1.6;    % increases effect of avoidance modifier when 
+p_ca1 = 1.6;    % increases effect of avoidance modifier when
 s_ca1 = 0.2
 
 d_ca2 = 0.1;        % increase to reduce PMF
 k_ca2 = 2.6;    % increase to decrease modification for x<k-d and reduce modification for x>k-d
-p_ca2 = 1.8;    % increases effect of avoidance modifier when 
+p_ca2 = 1.8;    % increases effect of avoidance modifier when
 s_ca2 = 2
 
 theta_range = pi/4; % range of the distribution of stepangles
@@ -207,7 +207,3 @@ n_coll = 249;
 p_coll = n_coll/N;
 sdev = sqrt( p_coll*(1 - p_coll)/N )
 ci = p_coll + [-1,1]*1.96*sdev
-
-
-
-

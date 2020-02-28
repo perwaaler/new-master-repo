@@ -44,7 +44,9 @@ for safety_level=1:2
         pc_save_matrix = zeros(J,m);
         p_c_save_matrix = zeros(J,m);
         ci_xi_u_matrix = cell(J, 1); 
-
+        thr_save_matrix = zeros(J,m);
+        p_exceed_matrix = zeros(J,m);
+        
         p_interactive_matrix = all_data{:,7};
         p_ea_matrix = all_data{:,8};
 
@@ -99,7 +101,7 @@ for safety_level=1:2
             u_u_trans = u_min_max(2);
             m = 10;
             U = sort(trans(linspace(u_l, u_u,m)));
-
+            thr_save_matrix(jj,:) = U;
             trans_data = trans(data_matrix);
 
             clf; plot(trans(min_data),'.'); hold on
@@ -157,6 +159,7 @@ for safety_level=1:2
                 end
                 param_save(:,k) = param;
                 p_u = length(exceed)/length(data);
+                p_exceed_matrix(jj,k) = p_u;
                 pc(k) = p_u*(1 - gpcdf(trans(0), param(2), param(1),U(k)) );
                 ue = U(k) - param(1)/param(2);
                 if param(2)<0; ue_save(k) = ue; end 
@@ -345,20 +348,28 @@ for safety_level=1:2
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc),'hit_rate')
         save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',      data_type, select_trans, 1, safety_level, Nenc), 'pc_save_matrix')
         save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, 1, safety_level, Nenc), 'p_c_save_matrix')
+        save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, 1, safety_level, Nenc), 'thr_save_matrix')
         save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, 1, safety_level, Nenc), 'param_save_matrix')
         save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc), 'ci_xi_u_matrix')
+        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc), 'p_exceed_matrix')    
+        
     elseif select_trans == 2
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc),'hit_rate')
         save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',      data_type, select_trans, p_ex*10, safety_level, Nenc), 'pc_save_matrix')
         save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, p_ex*10, safety_level, Nenc), 'p_c_save_matrix')
         save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, p_ex*10, safety_level, Nenc), 'param_save_matrix')
+        save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, p_ex*10, safety_level, Nenc), 'thr_save_matrix')
         save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc), 'ci_xi_u_matrix')
+        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, p_ex*10, safety_level, Nenc), 'p_exceed_matrix')    
     elseif select_trans == 3
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_inv, d_inv, safety_level, Nenc),'hit_rate')
         save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_samplesize_%d',      data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'pc_save_matrix')
         save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'p_c_save_matrix')
         save(sprintf('param__datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_samplesize_%d',  data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'param_save_matrix')
+        save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',        data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'thr_save_matrix')
         save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'ci_xi_u_matrix')
+        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'p_exceed_matrix')    
+    
     end
 
     end
