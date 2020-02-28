@@ -218,9 +218,131 @@ xi_matrix = imag(param_save_matrix)
 all_ci2 = ci_xi_u_matrix
 
 thr_autofind(all_ci2{2,1},xi,n_thr)
+%% comparing succss and failure rates
+
+% DAFEA transformed
+plots = cell(5,2)
+clf
+for k=1:5
+    
+    i=k*2/10
+    pc_safe1 = get_data(3, 1, 2, i, 1);
+    pc_safe2 = get_data(3, 1, 2, i, 2);
+
+    [succ_rate, fail_rate] = est_succ_fail_rate(pc_safe1, pc_safe2)
+
+    ci2_succ = compute_ci_pest(succ_rate, 500)
+    ci2_fail = compute_ci_pest(fail_rate, 500)
+
+    subplot(211)
+    plots{k,1} = plot(succ_rate, 'color' ,[1 i-0.2 0])
+    hold on
+    plot(ci2_succ, ':', 'color' ,[1 i-0.2 0])
+    title('success rate for different transformation parameters')
+    xlabel('threshold index')
+    legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], '0.2','0.4','0.6','0.8','1')
+    
+    subplot(212)
+    plots{k,2} = plot(fail_rate, 'color' ,[0 i-0.2 1])
+    hold on
+    plot(ci2_fail, ':', 'color' ,[0 i-0.2 1])
+    xlabel('threshold index')
+    legend([plots{1,2},plots{2,2},plots{3,2},plots{4,2},plots{5,2}], '0.2','0.4','0.6','0.8','1')
+end
+
+%% comments on success/failure plots
+% Increasing the power parameter seems to have the effect of increasing the
+% success rate. This is likely due to the fact that, as we have observed,
+% increasing the power parameter has the effect of decreasing the NZE-rate,
+% which results in fewer indeterminate tests. From these plots we can
+% conclude that if we want to maximize success rate and mimimize failure
+% rate, we should use p_ex=1.0, and use the lowest threshold. It is likely
+% that we are better of avoiding the retunr level to estimate.
+
+%% Using return levels in order to determine which intersection is safer
 
 
+m = 100;
+plots = cell(5,2)
+clf
+for k=1:5
+    
+    p_ex=k*2/10;
+    
+    param1 = get_data(4, 1, 2, p_ex, 1);
+    xi_matrix1 = imag(param1);
+    sigma_matrix1 = real(param1);
+    u_matrix1 = get_data(6, 1, 2, p_ex, 1);
+    p_exceed1 = get_data(7, 1, 2, p_ex, 1);
+    x_m1 = return_level_m(m, sigma_matrix1, xi_matrix1, u_matrix1, p_exceed1);    
+    
+    param2 = get_data(4, 1, 2, p_ex, 2);
+    xi_matrix2 = imag(param2);
+    sigma_matrix2 = real(param);
+    u_matrix2 = get_data(6, 1, 2, p_ex, 2);
+    p_exceed2 = get_data(7, 1, 2, p_ex, 2);
+    x_m2 = return_level_m(m, sigma_matrix2, xi_matrix2, u_matrix2, p_exceed2);
 
+    [succ_rate, fail_rate] = est_succ_fail_rate(x_m1, x_m2)
+
+    ci2_succ = compute_ci_pest(succ_rate, 500)
+    ci2_fail = compute_ci_pest(fail_rate, 500)
+
+    subplot(211)
+    plots{k,1} = plot(succ_rate, 'color' ,[1 p_ex-0.2 0])
+    hold on
+    plot(ci2_succ, ':', 'color' ,[1 p_ex-0.2 0])
+    title('success rate for different transformation parameters')
+    xlabel('threshold index')
+    legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], '0.2','0.4','0.6','0.8','1')
+    
+    subplot(212)
+    plots{k,2} = plot(fail_rate, 'color' ,[0 p_ex-0.2 1])
+    hold on
+    plot(ci2_fail, ':', 'color' ,[0 p_ex-0.2 1])
+    xlabel('threshold index')
+    legend([plots{1,2},plots{2,2},plots{3,2},plots{4,2},plots{5,2}], '0.2','0.4','0.6','0.8','1')
+end
+
+%% comments on using return levels for infering safety levels
+% well... apparantly its pretty fucking obvious which method should be used
+% to make inferences about safety levels... Using p_exp=1, we manage to get
+% 100% success rate for 5 out of 10 thresholds, using m=100.
+%
+% Three effects can be observed from the plots. First, we still see that the
+% stronger transformations actually improves the ability to infer safety
+% levels, as performance seems to grow with the strength of the
+% transformation. Why this phenomena occurs is hard to say. It is possible
+% that it is due to the fact that increasing the power of the
+% transformation has the effect of lessening the effect of outliers,
+% resulting in more stability, as the inference depends more heavily on
+% observations that are more regular. Second, we see that the inference is
+% more accurate when using lower thresholds. Third, we see that lowering the 
+% return period m results in significantly improved estimates.
+%
+% These observations together suggets that performance improves when we
+% are basing the inference on more data. In other words, we are letting the
+% regular observations do most of the talking. This actually makes sense,
+% since - given what we know about the simulation - there is no reason why
+% basing our guess on non-estreme observations would not work well for
+% safety order inference, since infering the safety order is equivalent to inferring
+% which data set corresponds to the larger radius - an inference for which
+% there is no need to focus on extreme events.
+%
+% It is important to note however that this experiment does not necesarily
+% demonstrate that we will see these benefits with traffic data. What we are
+% seing is that in order to infer which traffic location is safer for such
+% simulated environments, we can look at the regular data, i.e. we are
+% dealing with a type of data for which inference about the extremes based
+% on the not-extreme data happens to work well. It is not clear if the same
+% would be true for say real traffic data; it is not clear to which extent
+% we can say something about the relative danger levels of two
+% intersections when basing the inference mostly on regular non-extreme
+% behaviour. Put in other words, it is not clear how extreme the events in
+% traffic have to be before they start providing us with valuable
+% information about collision probabilities. One cannot simply assume
+% continuity accross the spectrum of encounter-severity the way we can for
+% this simulated data.
 
 
 

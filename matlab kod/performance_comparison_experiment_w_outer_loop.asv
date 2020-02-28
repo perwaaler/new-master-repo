@@ -101,8 +101,27 @@ for safety_level=1:2
             u_u_trans = u_min_max(2);
             m = 10;
             U = sort(trans(linspace(u_l, u_u,m)));
-            thr_save_matrix(jj,:) = U;
+
             trans_data = trans(data_matrix);
+            for ss=1:10
+                p_exceed_matrix(jj,ss) = length(trans_data(trans_data>U(ss)))/(50000);
+            end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
+            end
+    save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, p_ex*10, safety_level, Nenc), 'p_exceed_matrix')
+
+    end
+end
+            
+            
+            
+            
+            
+            
+            
+            
+            
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
             clf; plot(trans(min_data),'.'); hold on
             plot(1:length(min_data),U'*ones(1,length(min_data)), 'k');plot(ones(1,length(min_data))*trans(0));ylim([trans(30),trans(0)*1.1])
@@ -159,7 +178,7 @@ for safety_level=1:2
                 end
                 param_save(:,k) = param;
                 p_u = length(exceed)/length(data);
-                p_exceed_matrix(jj,k) = p_u;
+                p_exceed_matrix(jj,k);
                 pc(k) = p_u*(1 - gpcdf(trans(0), param(2), param(1),U(k)) );
                 ue = U(k) - param(1)/param(2);
                 if param(2)<0; ue_save(k) = ue; end 
@@ -351,7 +370,6 @@ for safety_level=1:2
         save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, 1, safety_level, Nenc), 'thr_save_matrix')
         save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, 1, safety_level, Nenc), 'param_save_matrix')
         save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc), 'ci_xi_u_matrix')
-        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc), 'p_exceed_matrix')    
         
     elseif select_trans == 2
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc),'hit_rate')
@@ -368,8 +386,6 @@ for safety_level=1:2
         save(sprintf('param__datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_samplesize_%d',  data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'param_save_matrix')
         save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',        data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'thr_save_matrix')
         save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'ci_xi_u_matrix')
-        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, p_inv, d_inv, safety_level, Nenc), 'p_exceed_matrix')    
-    
     end
 
     end
