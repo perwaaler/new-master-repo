@@ -29,7 +29,7 @@ lower_fraction = 0.1;
 select_trans = 2;
 p_ex = ii/10;
 p_inv = 3;
-d_inv = 3;
+d_inv = 3
 
 % plotting options
 compute_ci = 0;                                       % set equal to one if confidence intervals for xi are desired

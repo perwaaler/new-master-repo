@@ -14,7 +14,7 @@ for i = 1:n_thr-1
     end
     thr_opt(i) = (mean(zum)+0.2)*(1 + 1.2*(i/n_thr)^2);
 end
-thr_opt
-[mini,I] = min(thr_opt(1:end-1));
+thr_opt %#ok<NOPRT>
+[~,I] = min(thr_opt(1:end-1));
 thr_opt = I;
 end

@@ -25,7 +25,7 @@ title('untransformed data')
 % transforms
 p = 2;
 transinv = @(x)1./(3 + x).^p;
-transex = @(x)exp(-0.8*(x - 0));
+transex = @(x)exp(-0.6*(x - 0));
 transneg = @(x) -x;
 
 % choose transform to use

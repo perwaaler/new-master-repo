@@ -209,6 +209,21 @@ legend([a b c d e],'0.2','0.4','0.6','0.8','1.0')
 % better by relaxing the transformation a little. In other words, we want
 % to use a transformation that is stable, but not too stable. We want to
 % formulate an algorithm that strikes a balance between stability and 
-%% using automated threshold selection to 
+%% using automated threshold selection to select threshold
+load p_c_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
+pc2 = p_c_save_matrix;
+load param_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
+load param_ci_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
+xi_matrix = imag(param_save_matrix)
+all_ci2 = ci_xi_u_matrix
+
+thr_autofind(all_ci2{2,1},xi,n_thr)
+
+
+
+
+
+
+
 
 
