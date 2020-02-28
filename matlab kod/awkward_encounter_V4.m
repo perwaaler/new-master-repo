@@ -1,16 +1,18 @@
 % simulation of encounters between two vehicles.
-n = 1;                                  % number of encounter-samples desired           
-all_data = cell(n, 8) ;                 % collects data from each encounter-sample
-adress = "DAFEA, X, danger_FEA, danger_max_EA, n pure coll., n impure coll., p_ea, p_nea"
+
+clear all
+n = 1;                                  % number of encounter-samples desired
+all_data = cell(n, 12) ;                 % collects data from each encounter-sample
+adress = string('DAFEA, X, det_ttc_FEA, ttc_min, ttc_min_EA, danger_FEA, distance_min_EA, danger_max, n pure coll., n impure coll., p_ea, p_nea')
 N = 5*10^5;                                % number of encounters
 r = 0.06;                               % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
-compute_ttc = 0;                           % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
+est_ttc = 0;                           % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 1;
-plotting = 1;                              % set to one if plots of encounters are wanted
+plotting = 0;                              % set to one if plots of encounters are wanted
 
  for kk = 1:n
-kk %#ok<*NOPTS>
+kk
 
 pause_length = 2^-5;
 
@@ -22,7 +24,6 @@ b = 0.2/2;
 % parameters for the gamma distribution for the initial steps
 step_mean = 0.13;
 step_var = 0.005;
-
 % parametes as fcn of mean and variance
 a_init = step_mean^2/step_var;
 b_init = step_var/step_mean;
@@ -46,14 +47,17 @@ thetavar0 = 0.015;                      % variance of initial theta
 xinit = 6;                              % determines how far apart they are at the start
 sigma = 0.3;                            % variance of initial starting position
 danger_FEA = nan*zeros(N,1);            % danger index at time of first evasive action
+det_ttc_FEA = inf*ones(N,1);
 DAFEA = ones(N, NTTC)*nan;              % Saves danger at first moment of evasive action; each row contains NTTC sampled ttc values
 danger_max_nodetec = nan*zeros(1,N);    % highest index of danger for non-detection encounters (i.e. type 1 encounters)
-danger_max = nan*zeros(1,N);            % collects data from most dangerous timeframe from each encounter
+dist_min = nan*zeros(1,N);              % collects data from most dangerous timeframe from each encounter
+ttc_min = nan*zeros(1,N);
 enc_type = zeros(1,N);                  % vector containing encounter type of each encounter
 min_stepsize = 0.02;                    % set to make it impossible for a stepsize to be smaller than this
 stability_fac = 0.04;
-danger_max_EA = nan*ones(N,1000);       % collects danger measurements at each time frame where there is evasive action
-A_save = ones(N,500)*Inf;    
+distance_min_EA = inf*ones(N,1000);       % collects danger measurements at each time frame where there is evasive action
+ttc_min_EA = inf*ones(N,1000);       % collects danger measurements at each time frame where there is evasive action
+A_save = ones(N,500)*Inf;
 B_save = ones(N,500)*Inf;
 A_theta_save = ones(N,500)*Inf;
 B_theta_save = ones(N,500)*Inf;
@@ -63,9 +67,9 @@ aa =1;
 bb =1;
 
 for i=1:N
-i
+%i
 %%% initiation of encounter
-nn = 0;                                                      
+nn = 0;
 EA_index = 1;                                                         % variable used to find most dangerous moment during attempt to avoid collision
 first_detection = 0;                                                  % They have not yet detected eachother
 stepsize = min_stepsize*[1 1] + [gamrnd(a_init*[1 1],b_init)];        % determines average speed of each vehicle
@@ -83,6 +87,7 @@ B0 = B_real + 1i*B_im;
 detection_status = 0;
 encounter_classifier = 1; % tracks status: sign indicates interaction status (+ --> no interaction, - --> interaction), number indicates collision status (1 --> no collision, 2 --> collision)
 danger_enc_i = [];        % saves danger index associated with each timestep
+ttc_enc_i = [];        % saves danger index associated with each timestep
 counter = 0;
     while real(A0) < xinit && real(B0) > -xinit
         counter = counter + 1;
@@ -90,17 +95,19 @@ counter = 0;
         D = norm(A0-B0);
         Dim = norm(imag(A0-B0));                  % vertical part of the distance; if large, evasive action should be unlikely
         dp = Amp*exp(-(s*D)^p)*exp(-(2.5*Dim)^3); % detection probability
-        
+
 %%%%%%%%%%%%%%%%%%%%%%%% detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if  (detection_status==1 | rand(1) < dp) && real(A0) < real(B0)
             % saving information in vectors, and updating status
-            if first_detection == 0 & compute_ttc == 1 % a loop that collects information at first moment of evasive action
+            if first_detection == 0 & est_ttc == 1 % a loop that collects information at first moment of evasive action
                 for k=1:NTTC
                     ttc = ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, thetavar*bb, stability_fac);
                     DAFEA(i,k) = ttc;
                 end
+                det_ttc_FEA(i) = compute_ttc(A0,B0,stepsize,theta,r);
                 danger_FEA(i) = norm(A0-B0) - 2*r;
-                danger_max_EA(i,EA_index) = norm(A0-B0) - 2*r;
+                distance_min_EA(i,EA_index) = norm(A0-B0) - 2*r;
+                ttc_min_EA(i,EA_index) = compute_ttc(A0,B0,stepsize,theta,r);
                 EA_index = EA_index + 1;
             end
 
@@ -109,7 +116,7 @@ counter = 0;
             encounter_classifier = -1;
             danger_index = D - 2*r;
             danger_enc_i(length(danger_enc_i) + 1) = danger_index;
-
+            ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
             % take next step
                 pred_posA = A0 + a*b; % prediction of the A's future position
                 pred_posB = B0 - a*b; % prediction of the B's future position
@@ -122,7 +129,8 @@ counter = 0;
                 A1 = A0 + stepsize(1)*exp(1i*theta(1));
                 B1 = B0 - stepsize(2)*exp(1i*theta(2));
 
-            danger_max_EA(i,EA_index) = norm(A1-B1) - 2*r;
+            distance_min_EA(i,EA_index) = norm(A1-B1) - 2*r;
+            ttc_min_EA(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
             EA_index = EA_index + 1;
 
             if plotting == 1
@@ -144,8 +152,10 @@ counter = 0;
                 title("collision")
                 hold off
                 danger_index = norm(A1-B1) - 2*r;
-                danger_max(i) = danger_index;
+                dist_min(i) = danger_index;
+                ttc_min(i) = compute_ttc(A1,B1,stepsize,theta,r);
                 danger_enc_i(length(danger_enc_i) + 1) = danger_index;
+                ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A1,B1,stepsize,theta,r);
                 encounter_classifier = -2;             % set encounter to type crash with attempted evasive action
                 break
             end
@@ -155,6 +165,7 @@ counter = 0;
 
             danger_index = D - 2*r;
             danger_enc_i(length(danger_enc_i) + 1) = danger_index;
+            ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
 
             % taking next step
             theta = theta + normrnd(-stability_fac*theta,thetavar);
@@ -164,7 +175,7 @@ counter = 0;
             A1 = A0 + stepsize(1)*exp(1i*theta(1));
             B1 = B0 - stepsize(2)*exp(1i*theta(2));
             D = norm(A1-B1);
-
+            ttc = compute_ttc(A1,B1,stepsize,theta,r);
             if plotting == 1
                 xlim([-xinit,xinit])
                 ylim([-4,4])
@@ -186,9 +197,12 @@ counter = 0;
                 %%% compute ttc (which will now be negative) and danger_FEA
                 danger_FEA(i) = danger_index;
                 ttc = ttc_simulator_double_momentum_improved(A1,B1,stepsize,theta,min_stepsize,var_step,r, thetavar, stability_fac);
-                DAFEA(i,:) = ttc*ones(1,NTTC);            
+                DAFEA(i,:) = ttc*ones(1,NTTC);
+                det_ttc_FEA(i) = ttc;
                 danger_enc_i(length(danger_enc_i) + 1) = danger_index;
-                danger_max(i) = danger_index;
+                ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A1,B1,stepsize,theta,r);
+                dist_min(i) = danger_index;
+                ttc_min(i) = compute_ttc(A1,B1,stepsize,theta,r);
                 encounter_classifier = 2;                                  % indicates a collision with no evasive action attempted
                 break
             end
@@ -197,7 +211,7 @@ counter = 0;
         B_save(i,nn) = B1;
         A_theta_save(i,nn) = theta(1);
         B_theta_save(i,nn) = theta(2);
-        
+
         A0 = A1;
         B0 = B1;
     end
@@ -205,31 +219,32 @@ counter = 0;
     B_stepsize_save(i) = stepsize(2);
 
     enc_type(i) = encounter_classifier;
-    danger_max(i) = min(danger_enc_i);
+    dist_min(i) = min(danger_enc_i);
+    ttc_min(i) = min(ttc_enc_i);
 
     if encounter_classifier == 1                   % i.e. no evasive action and no collision has occured
         danger_max_nodetec(i) = min(danger_enc_i);
-        danger_FEA(i) = Inf;    % Inf indicates that there was no evasive action
+        danger_FEA(i) = Inf;                       % Inf indicates that there was no evasive action
     end
-    
-sum(enc_type==2);   % print to keep track of number of pure collisions
+
 end
 
 % remove all elements/rows corresponding to encounters with no EA
-danger_FEA = danger_FEA(danger_FEA<Inf);
+danger_FEA = danger_FEA(find(danger_FEA<Inf));
 X = DAFEA;
-DAFEA(enc_type==1,:) = [];
-danger_max_EA(enc_type==1,:) = [];
-
-danger_max_EA = min(danger_max_EA')'; % find most dangerous moment during attempt to avoid collision
-danger_max_nodetec = danger_max_nodetec( isnan(danger_max_nodetec==0) );
+DAFEA(find(enc_type==1),:) = [];
+distance_min_EA(find(enc_type==1),:) = [];
+distance_min_EA = min(distance_min_EA,[],2);
+ttc_min_EA(find(enc_type==1),:) = [];
+ttc_min_EA = min(ttc_min_EA,[],2);
+danger_max_nodetec = danger_max_nodetec( find(isnan(danger_max_nodetec)==0) );
 
 %%%%%%% Compute minimum ttc for all encounters where there was no evasive action
-if compute_ttc == 1 & compute_X ==1
-    
+if est_ttc == 1 & compute_X ==1
+
 N_enc_type1 = sum(enc_type==1);
-A_NEA = A_save(enc_type==1,:);
-B_NEA = B_save(enc_type==1,:);
+A_NEA = A_save(find(enc_type==1),:);
+B_NEA = B_save(find(enc_type==1),:);
 diff_NEA = A_NEA - B_NEA;
 real_diff_NEA = real(diff_NEA);
 norm_diff_NEA = sqrt(conj(diff_NEA).*diff_NEA);
@@ -237,12 +252,12 @@ ttc_dist_save = ones(N_enc_type1, NTTC)*Inf;
 for i=1:N_enc_type1
     %i
     ttc_dist = ones(500, NTTC)*Inf;
-    ttc_min = Inf;
+    ttc_minimum = Inf;
     min_ttc_index = 1;
 %     if min(norm_diff_NEA(i,:))>2
 %         continue
 %     end
-    
+
     for j=1:100
         t = norm_diff_NEA(i,j)/(A_stepsize_save(i) + B_stepsize_save(i));
         if real_diff_NEA(i,j)<0   &   t < 6    &     min(norm_diff_NEA(i,:)) < 4
@@ -250,45 +265,53 @@ for i=1:N_enc_type1
                 B0 = B_NEA(i,j);
                 theta = [A_theta_save(i,j), B_theta_save(i,j)];
                 stepsize = [A_stepsize_save(i), B_stepsize_save(i)];
-                
+
                 for k=1:NTTC
                     ttc = ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, thetavar*bb, stability_fac);
                     if ttc< Inf
                         pause(0.0)
                     end
-                    if ttc < ttc_min
-                        ttc_min=ttc;
+                    if ttc < ttc_minimum
+                        ttc_minum=ttc;
                         min_ttc_index = j;    % keeps track of which moment is most dangerous
                     end
                     ttc_dist(j,k) = ttc;
                     if ttc<0
-                        TTC = 0;
-                        AA = A0;
-                        BB = B0;
-                        step0 = stepsize;
-                        theta0 = theta;
+                        TTC = 0
+                        AA = A0
+                        BB = B0
+                        step0 = stepsize
+                        theta0 = theta
                     end
-                
+
                 end
-                
-                
-                     
+
+
+
     end
     ttc_dist_save(i,:) = ttc_dist(min_ttc_index,:); % find ttc-distribution from moment with lowest minimum ttc.
     end
 end
-     
- X(enc_type==1,:) = ttc_dist_save;   % vector that contains ttc-data from all encounters.
+
+ X(find(enc_type==1),:) = ttc_dist_save;   % vector that contains ttc-data from all encounters.
 end
 
-if n>1
+% ttc and stochastic-ttc measurements
 all_data{kk,1} = DAFEA;
 all_data{kk,2} = X;
-all_data{kk,3} = danger_FEA;
-all_data{kk,4} = danger_max_EA;
-all_data{kk,5} = sum(enc_type==2);
-all_data{kk,6} = sum(enc_type==-2);
-all_data{kk,7} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N;
-all_data{kk,8} = (sum(enc_type==-1)+sum(enc_type==-2))/N;
-end
+all_data{kk,3} = det_ttc_FEA;
+all_data{kk,4} = ttc_min';
+all_data{kk,5} = ttc_min_EA;
+
+% minim distance measurements
+all_data{kk,6} = danger_FEA;
+all_data{kk,7} = distance_min_EA;
+all_data{kk,8} = dist_min';
+
+% other information
+all_data{kk,9} = sum(enc_type==2);                                               % saves p_nea_coll
+all_data{kk,10} = sum(enc_type==-2);                                             % saves p_ea_coll
+all_data{kk,11} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N;  % saves p_interactive
+all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                       % saves p_ea
+
  end

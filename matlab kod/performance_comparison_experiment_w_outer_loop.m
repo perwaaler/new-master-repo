@@ -114,7 +114,7 @@ for safety_level=1:2
             exceed = trans_data(find(trans_data > u_l_trans));
             negL = @(par,exceed_data,u) -sum( log(gppdf(exceed_data,par(2),par(1),u)) );
             init = fminsearch(@(par) negL(par, exceed, u_l_trans), [3 0.3]);
-            pause(1)
+
             %%% Fit models for range of thresholds and show diagnostic plots
             shake_guess = 0.1;                 % variance of noise that gets added to initial guess when stuck
             Nenc = length(data_matrix(:,1));   % number of encounters
@@ -345,13 +345,13 @@ for safety_level=1:2
     
     % save results
     if select_trans == 1
-        save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc),'hit_rate')
-        save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',      data_type, select_trans, 1, safety_level, Nenc), 'pc_save_matrix')
-        save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, 1, safety_level, Nenc), 'p_c_save_matrix')
-        save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, 1, safety_level, Nenc), 'thr_save_matrix')
-        save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, 1, safety_level, Nenc), 'param_save_matrix')
-        save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc), 'ci_xi_u_matrix')
-        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, 1, safety_level, Nenc), 'p_exceed_matrix')    
+        save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, [], safety_level, Nenc),'hit_rate')
+        save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',      data_type, select_trans, [], safety_level, Nenc), 'pc_save_matrix')
+        save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, [], safety_level, Nenc), 'p_c_save_matrix')
+        save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',     data_type, select_trans, [], safety_level, Nenc), 'thr_save_matrix')
+        save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',   data_type, select_trans, [], safety_level, Nenc), 'param_save_matrix')
+        save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, [], safety_level, Nenc), 'ci_xi_u_matrix')
+        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, [], safety_level, Nenc), 'p_exceed_matrix')    
         
     elseif select_trans == 2
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_samplesize_%d',data_type, select_trans, p_ex*10, safety_level, Nenc),'hit_rate')
