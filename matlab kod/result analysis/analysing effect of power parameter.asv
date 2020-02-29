@@ -124,29 +124,22 @@ xlabel('threshold number')
 
 %% analysing accuracy %%
 
-pp = 0.9;
-
-frac2 = pc2/p_true;
-frac4 = pc4/p_true;
-frac6 = pc6/p_true;
-frac8 = pc8/p_true;
-frac10 = pc10/p_true;
-
+cut_off = 0.9;
 
 clf
 plot(frac2(:,8))
 hold on
 %plot(frac4(:,1))
-plot(frac6(:,8))
-%plot(frac8(:,1))
+% plot(frac6(:,8))
+plot(frac8(:,1))
 %plot(frac10(:,1))
 line([0,500], [1,1],'LineStyle','--','color','r')
 
-accuracy2 = mean(abs(frac2 - 1)<pp);
-accuracy4 = mean(abs(frac4 - 1)<pp);
-accuracy6 = mean(abs(frac6 - 1)<pp)
-accuracy8 = mean(abs(frac8 - 1)<pp)
-accuracy10 = mean(abs(frac10 - 1)<pp)
+accuracy2 = accuracy_rate(pc2, p_true, cut_off);
+accuracy4 = accuracy_rate(pc4, p_true, cut_off);
+accuracy6 = accuracy_rate(pc6, p_true, cut_off)
+accuracy8 = accuracy_rate(pc8, p_true, cut_off)
+accuracy10 = accuracy_rate(pc10, p_true, cut_off)
 
 ci2 = compute_ci_pest(accuracy2,500)
 ci4 = compute_ci_pest(accuracy4,500)
@@ -210,17 +203,85 @@ legend([a b c d e],'0.2','0.4','0.6','0.8','1.0')
 % to use a transformation that is stable, but not too stable. We want to
 % formulate an algorithm that strikes a balance between stability and 
 %% using automated threshold selection to select threshold
-load p_c_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
-pc2 = p_c_save_matrix;
-load param_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
-load param_ci_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
-xi_matrix = imag(param_save_matrix)
-all_ci2 = ci_xi_u_matrix
+p_true = 8.5333e-05;
+success_matrix = zeros(1,5);
+failure_matrix = zeros(1,5);
+mean_matrix = zeros(1,5);
+accuracy_matrix = zeros(1,5);
+accuracy_ci_matrix = zeros(5,2)
+cutoff = 0.95;
 
-thr_autofind(all_ci2{2,1},xi,n_thr)
+
+clf
+for nn=1:5
+    i=nn*2/10;
+    p_ex = i;
+
+    thr_ind1 = zeros(1,500);
+    pc_est1 = zeros(1,500);
+    pc1 = get_data(3, 1, 2, p_ex, 1);
+    xi1 = imag(get_data(4, 1, 2, p_ex, 1));
+    ci1 = get_data(5, 1, 2, p_ex, 1);
+
+    thr_ind2 = zeros(1,500);
+    pc_est2 = zeros(1,500);
+    pc2 = get_data(3, 1, 2, p_ex, 2);
+    xi2 = imag(get_data(4, 1, 2, p_ex, 2));
+    ci2 = get_data(5, 1, 2, p_ex, 2);
+
+    for k=1:500
+        thr_ind1(k) = thr_autofind(ci1{k}, xi1(k,:), 10);
+        thr_ind2(k) = thr_autofind(ci2{k}, xi2(k,:), 10);
+        pc_est1(k) = pc1(k,thr_ind1(k));
+        pc_est2(k) = pc1(k,thr_ind2(k));
+    end
+    [succ_rate, fail_rate] = est_succ_fail_rate(pc_est1,pc_est2)
+    
+    
+    accuracy_matrix(nn) = accuracy_rate(pc_est1, p_true, cutoff);
+    accuracy_ci_matrix(nn,:) = compute_ci_pest(accuracy_matrix(nn),500);
+    
+    success_matrix(nn) = succ_rate;
+    failure_matrix(nn) = fail_rate;
+    mean_matrix(nn) = mean(pc_est1)
+    
+    clf
+    plot(pc_est1)
+    line([0 500], [mean(pc_est1) mean(pc_est1)])
+    pause(.0)
+end
+
+exp_par = linspace(.2,1,5);
+subplot(311)
+plot(exp_par,success_matrix,'*')
+hold on
+plot(exp_par,failure_matrix,'*')
+title('success and failure rates')
+xlabel('transformation parameter')
+
+subplot(312)
+plot(exp_par, mean_matrix)
+hold on
+plot(exp_par,mean_matrix,'*')
+plot([.2 1],[p_true p_true])
+title('mean value of crash-frequency-estimates')
+xlabel('transformation parameter')
+
+subplot(313)
+plot(exp_par, accuracy_matrix)
+hold on
+plot(exp_par, accuracy_ci_matrix,':','color', 'blue')
+title(sprintf('accuracy plot with cutoff 0.%d', cutoff*100))
+xlabel('transformation parameter')
+ylim([min(accuracy_matrix)*0.9, max(accuracy_matrix)*1.1])
+
+%% comments on using automatic threshold selection
+% We see that when using the automatic threshold selection, the successrate
+% is quite low. 
+
 %% comparing succss and failure rates
 
-% DAFEA transformed
+
 plots = cell(5,2)
 clf
 for k=1:5
@@ -259,10 +320,8 @@ end
 % rate, we should use p_ex=1.0, and use the lowest threshold. It is likely
 % that we are better of avoiding the retunr level to estimate.
 
-%% Using return levels in order to determine which intersection is safer
-
-
-m = 100;
+%% Using return levels to determine which intersection is safer
+m = 30000;
 plots = cell(5,2)
 clf
 for k=1:5
@@ -278,7 +337,7 @@ for k=1:5
     
     param2 = get_data(4, 1, 2, p_ex, 2);
     xi_matrix2 = imag(param2);
-    sigma_matrix2 = real(param);
+    sigma_matrix2 = real(param2);
     u_matrix2 = get_data(6, 1, 2, p_ex, 2);
     p_exceed2 = get_data(7, 1, 2, p_ex, 2);
     x_m2 = return_level_m(m, sigma_matrix2, xi_matrix2, u_matrix2, p_exceed2);

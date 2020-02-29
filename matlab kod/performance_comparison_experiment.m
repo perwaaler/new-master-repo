@@ -6,7 +6,7 @@
 % data_type=3 --> danger_max_EA
 
 
-data_type = 2;
+data_type = 1;
 L = size(all_data,1);
 m = 10;                                                                % number of thresholds used for estimation
 ue_save_matrix = zeros(L,m);
@@ -18,15 +18,15 @@ p_ea_matrix = all_data{:,8};
 
 
 % transformation parameters
-select_trans = 3;
-p_ex = 0.6;
+select_trans = 2;
+p_ex = 1;
 p_inv = 3;
 
 d_inv = 3;
 
 % plotting options
 compute_ci = 1;                                       % set equal to one if confidence intervals for xi are desired
-qqplot = 0;
+qqplot = 1;
 save_plot = 0;
 
 % pausing options
@@ -55,7 +55,7 @@ ylim([-1,30])
 %%% transforming data and plotting transformed data and thresholds
 % transforms
 transinv = @(x)1./(d_inv + x).^p_inv;
-transex = @(x)exp(-p_ex*(x - 2));
+transex = @(x)exp(-p_ex*(x - 0));
 transneg = @(x) -x;
 
 % choose transform to use
@@ -237,6 +237,7 @@ for k=1:m
     
 end
 
+%%%%% diagnostic plots %%%%%
 clf;
 subplot(221)
 plot(U,param_save(1,:))
@@ -251,6 +252,8 @@ title('xi_{est}')
 hold on
 if compute_ci == 1
     plot(1:10,ci_xi_u)
+    thr_index = thr_autofind(ci_xi_u, param_save(2,:), m);
+    plot(thr_index, param_save(2,thr_index),'*');
 end
 
 subplot(223)
@@ -292,7 +295,7 @@ pause(stability_pause)
 % this estimator gives P(C1,NEA) when p_nea is based on danger at first
 % interactive action, DAFEA
 if data_type == 1
-    p_c = p_interactive*pc
+    p_c = pc
 end
 
 % this estimaor gives P(C, NEA) when p_nea is based on X
