@@ -6,7 +6,7 @@
 %%
 load('data_500enc_r_safe.mat')
 %% Initial plots
-data_type = 1;  
+data_type = 3;  
 data_matrix = all_data{1,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values
@@ -14,7 +14,7 @@ min_data = data_matrix(find(min(data_matrix,[],2)<Inf),:);
 min_data = min(min_data,[],2)
 
 % find minimum and maximum thresholds based on amount of data to be used
-u_minmax = find_threshold(min_data, 0.15, 0.8)
+u_minmax = find_threshold(min_data, 0.06, 0.8)
 u_l = u_minmax(1);
 u_u = u_minmax(2);
 
@@ -25,7 +25,7 @@ title('untransformed data')
 % transforms
 p = 2;
 transinv = @(x)1./(3 + x).^p;
-transex = @(x)exp(-0.6*(x - 0));
+transex = @(x)exp(-0.15*(x - 2));
 transneg = @(x) -x;
 
 % choose transform to use
@@ -136,6 +136,7 @@ for k=1:m
             plot(x_eval, gpcdf(x_eval, param(2), param(1), 0))
             line(trans([0,0]), 1.2,'LineStyle','--');
             line(get(gca, 'xlim'), [1 1],'Color','green','LineStyle','--');
+            title(sprintf('empirical d.f. vs model d.f. for threshold %d.',k))
 %             histogram(excess,'Normalization','probability'); hold on
 %             plot(linspace(0,max(excess)*1.5,100), gppdf(linspace(0,max(excess)*1.5,100),param(2),param(1),0) )
 %             hold off

@@ -1,12 +1,13 @@
 % simulation of encounters between two vehicles.
 
-n = 500;                                % number of encounter-samples desired
+for jj = 1:10
+n = 1;                                % number of encounter-samples desired
 all_data = cell(n, 12);                 % collects data from each encounter-sample
-N = 500;                                % number of encounters
+N = 2*10^5;                                % number of encounters
 r = 0.3;                                % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
-est_ttc = 1;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
-compute_X = 1;
+est_ttc = 0;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
+compute_X = 0;
 plotting = 0;                           % set to one if plots of encounters are wanted
 sausage = 0;
 plot_sim_walks = 0;
@@ -31,7 +32,7 @@ b_init = step_var_init/step_mean_init;
 
 % variance of the step-size
 var_step = 0.001;
-var_theta = 0.03;                       % determins the amount of random variability of the step-angle at each iteration.
+var_theta = 0.03;                           % determins the amount of random variability of the step-angle at each iteration.
 
 % parameters relating to detection probability dp; dp = A*exp(-s*(D + d)^p)
 % where D is distance between vehicles
@@ -39,7 +40,7 @@ Amp = 0.93;      % amplitude; reduce to make dp smaller everywhere
 d = 0;           % determines where dp is made smaller and larger by p; dp gets larger for D smaller than d, and smaller for D greater than d
 s = 0.26;        % increase to make detection less likely
 p = 2;           % makes dp larger r smaller depending on whether D>d or D<d. See above comment.
-%plot(linspace(0,10,100),Amp*exp(-(s * linspace(0,10,100) ).^p))
+% plot(linspace(0,10,100),Amp*exp(-(s * linspace(0,10,100) ).^p))
 
 thetamod_k = 0.3;                       % determines how quickly the person can change direction after detecting the other person
 thetamod_s = 1.6;                       % makes modification of behaviour more dramatic for very small ydiff, but less dramatic for large ydiff
@@ -70,7 +71,7 @@ aa =1;
 bb =1;
 
 for i=1:N
-%i
+i
 %%% initiation of encounter
 nn = 0;
 EA_index = 1;                                                         % variable used to find most dangerous moment during attempt to avoid collision
@@ -346,4 +347,12 @@ all_data{kk,10} = sum(enc_type==-2);                                            
 all_data{kk,11} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N;  % saves p_interactive
 all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                       % saves p_ea
 
- end
+pc_nea = sum(enc_type==2)/N;
+pc_ea = sum(enc_type==-2)/N;
+
+
+
+save('pc_nea_r_0_3_safety_level_1','pc_nea')
+save('pc_ea_r_0_3_safety_level_1','pc_ea')
+end
+end 
