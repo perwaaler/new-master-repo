@@ -48,7 +48,7 @@ qqplot = 0;
 save_plot = 0;
 
 % pausing options
-pause_trans = 0.5;
+pause_trans = 0.0;
 qq_pause = 0.0;
 stability_pause = 0.0;
 

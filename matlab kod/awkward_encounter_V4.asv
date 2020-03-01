@@ -7,7 +7,7 @@ r = 0.06;                               % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 1;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 0;
-plotting = 1;                           % set to one if plots of encounters are wanted
+plotting = 0;                           % set to one if plots of encounters are wanted
 sausage=0;
 plot_sim_walks = 0;
 

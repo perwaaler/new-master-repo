@@ -1,14 +1,14 @@
 % simulation of encounters between two vehicles.
 
-n = 1;                                % number of encounter-samples desired
-all_data = cell(n, 12);                % collects data from each encounter-sample
+n = 500;                                % number of encounter-samples desired
+all_data = cell(n, 12);                 % collects data from each encounter-sample
 N = 500;                                % number of encounters
-r = 0.06;                               % collision radius of each person
+r = 0.3;                                % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 1;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
-compute_X = 0;
-plotting = 1;                           % set to one if plots of encounters are wanted
-sausage=0;
+compute_X = 1;
+plotting = 0;                           % set to one if plots of encounters are wanted
+sausage = 0;
 plot_sim_walks = 0;
 
  for kk = 1:n
@@ -20,30 +20,32 @@ pause_length = 2^-5;
 step_par = [0.30*2 0.2/2];
 
 % parameters for the gamma distribution for the initial steps
-step_mean = 0.13;
-step_var = 0.005;
+step_mean_init = 0.125;
+step_var_init = 0.003;
+theta_var_init = 0.015;                      % variance of initial theta
+
+
 % parametes as fcn of mean and variance
-a_init = step_mean^2/step_var;
-b_init = step_var/step_mean;
+a_init = step_mean_init^2/step_var_init;
+b_init = step_var_init/step_mean_init;
 
 % variance of the step-size
-var_step = 0.0001;
+var_step = 0.001;
+var_theta = 0.03;                           % determins the amount of random variability of the step-angle at each iteration.
 
 % parameters relating to detection probability dp; dp = A*exp(-s*(D + d)^p)
 % where D is distance between vehicles
-Amp = 0.93;     % amplitude; reduce to make dp smaller everywhere
-d = 0;          % determines where dp is made smaller and larger by p; dp gets larger for D smaller than d, and smaller for D greater than d
-s = 0.5;        % increase to make detection less likely
-p = 2;          % makes dp larger r smaller depending on whether D>d or D<d. See above comment.
-%plot(linspace(0,10,100),Amp*exp(-(s*linspace(0,10,100)).^p))
+Amp = 0.93;      % amplitude; reduce to make dp smaller everywhere
+d = 0;           % determines where dp is made smaller and larger by p; dp gets larger for D smaller than d, and smaller for D greater than d
+s = 0.26;        % increase to make detection less likely
+p = 2;           % makes dp larger r smaller depending on whether D>d or D<d. See above comment.
+% plot(linspace(0,10,100),Amp*exp(-(s * linspace(0,10,100) ).^p))
 
 thetamod_k = 0.3;                       % determines how quickly the person can change direction after detecting the other person
 thetamod_s = 1.6;                       % makes modification of behaviour more dramatic for very small ydiff, but less dramatic for large ydiff
 thetamod_p = 3;                         % amplifies difference in reaction between small and large ydiff
-thetavar = 0.023;                       % determins the amount of random variability of the step-angle at each iteration.
-thetavar0 = 0.015;                      % variance of initial theta
 xinit = 6;                              % determines how far apart they are at the start
-sigma = 0.3;                            % variance of initial starting position
+sigma_var0 = 0.3;                            % variance of initial starting position
 
 dist_FEA = inf*ones(N,1);            % danger index at time of first evasive action
 ttc_FEA = inf*ones(N,1);
@@ -68,19 +70,19 @@ aa =1;
 bb =1;
 
 for i=1:N
-i
+%i
 %%% initiation of encounter
 nn = 0;
 EA_index = 1;                                                         % variable used to find most dangerous moment during attempt to avoid collision
 first_detection = 0;                                                  % They have not yet detected eachother
 stepsize = min_stepsize*[1 1] + [gamrnd(a_init*[1 1],b_init)];        % determines average speed of each vehicle
-theta = normrnd([0,0], thetavar0);
+theta = normrnd([0,0], theta_var_init);
 
 %%% initial positions
 A_real = -xinit;
 B_real = xinit;
-A_im = normrnd(0,sigma);
-B_im = normrnd(0,sigma);
+A_im = normrnd(0,sigma_var0);
+B_im = normrnd(0,sigma_var0);
 A0 = A_real + 1i*A_im;
 B0 = B_real + 1i*B_im;
 
@@ -93,21 +95,22 @@ counter = 0;
     while real(A0) < xinit && real(B0) > -xinit
         counter = counter + 1;
         nn = nn + 1;
+        
         D = norm(A0-B0);
         Dim = norm(imag(A0-B0));                  % vertical part of the distance; if large, evasive action should be unlikely
-        dp = Amp*exp(-(s*D)^p)*exp(-(2.5*Dim)^3); % detection probability
+        dp = Amp*exp(-(s*D)^p)*exp(-(Dim/0.8000)^3); % detection probability
 
 %%%%%%%%%%%%%%%%%%%%%%%% detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if  (detection_status==1 | rand(1) < dp) && real(A0) < real(B0)
             % saving information in vectors, and updating status
             if first_detection == 0 & est_ttc == 1 % a loop that collects information at first moment of evasive action
                 for k=1:NTTC
-                    ttc = ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, thetavar*bb, stability_fac,plot_sim_walks);
+                    ttc = ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, var_theta*bb, stability_fac,plot_sim_walks);
                     stoch_ttc_FEA(i,k) = ttc;
                 end
                 ttc_FEA(i) = compute_ttc(A0,B0,stepsize,theta,r);
                 if ttc_FEA(i) < min(stoch_ttc_FEA(i,:))
-                    sausage=sausage+1
+                    sausage = sausage+1
                     ttc_FEA(i)
                     min(stoch_ttc_FEA(i,:))
                     pause(1)
@@ -155,7 +158,7 @@ counter = 0;
             ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
             
             % take next step
-            [A1, B1, theta] = take_evasive_step(A0,B0,step_par,stepsize,var_step, min_stepsize,theta,thetavar,stability_fac,thetamod_k,thetamod_p,thetamod_s);
+            [A1, B1, theta] = take_evasive_step(A0,B0,step_par,stepsize,var_step, min_stepsize,theta,var_theta,stability_fac,thetamod_k,thetamod_p,thetamod_s);
             
             dist_min_EA(i,EA_index) = norm(A1-B1) - 2*r;
             ttc_min_EA(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
@@ -194,7 +197,7 @@ counter = 0;
             ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
 
             % taking next step
-            theta = theta + normrnd(-stability_fac*theta,thetavar);
+            theta = theta + normrnd(-stability_fac*theta,var_theta);
             stepsize = stepsize + normrnd([0 0],var_step);
             stepsize(1) = max(min_stepsize,stepsize(1));
             stepsize(2) = max(min_stepsize,stepsize(2));
@@ -221,7 +224,7 @@ counter = 0;
                 danger_index = D - 2*r;
 
                 %%% compute ttc (which will now be negative) and danger_FEA
-                ttc = ttc_simulator_double_momentum_improved(A1,B1,stepsize,theta,min_stepsize,var_step,r, thetavar, stability_fac);
+                ttc = ttc_simulator_double_momentum_improved(A1,B1,stepsize,theta,min_stepsize,var_step,r, var_theta, stability_fac);
 
                 dist_FEA(i) = danger_index;
                 ttc_FEA(i) = ttc;
@@ -252,8 +255,10 @@ counter = 0;
     if encounter_classifier == 1                   % i.e. no evasive action and no collision has occured
         dist_min_NEA(i) = min(danger_enc_i);
     end
+    
 
 end
+sum(enc_type==-2)
 
 % remove all elements/rows corresponding to encounters with no EA
 dist_FEA(enc_type==1,:) =[];
@@ -294,7 +299,7 @@ for i=1:N_enc_type1
                 stepsize = [A_stepsize_save(i), B_stepsize_save(i)];
 
                 for k=1:NTTC
-                    ttc = ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, thetavar*bb, stability_fac,plot_sim_walks);
+                    ttc = ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, var_theta*bb, stability_fac,plot_sim_walks);
                     if ttc< Inf
                         pause(0.0)
                     end
@@ -304,11 +309,11 @@ for i=1:N_enc_type1
                     end
                     ttc_dist(j,k) = ttc;
                     if ttc<0
-                        TTC = 0
-                        AA = A0
-                        BB = B0
-                        step0 = stepsize
-                        theta0 = theta
+                        TTC = 0;
+                        AA = A0;
+                        BB = B0;
+                        step0 = stepsize;
+                        theta0 = theta;
                     end
 
                 end
