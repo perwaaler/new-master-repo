@@ -17,40 +17,31 @@ plot(hit_rate6)
 plot(hit_rate8)
 plot(hit_rate10)
 %% analysing mean value
-load p_c_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
-pc2 = p_c_save_matrix;
-ci2 = compute_ci_meanest(p_c_save_matrix, 500)
-load p_c_datatype_1_trans_2_transpar_4_safetylevel_2_samplesize_334.mat
-pc4 = p_c_save_matrix;
-ci4 = compute_ci_meanest(p_c_save_matrix, 500)
-load p_c_datatype_1_trans_2_transpar_6_safetylevel_2_samplesize_334.mat
-pc6 = p_c_save_matrix;
-ci6 = compute_ci_meanest(p_c_save_matrix, 500)
-load p_c_datatype_1_trans_2_transpar_8_safetylevel_2_samplesize_334.mat
-pc8 = p_c_save_matrix;
-ci8 = compute_ci_meanest(p_c_save_matrix, 500)
-load p_c_datatype_1_trans_2_transpar_10_safetylevel_2_samplesize_334.mat
-pc10 = p_c_save_matrix;
-ci10 = compute_ci_meanest(p_c_save_matrix, 500)
+pc2 = get_data(3, 1, 2, 0.2, 1);
+ci2 = compute_ci_meanest(pc2, 500);
+pc4 = get_data(3, 1, 2, 0.4, 1);
+ci4 = compute_ci_meanest(pc4, 500);
+pc6 = get_data(3, 1, 2, 0.6, 1);
+ci6 = compute_ci_meanest(pc6, 500);
+pc8 = get_data(3, 1, 2, 0.8, 1);
+ci8 = compute_ci_meanest(pc8, 500);
+pc10 = get_data(3, 1, 2, 1, 1);
+ci10 = compute_ci_meanest(pc10, 500);
 
 
 p_true = 8.5333e-05;
 
 clf
-a = plot(mean(pc2), 'color' ,[0 .0 1])
+a = plot(mean(pc2), 'color' ,[0 .0 1]);
 hold on
 plot(ci2,'LineStyle', ':', 'color' ,[0 .0 1])
-
-b = plot(mean(pc4), 'color' ,[0 .2 1])
+b = plot(mean(pc4), 'color' ,[0 .2 1]);
 plot(ci4,'LineStyle', ':', 'color' ,[0 .2 1])
-
-c = plot(mean(pc6),'color',[0 .4 1])
+c = plot(mean(pc6),'color',[0 .4 1]);
 plot(ci6,'LineStyle', ':', 'color' ,[0 .4 1])
-
-d = plot(mean(pc8),'color',[0 .6 1])
+d = plot(mean(pc8),'color',[0 .6 1]);
 plot(ci8,'LineStyle', ':', 'color' ,[0 .6 1])
-
-e = plot(mean(pc10), 'color' ,[0 .8 1])
+e = plot(mean(pc10), 'color' ,[0 .8 1]);
 plot(ci10,'LineStyle', ':', 'color' ,[0 .8 1])
 
 line([0,10], [p_true,p_true],'color','r')
@@ -62,16 +53,11 @@ xlabel('threshold number')
 % specifically, the tendency to overestimate increases. In order to
 % compensate for this increased bias, we have to use higher thresholds.
 %% analysing Mean-Square-Error
-load p_c_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
-pc2 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_4_safetylevel_2_samplesize_334.mat
-pc4 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_6_safetylevel_2_samplesize_334.mat
-pc6 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_8_safetylevel_2_samplesize_334.mat
-pc8 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_10_safetylevel_2_samplesize_334.mat
-pc10 = p_c_save_matrix;
+pc2 = get_data(3, 1, 2, 0.2, 1);
+pc4 = get_data(3, 1, 2, 0.4, 1);
+pc6 = get_data(3, 1, 2, 0.6, 1);
+pc8 = get_data(3, 1, 2, 0.8, 1);
+pc10 = get_data(3, 1, 2, 1, 1);
 
 
 rmse2 = sqrt(sum((pc2-p_true).^2)/500);
@@ -93,17 +79,13 @@ xlabel('threshold number')
 % As we might expect from the bias plots, the p=0.2 has the lowest and most
 % consistent rmse. For the other parameters, we see a clear decline in bias
 % as threshold increases.
+
 %% analysing standard deviation
-load p_c_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
-pc2 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_4_safetylevel_2_samplesize_334.mat
-pc4 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_6_safetylevel_2_samplesize_334.mat
-pc6 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_8_safetylevel_2_samplesize_334.mat
-pc8 = p_c_save_matrix;
-load p_c_datatype_1_trans_2_transpar_10_safetylevel_2_samplesize_334.mat
-pc10 = p_c_save_matrix;
+pc2 = get_data(3, 1, 2, 0.2, 1);
+pc4 = get_data(3, 1, 2, 0.4, 1);
+pc6 = get_data(3, 1, 2, 0.6, 1);
+pc8 = get_data(3, 1, 2, 0.8, 1);
+pc10 = get_data(3, 1, 2, 1, 1);
 
 
 std2 = std(pc2);
@@ -111,6 +93,7 @@ std4 = std(pc4);
 std6 = std(pc6);
 std8 = std(pc8);
 std10 = std(pc10);
+
 clf
 plot(std2)
 hold on
@@ -122,45 +105,58 @@ legend('0.2','0.4','0.6','0.8','1.0')
 title('standard deviation')
 xlabel('threshold number')
 
-%% analysing accuracy %%
+%% comparing accuracy for different parameters
 
-cut_off = 0.95;
+cut_off = .9;
 
-clf
-plot(frac2(:,8))
-
-%plot(frac4(:,1))
-% plot(frac6(:,8))
-plot(frac8(:,1))
-%plot(frac10(:,1))
-line([0,500], [1,1],'LineStyle','--','color','r')
+pc2 = get_data(3, 1, 2, 0.2, 1);
+pc4 = get_data(3, 1, 2, 0.4, 1);
+pc6 = get_data(3, 1, 2, 0.6, 1);
+pc8 = get_data(3, 1, 2, 0.8, 1);
+pc10 = get_data(3, 1, 2, 1, 1);
+pc_neg_ttc = get_data(3, 3, 1, [], 1);
+pc_neg_stoch_ttc = get_data(3, 1, 1, [], 1);
+pc_neg_min_dist = get_data(3, 6, 1, [], 1);
 
 accuracy2 = accuracy_rate(pc2, p_true, cut_off);
 accuracy4 = accuracy_rate(pc4, p_true, cut_off);
-accuracy6 = accuracy_rate(pc6, p_true, cut_off)
-accuracy8 = accuracy_rate(pc8, p_true, cut_off)
-accuracy10 = accuracy_rate(pc10, p_true, cut_off)
+accuracy6 = accuracy_rate(pc6, p_true, cut_off);
+accuracy8 = accuracy_rate(pc8, p_true, cut_off);
+accuracy10 = accuracy_rate(pc10, p_true, cut_off);
+accuracy_neg_ttc = accuracy_rate(pc_neg_ttc, p_true, cut_off);
+accuracy_neg_stoch_ttc = accuracy_rate(pc_neg_stoch_ttc, p_true, cut_off);
+accuracy_neg_min_dist = accuracy_rate(pc_neg_min_dist, p_true, cut_off);
 
-ci2 = compute_ci_pest(accuracy2,500)
-ci4 = compute_ci_pest(accuracy4,500)
-ci6 = compute_ci_pest(accuracy6,500)
-ci8 = compute_ci_pest(accuracy8,500)
-ci10 = compute_ci_pest(accuracy10,500)
+ci2 = compute_ci_pest(accuracy2,500);
+ci4 = compute_ci_pest(accuracy4,500);
+ci6 = compute_ci_pest(accuracy6,500);
+ci8 = compute_ci_pest(accuracy8,500);
+ci10 = compute_ci_pest(accuracy10,500);
+ci_neg_ttc = compute_ci_pest(accuracy_neg_ttc,500);
+ci_neg_stoch_ttc = compute_ci_pest(accuracy_neg_stoch_ttc,500);
+ci_neg_min_dist = compute_ci_pest(accuracy_neg_min_dist,500);
 
 
 clf
-a=plot(accuracy2,'r')
+a=plot(100*accuracy2,'color', [0 0 1]);
 hold on
-plot(ci2, ':','color','r')
-b=plot(accuracy4,'b')
-plot(ci4, ':','color','g')
-c=plot(accuracy6,'m')
-plot(ci6, ':','color','g')
-d=plot(accuracy8,'color','black')
-plot(ci8, ':','color','g')
-e=plot(accuracy10,'g')
-plot(ci10, ':','color','g')
-legend([a b c d e],'0.2','0.4','0.6','0.8','1.0')
+plot(100*ci2, ':','color', [0 0 1])
+b=plot(100*accuracy4,'color', [0 .25 1]);
+plot(100*ci4, ':','color','g')
+c=plot(100*accuracy6,'color', [0 .5 1]);
+plot(100*ci6, ':','color','g')
+d=plot(100*accuracy8,'color', [0 .75 1]);
+plot(100*ci8, ':','color','g')
+e=plot(100*accuracy10,'color', [0 1 1]);
+plot(100*ci10, ':','color','g')
+f=plot(100*accuracy_neg_ttc,'color', 'black');
+plot(100*ci_neg_ttc, ':','color','black')
+g=plot(100*accuracy_neg_stoch_ttc,'color', 'red');
+plot(100*ci_neg_stoch_ttc, ':','color','red')
+h=plot(100*accuracy_neg_min_dist,'color', 'green');
+plot(100*ci_neg_min_dist, ':','color','green')
+
+legend([a b c d e f],'0.2','0.4','0.6','0.8','1.0', 'negated data')
 
 %% comments on accuracy plots
 % for p=0.2, the accuracy is fairly stable accross different thresholds,
@@ -202,13 +198,21 @@ legend([a b c d e],'0.2','0.4','0.6','0.8','1.0')
 % better by relaxing the transformation a little. In other words, we want
 % to use a transformation that is stable, but not too stable. We want to
 % formulate an algorithm that strikes a balance between stability and 
+
+% note that the negated data has significantly lower success rate.
+% Comparing the transformation of p_ex = 0.4 to negated transform, we see
+% that there is a difference of approximately 30% in peak performance! At
+% peak performance, we would get a good approximation about 4 times more
+% often by using this transformation.
+
 %% using automated threshold selection to select threshold
+%% comparing accuracy, fail/success rates and bias
 p_true = 8.5333e-05;
 success_matrix = zeros(1,5);
 failure_matrix = zeros(1,5);
 mean_matrix = zeros(1,5);
 accuracy_matrix = zeros(1,5);
-accuracy_ci_matrix = zeros(5,2)
+accuracy_ci_matrix = zeros(5,2);
 cutoff = 0.95;
 
 
@@ -235,7 +239,7 @@ for nn=1:5
         pc_est1(k) = pc1(k,thr_ind1(k));
         pc_est2(k) = pc1(k,thr_ind2(k));
     end
-    [succ_rate, fail_rate] = est_succ_fail_rate(pc_est1,pc_est2)
+    [succ_rate, fail_rate] = est_succ_fail_rate(pc_est1,pc_est2);
     
     
     accuracy_matrix(nn) = accuracy_rate(pc_est1, p_true, cutoff);
@@ -243,7 +247,7 @@ for nn=1:5
     
     success_matrix(nn) = succ_rate;
     failure_matrix(nn) = fail_rate;
-    mean_matrix(nn) = mean(pc_est1)
+    mean_matrix(nn) = mean(pc_est1);
     
     clf
     plot(pc_est1)
@@ -279,24 +283,23 @@ ylim([min(100*accuracy_matrix)*0.9, max(100*accuracy_matrix)*1.1])
 % We see that when using the automatic threshold selection, the successrate
 % is quite low. 
 
-%% comparing succss and failure rates
+%% comparing succss and failure rates for different transformation parameters
 
-
-plots = cell(5,2)
+plots = cell(5,2);
 clf
 for k=1:5
     
-    i=k*2/10
+    i=k*2/10;
     pc_safe1 = get_data(3, 1, 2, i, 1);
     pc_safe2 = get_data(3, 1, 2, i, 2);
 
-    [succ_rate, fail_rate] = est_succ_fail_rate(pc_safe1, pc_safe2)
+    [succ_rate, fail_rate] = est_succ_fail_rate(pc_safe1, pc_safe2);
 
-    ci2_succ = compute_ci_pest(succ_rate, 500)
-    ci2_fail = compute_ci_pest(fail_rate, 500)
+    ci2_succ = compute_ci_pest(succ_rate, 500);
+    ci2_fail = compute_ci_pest(fail_rate, 500);
 
     subplot(211)
-    plots{k,1} = plot(succ_rate, 'color' ,[1 i-0.2 0])
+    plots{k,1} = plot(succ_rate, 'color' ,[1 i-0.2 0]);
     hold on
     plot(ci2_succ, ':', 'color' ,[1 i-0.2 0])
     title('success rate for different transformation parameters')
@@ -304,7 +307,7 @@ for k=1:5
     legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], '0.2','0.4','0.6','0.8','1')
     
     subplot(212)
-    plots{k,2} = plot(fail_rate, 'color' ,[0 i-0.2 1])
+    plots{k,2} = plot(fail_rate, 'color' ,[0 i-0.2 1]);
     hold on
     plot(ci2_fail, ':', 'color' ,[0 i-0.2 1])
     xlabel('threshold index')
@@ -321,8 +324,8 @@ end
 % that we are better of avoiding the retunr level to estimate.
 
 %% Using return levels to determine which intersection is safer
-m = 30000;
-plots = cell(5,2)
+m = 50;
+plots = cell(5,2);
 clf
 for k=1:5
     
@@ -342,13 +345,13 @@ for k=1:5
     p_exceed2 = get_data(7, 1, 2, p_ex, 2);
     x_m2 = return_level_m(m, sigma_matrix2, xi_matrix2, u_matrix2, p_exceed2);
 
-    [succ_rate, fail_rate] = est_succ_fail_rate(x_m1, x_m2)
+    [succ_rate, fail_rate] = est_succ_fail_rate(x_m1, x_m2);
 
-    ci2_succ = compute_ci_pest(succ_rate, 500)
-    ci2_fail = compute_ci_pest(fail_rate, 500)
+    ci2_succ = compute_ci_pest(succ_rate, 500);
+    ci2_fail = compute_ci_pest(fail_rate, 500);
 
     subplot(211)
-    plots{k,1} = plot(succ_rate, 'color' ,[1 p_ex-0.2 0])
+    plots{k,1} = plot(succ_rate, 'color' ,[1 p_ex-0.2 0]);
     hold on
     plot(ci2_succ, ':', 'color' ,[1 p_ex-0.2 0])
     title('success rate for different transformation parameters')
@@ -356,7 +359,7 @@ for k=1:5
     legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], '0.2','0.4','0.6','0.8','1')
     
     subplot(212)
-    plots{k,2} = plot(fail_rate, 'color' ,[0 p_ex-0.2 1])
+    plots{k,2} = plot(fail_rate, 'color' ,[0 p_ex-0.2 1]);
     hold on
     plot(ci2_fail, ':', 'color' ,[0 p_ex-0.2 1])
     xlabel('threshold index')
