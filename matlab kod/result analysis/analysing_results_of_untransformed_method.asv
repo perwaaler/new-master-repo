@@ -63,27 +63,40 @@ pc_neg_stoch_ttc_exp2 = get_data(3, 1, 2, 0.2, 1, 80, 6);
 pc_neg_stoch_ttc_exp3 = get_data(3, 1, 2, 0.3, 1, 80, 6);
 pc_neg_stoch_ttc_exp4 = get_data(3, 1, 2, 0.4, 1, 80, 6);
 pc_neg_stoch_ttc_exp5 = get_data(3, 1, 2, 0.5, 1, 80, 6);
+
+pc_neg_stoch_ttc_inv10 = get_data(3, 1, 3, [1 3.5], 1, 80, 6);
+pc_neg_stoch_ttc_inv15 = get_data(3, 1, 3, [1.5 3.5], 1, 80, 6);
+pc_neg_stoch_ttc_inv20 = get_data(3, 1, 3, [2 3.5], 1, 80, 6);
+pc_neg_stoch_ttc_inv25 = get_data(3, 1, 3, [2.5 3.5], 1, 80, 6);
 pc_neg_stoch_ttc_inv30 = get_data(3, 1, 3, [3 3.5], 1, 80, 6);
+
 pc_neg_ttc = get_data(3, 3, 1, [], 1, 80, 6);
 
 accuracy_neg_stoch_ttc = accuracy_rate(pc_neg_stoch_ttc, p_true, cut_off);
+accuracy_neg_ttc = accuracy_rate(pc_neg_ttc, p_true, cut_off);
+
 accuracy_neg_stoch_ttc_exp1 = accuracy_rate(pc_neg_stoch_ttc_exp1, p_true, cut_off);
 accuracy_neg_stoch_ttc_exp2 = accuracy_rate(pc_neg_stoch_ttc_exp2, p_true, cut_off);
 accuracy_neg_stoch_ttc_exp3 = accuracy_rate(pc_neg_stoch_ttc_exp3, p_true, cut_off);
 accuracy_neg_stoch_ttc_exp4 = accuracy_rate(pc_neg_stoch_ttc_exp4, p_true, cut_off);
 accuracy_neg_stoch_ttc_exp5 = accuracy_rate(pc_neg_stoch_ttc_exp5, p_true, cut_off);
+accuracy_neg_stoch_ttc_inv10 = accuracy_rate(pc_neg_stoch_ttc_inv10, p_true, cut_off);
+accuracy_neg_stoch_ttc_inv15 = accuracy_rate(pc_neg_stoch_ttc_inv15, p_true, cut_off);
+accuracy_neg_stoch_ttc_inv20 = accuracy_rate(pc_neg_stoch_ttc_inv20, p_true, cut_off);
+accuracy_neg_stoch_ttc_inv25 = accuracy_rate(pc_neg_stoch_ttc_inv25, p_true, cut_off);
 accuracy_neg_stoch_ttc_inv30 = accuracy_rate(pc_neg_stoch_ttc_inv30, p_true, cut_off);
-accuracy_neg_ttc = accuracy_rate(pc_neg_ttc, p_true, cut_off);
 
 
 ci_neg_stoch_ttc = compute_ci_pest(accuracy_neg_stoch_ttc,500);
+ci_neg_ttc = compute_ci_pest(accuracy_neg_ttc,500);
+
 ci_neg_stoch_ttc_exp1 = compute_ci_pest(accuracy_neg_stoch_ttc_exp1,500);
 ci_neg_stoch_ttc_exp2 = compute_ci_pest(accuracy_neg_stoch_ttc_exp2,500);
 ci_neg_stoch_ttc_exp3 = compute_ci_pest(accuracy_neg_stoch_ttc_exp3,500);
 ci_neg_stoch_ttc_exp4 = compute_ci_pest(accuracy_neg_stoch_ttc_exp4,500);
 ci_neg_stoch_ttc_exp5 = compute_ci_pest(accuracy_neg_stoch_ttc_exp5,500);
 ci_neg_stoch_ttc_inv30 = compute_ci_pest(accuracy_neg_stoch_ttc_inv30,500);
-ci_neg_ttc = compute_ci_pest(accuracy_neg_ttc,500);
+
 
 
 

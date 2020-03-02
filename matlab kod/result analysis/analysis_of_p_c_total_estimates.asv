@@ -1,0 +1,17 @@
+load 'pc_nea_2mill_r_0_3.mat'
+load 'pc_ea_2mill_r_0_3.mat'
+cut_off = 0.8;
+pc_tot = pc_nea + pc_ea;
+
+pc_min_ttc =      get_data(3, 3, 1, [], 1, 80, 6);
+pc_split = get_data(3, 4, 1, [], 1, 80, 6) + get_data(3, 4, 1, [], 1, 80, 6);
+
+accuracy = accuracy_rate(pc_min_ttc, pc_tot, cut_off);
+
+ci_min_ttc = compute_ci_pest(accuracy,500);
+
+clf
+c=plot(100*accuracy,'o','color', [0 0 1]);
+hold on
+plot(100*accuracy,'color', [0 0 1]);
+plot(100*ci_min_ttc,':','color',[0 0 1])
