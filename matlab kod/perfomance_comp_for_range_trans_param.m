@@ -1,3 +1,4 @@
+
 %% Estimation of P(collision) using different transformation parameters
 % this code is used to take simulated data and perform POT method to
 % estimate P(collision). Data_matrix  can be either danger_FEA, DAFEA, X,
@@ -30,12 +31,12 @@ for i=1:5
     % number of thresholds
     n_u = 10;
 
-    % arrays for saving data                                                         
+    % arrays for saving data
     ue_save_matrix = zeros(J,n_u);
     param_save_matrix = zeros(J,n_u);
     pc_save_matrix = zeros(J,n_u);
     p_c_save_matrix = zeros(J,n_u);
-    ci_xi_u_matrix = cell(J, 1); 
+    ci_xi_u_matrix = cell(J, 1);
     thr_save_matrix = zeros(J,n_u);
     p_exceed_matrix = zeros(J,n_u);
 
@@ -77,7 +78,7 @@ for i=1:5
 
         % transform thresholds and data
         u_min_max = sort(trans([u_l,u_u]));
-        u_l_trans = u_min_max(1); 
+        u_l_trans = u_min_max(1);
         u_u_trans = u_min_max(2);
         U = sort(trans(linspace(u_l, u_u, n_u)));
         thr_save_matrix(jj,:) = U;
@@ -85,7 +86,7 @@ for i=1:5
 
         % plot transformed data with transformed thresholds
         clf
-        plot(trans(min_data),'.') 
+        plot(trans(min_data),'.')
         hold on
         plot(1:length(min_data),U'*ones(1,length(min_data)), 'k')
         plot(ones(1,length(min_data))*trans(0))
@@ -111,7 +112,7 @@ for i=1:5
         pc = zeros(1,n_u)*nan;                                                           % collects estimated collision probability for each threshold
         ue_save = zeros(1,n_u)*nan;                                                      % collects estimated upper endpoint
         max_data = max(max(trans_data));                                                 % largest observed value
-        logit = 1;   
+        logit = 1;
 
         p_inter = all_data{jj,end-1};
         p_ea = all_data{jj,end};
@@ -121,7 +122,7 @@ for i=1:5
         xplot_upper = 1;
 
         % number of points where cdf gets evaluated
-        n_eval_cdf = 1000;      
+        n_eval_cdf = 1000;
 
         for k=1:n_u
 
@@ -132,21 +133,21 @@ for i=1:5
 
             pc(k) = p_u*(1 - gpcdf(trans(0), param(2), param(1), U(k)) );
             ue = U(k) - param(1)/param(2);
-            if param(2)<0; ue_save(k) = ue; end 
+            if param(2)<0; ue_save(k) = ue; end
 
             if qqplot == 1
 
-                %%% generate sample of stochastic ttc, where one sample is drawn from each encounter.                   
+                %%% generate sample of stochastic ttc, where one sample is drawn from each encounter.
                 col_ind = randsample(Nexp, Nenc, true)';
                 ind = sub2ind(size(trans_data), 1:Nenc, col_ind );
-                ttc_sample = trans_data(ind); 
+                ttc_sample = trans_data(ind);
                 exceed = ttc_sample( ttc_sample>U(k) );
                 excess = exceed - U(k);
 
                 %%% compute empirical d.f. for excesses
                 exceed_data = trans_data(    max(trans_data,[],2) > U(k) ,:   );   % keeps only rows with atleast one obs. above threshold
                 pu_i = sum(exceed_data>U(k), 2)/ size(trans_data,2);                     % probability to exceed threshold for each encounter
-                weights = pu_i/sum(pu_i) ;                                          
+                weights = pu_i/sum(pu_i) ;
 
                 %%% replace obs. below u with nan's
                 below_u = find(exceed_data<=U(k));
@@ -166,7 +167,7 @@ for i=1:5
                     title(sprintf('empirical vs model quantiles, for threshold %d.',k))
                 subplot(212)
                     plot(x_eval,femp,'.')
-                    hold on 
+                    hold on
                     plot(x_eval, gpcdf(x_eval, param(2), param(1), 0))
                     line(([0,0]), 1.2,'LineStyle','--');
                     line(get(gca, 'xlim'), [1 1],'Color','green','LineStyle','--');
@@ -191,7 +192,7 @@ for i=1:5
 
                     [param_bs, p_u_bs] = bootstrap_est(trans_data, Nenc, init, U(k), shake_var);
                     sigma_sample(j) = param_bs(1); %#ok<*SAGROW>
-                    xi_sample(j) = param_bs(2); 
+                    xi_sample(j) = param_bs(2);
                     p_nea_sample(j) = p_u_bs*(1 - gpcdf(trans(0), param_bs(2), param_bs(1),U(k)) );
 
                 end
@@ -233,7 +234,7 @@ for i=1:5
             plot(U,ones(1,n_u)*trans(0))
             title('upper endpoint estimates')
         end
-        subplot(224)%%%%%%%%%%%%%%%%%%%%%%    
+        subplot(224)%%%%%%%%%%%%%%%%%%%%%%
         if logit==1
             plot(U,log10(pc))
             title('log(p_{est})')
@@ -287,27 +288,27 @@ for i=1:5
 
     % save results
     if select_trans == 1
-        
+
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100),'hit_rate')
         save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',          data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100), 'pc_save_matrix')
         save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',         data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100), 'p_c_save_matrix')
         save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',         data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100), 'thr_save_matrix')
         save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',       data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100), 'param_save_matrix')
         save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100), 'ci_xi_u_matrix')
-        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100), 'p_exceed_matrix')    
+        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, [], safety_level, up_frac*100, lo_frac*100), 'p_exceed_matrix')
 
     elseif select_trans == 2
-        
+
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100),'hit_rate')
         save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',          data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'pc_save_matrix')
         save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',         data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'p_c_save_matrix')
         save(sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',       data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'param_save_matrix')
         save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',         data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'thr_save_matrix')
         save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'ci_xi_u_matrix')
-        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'p_exceed_matrix')    
-    
+        save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'p_exceed_matrix')
+
     elseif select_trans == 3
-        
+
         save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d', data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100),'hit_rate')
         save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',       data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'pc_save_matrix')
         save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',      data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'p_c_save_matrix')
