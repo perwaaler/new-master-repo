@@ -1,3 +1,15 @@
+%% plot probabilities 
+clf
+pc_neg_stoch_ttc_exp2 = get_data(3, 1, 2, 0.2, 1, 80, 6);
+pc_neg_stoch_ttc_inv30 = get_data(3, 1, 3, [3 3.5], 1, 80, 6);
+
+load 'pc_ea_2mill_r_0_3.mat'
+p_true = pc_nea;
+plot(pc_neg_stoch_ttc_inv30(:,1)/p_true,'.')
+
+hold on
+plot(ones(1,500)*0.1)
+plot(ones(1,500)*1.9)
 %% analysing mean value
 pc_stoch_ttc = get_data(3, 1, 1, [], 1, 80, 6);
 pc_ttc =       get_data(3, 3, 1, [], 1, 80, 6);
@@ -29,7 +41,7 @@ title('mean value for different transformation parameters')
 xlabel('threshold number')
 
 %% analysing Mean-Square-Error
-pc2 = get_data(3, 1, 1, [], 1, 80, 6);
+pc2 = get_data(3, 1, 3, [3 3.5], 1, 80, 6);
 load 'pc_ea_2mill_r_0_3.mat'
 p_true = pc_nea;
 
@@ -43,7 +55,7 @@ xlabel('threshold number')
 load 'pc_ea_2mill_r_0_3.mat'
 p_true = pc_nea;
 
-cut_off = .8;
+cut_off = .5;
 
 pc_neg_stoch_ttc =      get_data(3, 1, 1, [], 1, 80, 6);
 pc_neg_stoch_ttc_exp1 = get_data(3, 1, 2, 0.1, 1, 80, 6);
