@@ -20,7 +20,7 @@ pause_length = 2^-5;
 step_par = [0.30*2 0.2/2];
 
 % parameters for the gamma distribution for the initial steps
-step_mean_init = 0.125;
+step_mean_init = 0.125*0.93;
 step_var_init = 0.003;
 theta_var_init = 0.015;                      % variance of initial theta
 

@@ -4,9 +4,9 @@
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 %%
-load data_500enc_r_safety_level_1_v2.mat
+load data_500enc_r_0_3_safety_level_2.mat
 %% Initial plots
-data_type = 2;  
+data_type = 1;  
 data_matrix = all_data{1,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values
@@ -50,14 +50,14 @@ title('transformed data')
 legend('transformed thresholds')
 %% ensure good initial value!
 trans_data = trans_data(:);
-exceed = trans_data(find(trans_data > u_l_trans));
+exceed = trans_data(trans_data > u_l_trans);
 negL = @(par,exceed_data,u) -sum( log(gppdf(exceed_data,par(2),par(1),u)) );
 init = fminsearch(@(par) negL(par, exceed, u_l_trans), [3 0.3])
 %% Fit models for range of thresholds and show diagnostic plots
 shake_guess = 0.1;                 % variance of noise that gets added to initial guess when stuck
 Nenc = length(data_matrix(:,1));   % number of encounters
 Nexp = length(data_matrix(1,:));   % number of values per row. If surrogate-measure is deterministic, then Nexp=1.
-Nbs = 100;                         % number of bootstrapped samples to compute standard error
+Nbs = 20;                         % number of bootstrapped samples to compute standard error
 trans_data = trans(data_matrix);
 m = 10;                                                    % number of thresholds used for estimation
 U = sort(trans(linspace(u_l, u_u,m)));                     % vector containing thresholds'
@@ -84,7 +84,7 @@ n_eval_cdf = 1000;    % number of points where cdf gets evaluated
 for k=1:m
     k
     data = trans_data(:);
-    exceed = data(find(data>U(k)));
+    exceed = data(data>U(k));
     param = fminsearch(@(par) negL(par,exceed,U(k)),init);
     init_temp = init;
     while_counter = 0;
@@ -103,17 +103,17 @@ for k=1:m
     ue = U(k) - param(1)/param(2);
     if param(2)<0; ue_save(k) = ue; end
 
-    if qqplot == 1;
+    if qqplot == 1
 
         %%% generate sample of stochastic ttc, where one sample is drawn from each encounter.
         col_ind = randsample(Nexp,Nenc, true)';
         ind = sub2ind(size(trans_data), 1:Nenc, col_ind );
         ttc_sample = trans_data(ind);
-        exceed = ttc_sample(find(ttc_sample>U(k)));
+        exceed = ttc_sample(ttc_sample>U(k));
         excess = exceed - U(k);
 
         %%% compute empirical d.f. for excesses
-        exceed_data = trans_data(    find(max(trans_data,[],2) > U(k)) ,:   );   % keeps only rows with atleast one obs. above threshold
+        exceed_data = trans_data(   max(trans_data,[],2) > U(k) ,:   );   % keeps only rows with atleast one obs. above threshold
         pu_i = sum(exceed_data>U(k), 2)/ size(trans_data,2);                     % probability to exceed threshold for each encounter
         weights = pu_i/sum(pu_i) ;
 
@@ -150,13 +150,15 @@ for k=1:m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% bootstrapping %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if compute_ci == 1
-
+        sigma_sample = zeros(1,Nbs);
+        xi_sample = zeros(1,Nbs);
+        p_nea_sample = zeros(1,Nbs);
         for j=1:Nbs
 
             resampling = randsample(Nenc,Nenc,true);              % indeces used to bootstrap
             trans_DAFEA_bs = trans_data(resampling,:);            % bootstrapped sample
             data = trans_DAFEA_bs(:);
-            exceed = data(find(data>U(k)));                         % get exceedences
+            exceed = data(data>U(k));                         % get exceedences
             param_bs =  fminsearch(@(par) negL(par,exceed,U(k)),init);                           % estimate parameters
             init_temp = init;
             while_counter = 1;
@@ -170,14 +172,14 @@ for k=1:m
                 if while_counter==300; param_bs = [nan,nan]; break; end
             end
             p_u = length(exceed)/length(data);
-            sigma_sample(j) = param_bs(1);
+            sigma_sample(j) = param_bs(1); %#ok<*SAGROW>
             xi_sample(j) = param_bs(2);
             p_nea_sample(j) = p_u*(1 - gpcdf(trans(0), param_bs(2), param_bs(1),U(k)) );
 
         end
-        sigma_sample(find(isnan(sigma_sample))) = [];
-        xi_sample(find(isnan(xi_sample))) = [];
-        p_nea_sample(find(isnan(p_nea_sample))) = [];
+        sigma_sample(isnan(sigma_sample)) = [];
+        xi_sample(isnan(xi_sample)) = [];
+        p_nea_sample(isnan(p_nea_sample)) = [];
 
         sigma_mean = mean(sigma_sample);
         xi_mean = mean(xi_sample);
@@ -212,7 +214,7 @@ plot(U, param_save(2,:))
 title('xi_{est}')
 hold on
 if compute_ci == 1
-    plot(U,ci_xi_u,'.')
+    plot(U,ci_xi_u)
 end
 
 subplot(223)

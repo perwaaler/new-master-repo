@@ -5,7 +5,7 @@ xi_sample(isnan(xi_sample)) = [];
 pc_sample(isnan(pc_sample)) = [];
 
 se_sigma = std(sigma_sample);
-se_xi = std(xi_sample);
+se_xi = std(xi_sample)
 se_p_nea = std(pc_sample);
 
 ci_sigma = sort(  param(1) + [-1 1]*1.96*se_sigma  );
