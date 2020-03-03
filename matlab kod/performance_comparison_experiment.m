@@ -304,11 +304,11 @@ elseif select_trans == 2
     save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'ci_xi_u_matrix')
     save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',    data_type, select_trans, p_ex*10, safety_level, up_frac*100, lo_frac*100), 'p_exceed_matrix')    
 elseif select_trans == 3
-    save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d', data_type, select_trans, p_inv, d_inv, safety_level, up_frac*100, lo_frac*100),'hit_rate')
-    save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',       data_type, select_trans, p_inv, d_inv, safety_level, up_frac*100, lo_frac*100), 'pc_save_matrix')
-    save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',      data_type, select_trans, p_inv, d_inv, safety_level, up_frac*100, lo_frac*100), 'p_c_save_matrix')
-    save(sprintf('param__datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',   data_type, select_trans, p_inv, d_inv, safety_level, up_frac*100, lo_frac*100), 'param_save_matrix')
-    save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',      data_type, select_trans, p_inv, d_inv, safety_level, up_frac*100, lo_frac*100), 'thr_save_matrix')
-    save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d', data_type, select_trans, p_inv, d_inv, safety_level, up_frac*100, lo_frac*100), 'ci_xi_u_matrix')
-    save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d', data_type, select_trans, p_inv, d_inv, safety_level, up_frac*100, lo_frac*100), 'p_exceed_matrix') 
+    save(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d', data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100),'hit_rate')
+    save(sprintf('pc_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',       data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'pc_save_matrix')
+    save(sprintf('p_c_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',      data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'p_c_save_matrix')
+    save(sprintf('param__datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',   data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'param_save_matrix')
+    save(sprintf('thr_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d',      data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'thr_save_matrix')
+    save(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d', data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'ci_xi_u_matrix')
+    save(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_%d_safetylevel_%d_u_frac_%d_l_frac_%d', data_type, select_trans, p_inv*10, d_inv*10, safety_level, up_frac*100, lo_frac*100), 'p_exceed_matrix') 
 end
