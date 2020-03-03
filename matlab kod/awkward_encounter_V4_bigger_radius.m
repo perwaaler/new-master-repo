@@ -1,15 +1,5 @@
 % simulation of encounters between two vehicles.
 
-<<<<<<< HEAD
-for jj = 1:10
-n = 1;                                % number of encounter-samples desired
-all_data = cell(n, 12);                 % collects data from each encounter-sample
-N = 2*10^5;                                % number of encounters
-r = 0.3;                                % collision radius of each person
-NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
-est_ttc = 0;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
-compute_X = 0;
-=======
 n = 500;                                % number of encounter-samples desired
 all_data = cell(n, 12);                 % collects data from each encounter-sample
 N = 500;                                % number of encounters
@@ -17,12 +7,11 @@ r = 0.3;                                % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 1;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 1;
->>>>>>> 543fb1d6c020c253e4baa2d1b99b21b7160be84e
 plotting = 0;                           % set to one if plots of encounters are wanted
 sausage = 0;
 plot_sim_walks = 0;
 
- for kk = 1:n
+for kk = 1:n
 kk %#ok<NOPTS>
 
 pause_length = 2^-5;
@@ -81,11 +70,7 @@ aa =1;
 bb =1;
 
 for i=1:N
-<<<<<<< HEAD
 i
-=======
-%i
->>>>>>> 543fb1d6c020c253e4baa2d1b99b21b7160be84e
 %%% initiation of encounter
 nn = 0;
 EA_index = 1;                                                         % variable used to find most dangerous moment during attempt to avoid collision
@@ -110,7 +95,7 @@ counter = 0;
     while real(A0) < xinit && real(B0) > -xinit
         counter = counter + 1;
         nn = nn + 1;
-        
+
         D = norm(A0-B0);
         Dim = norm(imag(A0-B0));                  % vertical part of the distance; if large, evasive action should be unlikely
         dp = Amp*exp(-(s*D)^p)*exp(-(Dim/0.8000)^3); % detection probability
@@ -153,12 +138,12 @@ counter = 0;
                     %saveas(gcd,sprintf('fig_%d_%d.jpg',i,counter))
                     %savefig(sprintf('fig_%d_%d',i,counter))
                     pause(4)
-                    
+
                     %ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, thetavar*bb, stability_fac,1)
                 end
-                
+
                 pause(0)
-                
+
                 dist_FEA(i) = norm(A0-B0) - 2*r;
                 dist_min_EA(i,EA_index) = norm(A0-B0) - 2*r;
                 ttc_min_EA(i,EA_index) = compute_ttc(A0,B0,stepsize,theta,r);
@@ -171,10 +156,10 @@ counter = 0;
             danger_index = D - 2*r;
             danger_enc_i(length(danger_enc_i) + 1) = danger_index;
             ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
-            
+
             % take next step
             [A1, B1, theta] = take_evasive_step(A0,B0,step_par,stepsize,var_step, min_stepsize,theta,var_theta,stability_fac,thetamod_k,thetamod_p,thetamod_s);
-            
+
             dist_min_EA(i,EA_index) = norm(A1-B1) - 2*r;
             ttc_min_EA(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
             EA_index = EA_index + 1;
@@ -270,7 +255,7 @@ counter = 0;
     if encounter_classifier == 1                   % i.e. no evasive action and no collision has occured
         dist_min_NEA(i) = min(danger_enc_i);
     end
-    
+
 
 end
 sum(enc_type==-2)
@@ -361,16 +346,4 @@ all_data{kk,10} = sum(enc_type==-2);                                            
 all_data{kk,11} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N;  % saves p_interactive
 all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                       % saves p_ea
 
-<<<<<<< HEAD
-pc_nea = sum(enc_type==2)/N;
-pc_ea = sum(enc_type==-2)/N;
-
-
-
-save(sprintf('pc_nea_r_0_3_2hundredk_safety_level_1_iteration_%d',jj),'pc_nea')
-save( sprintf('pc_ea_r_0_3_2hundredk_safety_level_1_iteration_%d',jj),'pc_ea')
-end
-end 
-=======
  end
->>>>>>> 543fb1d6c020c253e4baa2d1b99b21b7160be84e
