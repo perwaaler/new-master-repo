@@ -9,25 +9,25 @@ function out = get_data(variable, data_type, select_trans, trans_par, safety_lev
 
 if select_trans==1 || select_trans==2
 if variable == 1
-    load(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*10, safety_level, up_frac, lo_frac))
+    load(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac))
     out = hit_rate;
 elseif variable == 2
-    load(      sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*10, safety_level, up_frac, lo_frac)) %#ok<*LOAD>
+    load(      sprintf('pc_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac)) %#ok<*LOAD>
     out = pc_save_matrix;
 elseif variable == 3
-    load(     sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*10, safety_level, up_frac, lo_frac))
+    load(     sprintf('p_c_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac))
     out = p_c_save_matrix;
 elseif variable == 4
-    load(   sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*10, safety_level, up_frac, lo_frac))
+    load(   sprintf('param_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac))
     out = param_save_matrix;
 elseif variable == 5
-    load(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*10, safety_level, up_frac, lo_frac))
+    load(sprintf('param_ci_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac))
     out = ci_xi_u_matrix;
 elseif variable == 6
-    load(     sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*10, safety_level, up_frac, lo_frac))
+    load(     sprintf('thr_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac))
     out = thr_save_matrix;
 elseif variable == 7
-    load(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*10, safety_level, up_frac, lo_frac))
+    load(sprintf('p_exceed_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac))
     out = p_exceed_matrix;
 end
 end

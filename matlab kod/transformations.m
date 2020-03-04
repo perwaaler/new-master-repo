@@ -6,15 +6,7 @@
 %%
 load data_500enc_r_0_3_safety_level_2.mat
 %% Initial plots
-<<<<<<< HEAD
-data_type = 1;  
-=======
-<<<<<<< HEAD
-data_type = 3;  
-=======
-data_type = 2;  
->>>>>>> 543fb1d6c020c253e4baa2d1b99b21b7160be84e
->>>>>>> 441aeeddcf9e5df312dd24751a3fe3936e0219e8
+data_type = 1;
 data_matrix = all_data{1,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values
@@ -22,11 +14,9 @@ min_data = data_matrix(min(data_matrix,[],2)<Inf,:);
 min_data = min(min_data,[],2);
 
 % find minimum and maximum thresholds based on amount of data to be used
-<<<<<<< HEAD
-u_minmax = find_threshold(min_data, 0.06, 0.8)
-=======
+
 u_minmax = find_threshold(min_data, 0.06, 0.8);
->>>>>>> 543fb1d6c020c253e4baa2d1b99b21b7160be84e
+
 u_l = u_minmax(1);
 u_u = u_minmax(2);
 
@@ -38,24 +28,23 @@ plot(ones(1,length(min_data))*u_u)
 title('untransformed data')
 %% transforming data and plotting transformed data and thresholds
 % transforms
-p = 2;
+p = 3;
+
 transinv = @(x)1./(3 + x).^p;
-<<<<<<< HEAD
-transex = @(x)exp(-0.15*(x - 2));
-=======
-transex = @(x)exp(-0.4*(x - 0));
->>>>>>> 543fb1d6c020c253e4baa2d1b99b21b7160be84e
+
+transex = @(x)exp(-0.3*(x - 2));
+
 transneg = @(x) -x;
 
 % choose transform to use
-trans = @(x) transex(x);
+trans = @(x) transinv(x);
 Nenc = length(data_matrix(:,1));
 
 % transform thresholds
 u_min_max = sort(trans([u_l,u_u]));
 u_l_trans = u_min_max(1);
 u_u_trans = u_min_max(2);
-m=10;
+m=5;
 U = sort(trans(linspace(u_l, u_u,m)));
 
 trans_data = trans(data_matrix);
@@ -74,9 +63,8 @@ shake_guess = 0.1;                 % variance of noise that gets added to initia
 Nenc = length(data_matrix(:,1));   % number of encounters
 Nexp = length(data_matrix(1,:));   % number of values per row. If surrogate-measure is deterministic, then Nexp=1.
 Nbs = 20;                         % number of bootstrapped samples to compute standard error
-trans_data = trans(data_matrix);
-m = 10;                                                    % number of thresholds used for estimation
-U = sort(trans(linspace(u_l, u_u,m)));                     % vector containing thresholds'
+trans_data = trans(data_matrix);                                                  % number of thresholds used for estimation
+                   % vector containing thresholds'
 
 % collects 95% ci's for xi
 ci_sigma_u = zeros(2,m)*nan;
@@ -98,7 +86,6 @@ xplot_upper = 1;
 n_eval_cdf = 1000;    % number of points where cdf gets evaluated
 
 for k=1:m
-    k
     data = trans_data(:);
     exceed = data(data>U(k));
     param = fminsearch(@(par) negL(par,exceed,U(k)),init);
@@ -156,9 +143,6 @@ for k=1:m
             line(trans([0,0]), 1.2,'LineStyle','--');
             line(get(gca, 'xlim'), [1 1],'Color','green','LineStyle','--');
             title(sprintf('empirical d.f. vs model d.f. for threshold %d.',k))
-%             histogram(excess,'Normalization','probability'); hold on
-%             plot(linspace(0,max(excess)*1.5,100), gppdf(linspace(0,max(excess)*1.5,100),param(2),param(1),0) )
-%             hold off
 
         pause(pause_length)
     end
@@ -227,11 +211,12 @@ if compute_ci == 1
     plot(U,ci_sigma_u)
 end
 subplot(222)
-plot(U, param_save(2,:))
+plot(U, param_save(2,:),'s'); hold on
+plot(U, param_save(2,:),'b')
+xlabel('threshold')
 title('xi_{est}')
-hold on
 if compute_ci == 1
-    plot(U,ci_xi_u)
+    plot(U,ci_xi_u,':','color','b')
 end
 
 subplot(223)

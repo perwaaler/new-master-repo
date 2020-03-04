@@ -5,16 +5,16 @@
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 
-data_type = 5; % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
+data_type = 3; % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 safety_level = 1;
-select_trans = 2;
+select_trans = 3;
 
 % transformation parameters
 if select_trans==2
-    p_ex = 0.3;
+    p_ex = .5;
     trans_par = p_ex;
 else
-    p_inv = 3;
+    p_inv = 3.5;
     d_inv = 3.5;
     trans_par = [d_inv, p_inv];
 end
@@ -49,14 +49,14 @@ lo_frac = 0.06;
 
     
 % plotting options
-compute_ci = 0;              % set equal to one if confidence intervals for xi are desired
-qqplot = 0;
+compute_ci = 1;              % set equal to one if confidence intervals for xi are desired
+qqplot = 1;
 save_plot = 0;
 
 % pausing options
 pause_trans = 0.0;
 qq_pause = 0.0;
-stability_pause = 0;
+stability_pause = 4;
 
 trans =@(x) transform(x, select_trans, trans_par);
 
@@ -100,7 +100,7 @@ for jj=1:J
     shake_var = 0.1;                 % variance of noise that gets added to initial guess when stuck
     Nenc = length(data_matrix(:,1));   % number of encounters
     Nexp = length(data_matrix(1,:));   % number of values per row. If surrogate-measure is deterministic, then Nexp=1.
-    Nbs = 20;                         % number of bootstrapped samples to compute standard error
+    Nbs = 50;                         % number of bootstrapped samples to compute standard error
 
     % collects 95% ci's for xi and sigma
     ci_sigma_u = zeros(2,n_u)*nan;
@@ -221,9 +221,10 @@ for jj=1:J
     title('xi_{est}')
     hold on
     if compute_ci == 1
+        plot(U,ci_xi_u,'o')
         plot(U,ci_xi_u)
         thr_index = thr_autofind(ci_xi_u, param_save(2,:), n_u);
-        plot(U(thr_index), param_save(2,thr_index),'*');
+        plot(U(thr_index), param_save(2,thr_index),'*','color','green');
     end
 
     subplot(223)%%%%%%%%%%%%%%%%%%%%%%

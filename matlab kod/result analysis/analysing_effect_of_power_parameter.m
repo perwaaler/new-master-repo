@@ -17,19 +17,19 @@ plot(hit_rate6)
 plot(hit_rate8)
 plot(hit_rate10)
 %% analysing mean value
-pc2 = get_data(3, 1, 2, 0.2, 1);
+pc2 = get_data(3, 1, 2, 0.1, 1, 80, 6);
 ci2 = compute_ci_meanest(pc2, 500);
-pc4 = get_data(3, 1, 2, 0.4, 1);
+pc4 = get_data(3, 1, 2, 0.2, 1, 80, 6);
 ci4 = compute_ci_meanest(pc4, 500);
-pc6 = get_data(3, 1, 2, 0.6, 1);
+pc6 = get_data(3, 1, 2, 0.3, 1, 80, 6);
 ci6 = compute_ci_meanest(pc6, 500);
-pc8 = get_data(3, 1, 2, 0.8, 1);
+pc8 = get_data(3, 1, 2, 0.4, 1, 80, 6);
 ci8 = compute_ci_meanest(pc8, 500);
-pc10 = get_data(3, 1, 2, 1, 1);
+pc10 = get_data(3, 1, 2, 0.5, 1, 80, 6);
 ci10 = compute_ci_meanest(pc10, 500);
 
-
-p_true = 8.5333e-05;
+load 'pc_nea_2mill_r_0_3.mat'
+p_true = pc_nea;
 
 clf
 a = plot(mean(pc2), 'color' ,[0 .0 1]);
@@ -81,11 +81,11 @@ xlabel('threshold number')
 % as threshold increases.
 
 %% analysing standard deviation
-pc2 = get_data(3, 1, 2, 0.2, 1);
-pc4 = get_data(3, 1, 2, 0.4, 1);
-pc6 = get_data(3, 1, 2, 0.6, 1);
-pc8 = get_data(3, 1, 2, 0.8, 1);
-pc10 = get_data(3, 1, 2, 1, 1);
+pc2 = get_data(3, 1, 2, 0.1, 1, 80, 6);
+pc4 = get_data(3, 1, 2, 0.2, 1, 80, 6);
+pc6 = get_data(3, 1, 2, 0.3, 1, 80, 6);
+pc8 = get_data(3, 1, 2, 0.4, 1, 80, 6);
+pc10 = get_data(3, 1, 2, 0.5, 1, 80, 6);
 
 
 std2 = std(pc2);

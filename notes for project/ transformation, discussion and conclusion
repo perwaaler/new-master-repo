@@ -1,0 +1,41 @@
+it seems that p_inv = 4.5 or 4 performs best of the tested inverse transform parameters, and that in general inverse transforms
+yields significantly better performance than exponential transforms in terms of accuracy. In order for this information to be useful
+in a more general sense, we need to be able to relate these findings to the fitting process, and see if we can identify some features
+in the diagnostic plots that would allow us to make appropriate modeling choices when we do not know what the true value of the
+estimand is. What rules for selecting transformation type and parameter are suggested by the results of the experiment, if any?
+
+
+From the accuracy and bias plot comparing the different transformation parameters, we see that increasing the power tilts the expected
+value in the direction of higher expected values, both for the inverse and the exponential transform. The higher expected values
+results in a higher probability that we get non-zero-estimates. In particular, we see that for the exponential transform, larger
+transforms
+
+* So far, what I've been able to gather is that when there is large and obvious
+bias - as is the case when using exponential transform with too high power parameter - then I'm better of using a weaker
+transform which displays less bias. From that, I formulate the following rough rule of thumb: choose a transformation parameter as
+high as possible while still getting reasonable diagnostic plots.
+
+I compared inv_trans(4.5) with exp_trans(0.5), so the two strongest transforms used. The difference I have noted thus far
+after having watched many distribution plots for each is that when using the inverse transform, approximate unbiasedness
+seems to be achieved instantly, as even for low thresholds the fit between empirical and model distribution is quite good.
+For the exponential transform on the other hand, we see clear bias for a number of thresholds before we start seeing a reasonable fit.
+This sheds some light to some extent why the inverse transform performs better. It allows for a good fit already at low thresholds,
+which means that our estimates can be based on more data, whereas for the exponential transform we have to lift the threshold
+quite a bit before there is sufficiently low bias for the estimates to become useful, at the cost of higher variance. Similarly,
+the improvement in performance we get when using exponentially transformed data rather than untransformed data could be partially
+explained by the same arguments, as we see here too that that with the transformed data we obtain good fits at a lower threshold
+relative to the untransformed data.
+
+Another way to formulate the above observations is that when using the inverse transform, the bias is more stable across
+different thresholds. This behavior is something we would expect when the random variable follows a GPD distribution. This is
+because under such circumstances, the peaks over the threshold will also follow a GPD distribution, and hence good
+fits are obtained even when using low thresholds since the modeling assumptions are accurate. In conclusion, it might be the
+case that the inverse transform performs well in part because it has the effect of making the data-distribution more similar to a GPD
+distribution, i.e. making the model assumptions more accurate, possibly explaining the increased fitting stability across different
+thresholds relative to that of the exponential transform.
+
+Another observed qualitative difference between the inverse and exponential transform, was that the goodness of fit across different
+thresholds seemed much more stable w.r.t. parameter choice in the case of the inverse transform. Even for very powerful transformations
+the fit was quite good at low thresholds. For the exponential transform, we observed instead that the bias grew very quickly
+at the lower thresholds as we increased the power parameter of the transformation. This feature could be another indicator that
+one type of transform is more suitable than the other.
