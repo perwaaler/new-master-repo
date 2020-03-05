@@ -95,12 +95,11 @@ trans_string{2} = 'exponential';
 trans_string{3} = 'inverse';
 
 cut_off = .5;
-data_type = 3;
+data_type = 6;
 sev_meas = 1;
 tran = 2;
 par_range = [.1 .15 .2 .3 .4 .5];  % ttc parameters
 par_range = [.02 .06 .1 .2 .3 .4 ]; % mindist parameters
-par_range = [];
 %par_range = [1 1.5 2 2.5 3 3.5 4 4.5];
 n_ex = length(par_range);
 data_markers = data_marker();
