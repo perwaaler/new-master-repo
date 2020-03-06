@@ -51,13 +51,52 @@ clf
 plot(rmse2)
 title('root-mean-square-error')
 xlabel('threshold number')
+%%
+load 'pc_nea_2mill_r_0_3.mat'
+p_true = pc_nea;
+
+sev_measure = cell(3,1);
+sev_measure{1} = 'stoch. TTC';
+sev_measure{2} = 'TTC';
+sev_measure{3} = 'min. dist.';
+
+trans_string = cell(3,1);
+trans_string{1} = [];
+trans_string{2} = 'exponential';
+trans_string{3} = 'inverse';
+
+cut_off = .5;
+data_type = 1;
+sev_meas = 1;
+tran = 2;
+
+clf
+a = plot_acc_w_ci(6, 1, [], p_true, cut_off, 'r', data_markers{1});
+b = plot_acc_w_ci(1, 1, [], p_true, cut_off, 'b', data_markers{2});
+b = plot_acc_w_ci(3, 1, [], p_true, cut_off, 'g', data_markers{3});
+title('estimate of p(coll, NEA) for different severity measures')
+
 %% comparing accuracy plots
 load 'pc_nea_2mill_r_0_3.mat'
 p_true = pc_nea;
 
-cut_off = .5;
+sev_measure = cell(3,1);
+sev_measure{1} = 'stoch. TTC';
+sev_measure{2} = 'TTC';
+sev_measure{3} = 'min. dist.';
 
+trans_string = cell(3,1);
+trans_string{1} = [];
+trans_string{2} = 'exponential';
+trans_string{3} = 'inverse';
+
+cut_off = .5;
+data_type = 1;
+sev_meas = 1;
+tran = 2;
 par_range = [.1 .15 .2 .25 .3 .4 .5];
+%par_range = [.02 .04 .06 .1 .2 .3 .4 ];
+%par_range = [1 1.5 2 2.5 3 3.5 4 4.5];
 n_ex = length(par_range);
 data_markers = cell(1,n_ex);
 data_markers{1} = 'o';
@@ -75,15 +114,15 @@ data_markers{9} = 'v';
 pc_stochttc_exp = cell(1,n_ex);
 accuracy_stoch_ttc_exp = cell(1,n_ex);
 ci_stoch_ttc_exp = cell(1,n_ex);
-labels = cell(n_ex, 1);
+legend_labels = cell(n_ex, 1);
 color_spec = linspace(0,1,n_ex);
 plot_vec = zeros(1, n_ex);
 
 clf
 hold on
 for i=1:n_ex
-
-    pc_stochttc_exp{i} = get_data(3, 1, 2, par_range(i), 1, 80, 6);
+    
+    pc_stochttc_exp{i} = get_data(3, data_type, tran, par_range(i), 1, 80, 6);
     accuracy_stoch_ttc_exp{i} = accuracy_rate(pc_stochttc_exp{i}, p_true, cut_off);
     ci_stoch_ttc_exp{i} = compute_ci_pest(accuracy_stoch_ttc_exp{i},500);
 
@@ -92,28 +131,39 @@ for i=1:n_ex
     plot(100*accuracy_stoch_ttc_exp{i},'color', [0 color_spec(i) 1]);
     plot(100*ci_stoch_ttc_exp{i},':','color',[0 color_spec(i) 1])
 
-    labels{i,1} = sprintf('stoch ttc, p = 0.%d',par_range(i)*100);
+    legend_labels{i,1} = sprintf('%s, p = %s',sev_measure{sev_meas}, num2str(par_range(i)));
 end
 
-a = plot_acc_w_ci(1, 1, [], p_true, cut_off, 'r', data_markers{8});
+a = plot_acc_w_ci(6, 1, [], p_true, cut_off, 'r', data_markers{8});
 %plot_acc_w_ci(data_type, transform, trans_par, p_true, cut_off, color, data_mark)
 %b = plot_acc_w_ci(3, 1, [], p_true, cut_off, 'r', data_markers{9});
 %c = plot_acc_w_ci(1, 3, [4.5 3.5], p_true, cut_off, 'r', data_markers{9});
 
 
-labels{8} = 'stoch ttc';
-labels{9} = 'ttc';
+legend_labels{end + 1} = sev_measure{3};
+% labels{9} = 'ttc';
 
-title(sprintf('accuracy plots for exponential transform, cutoff = 0.%d',cut_off*10))
-
-legend([plot_vec a], labels)
+title(sprintf('accuracy plots for %s, %s transform, cut-off = 0.%d',sev_measure{sev_meas},trans_string{tran} , cut_off*10))
+xlabel('threshold index')
+legend([plot_vec a], legend_labels)%labels)
 %% accuracy inv transform
 %
 load 'pc_nea_2mill_r_0_3.mat'
 p_true = pc_nea;
+sev_measure = cell(3,1);
+sev_measure{1} = 'stoch. TTC';
+sev_measure{2} = 'TTC';
+sev_measure{3} = 'min. dist.';
 
-cut_off = .5;
+trans_string = cell(3,1);
+trans_string{1} = [];
+trans_string{2} = 'exponential';
+trans_string{3} = 'inverse';
 
+sev_meas = 3;
+cut_off = .8;
+data_type = 6;
+par_range = [.1 .2 .3 .4 .5 .6 .8 1 1.5 2];
 par_range = [1 1.5 2 2.5 3 3.5 4 4.5];
 n_ex = length(par_range);
 data_markers = cell(1,n_ex);
@@ -126,12 +176,13 @@ data_markers{6} = 'd';
 data_markers{7} = 's';
 data_markers{8} = 'h';
 data_markers{9} = '^';
-data_markers{9} = 'v';
+data_markers{10} = 'v';
+
 
 pc_stochttc_exp = cell(1,n_ex);
 accuracy_stoch_ttc_exp = cell(1,n_ex);
 ci_stoch_ttc_exp = cell(1,n_ex);
-labels = cell(n_ex, 1);
+legend_labels = cell(n_ex, 1);
 color_spec = linspace(0,1,n_ex);
 plot_vec = zeros(1, n_ex);
 
@@ -139,7 +190,7 @@ clf
 hold on
 for i=1:n_ex
 
-    pc_stochttc_exp{i} = get_data(3, 1, 3, [par_range(i),3.5], 1, 80, 6);
+    pc_stochttc_exp{i} = get_data(3, data_type, 3, [par_range(i),3.5], 1, 80, 6);
     accuracy_stoch_ttc_exp{i} = accuracy_rate(pc_stochttc_exp{i}, p_true, cut_off);
     ci_stoch_ttc_exp{i} = compute_ci_pest(accuracy_stoch_ttc_exp{i},500);
 
@@ -148,19 +199,19 @@ for i=1:n_ex
     plot(100*accuracy_stoch_ttc_exp{i},'color', [0 color_spec(i) 1]);
     plot(100*ci_stoch_ttc_exp{i},':','color',[0 color_spec(i) 1])
 
-    labels{i,1} = sprintf('stoch ttc, %d.%d',floor(par_range(i)), decpart(par_range(i)));;
+    legend_labels{i,1} = sprintf('%s, p = %s',sev_measure{sev_meas}, num2str(par_range(i)));
 end
 
-a = plot_acc_w_ci(1, 1, [], p_true, cut_off, 'r', data_markers{end-1});
+a = plot_acc_w_ci(6, 1, [], p_true, cut_off, 'r', data_markers{end-1});
 
 
 
-labels{n_ex+1} = 'stoch ttc';
+legend_labels{n_ex+1} = 'min dist';
 
 
-title(sprintf('accuracy plots for inverse transform, cutoff = 0.%d',cut_off*10))
+title(sprintf('accuracy plots for %s, inverse transform, cut-off = %s', sev_measure{sev_meas}, num2str(cut_off)) );
 
-legend([plot_vec a], labels)
+legend([plot_vec a], legend_labels)
 
 %% comparison of peak performance between exponential and inverse transform
 load 'pc_nea_2mill_r_0_3.mat'
@@ -196,7 +247,7 @@ data_markers{9} = 'v';
 
 pc_stochttc_exp = cell(1,n_ex);
 ci_stoch_ttc_exp = cell(1,n_ex);
-labels = cell(n_ex, 1);
+legend_labels = cell(n_ex, 1);
 color_spec = linspace(0,1,n_ex);
 plot_vec = zeros(1, n_ex);
 
@@ -213,15 +264,15 @@ for i=1:n_ex
     plot(accuracy_stoch_ttc_exp{i},'color', [0 color_spec(i) 1]);
     plot(ci_stoch_ttc_exp{i},':','color',[0 color_spec(i) 1])
 
-    labels{i,1} = sprintf('stoch ttc, %d.%d',floor(par_range(i)), decpart(par_range(i)));
+    legend_labels{i,1} = sprintf('stoch ttc, %d.%d',floor(par_range(i)), decpart(par_range(i)));
 end
 a = plot(ones(1,10)*p_true,'r');
 
-labels{n_ex+1} = 'pc_{nea} true';
+legend_labels{n_ex+1} = 'pc_{nea} true';
 
-title('mean value for inverse transform')
+title('Expected value for inverse transform')
 
-legend([plot_vec a], labels)
+legend([plot_vec a], legend_labels)
 
 %% analysing mean value of exp transform
 
@@ -247,7 +298,7 @@ data_markers{9} = 'v';
 
 pc_stochttc_exp = cell(1,n_ex);
 ci_stoch_ttc_exp = cell(1,n_ex);
-labels = cell(n_ex, 1);
+legend_labels = cell(n_ex, 1);
 color_spec = linspace(0,1,n_ex);
 plot_vec = zeros(1, n_ex);
 
@@ -264,16 +315,16 @@ for i=1:n_ex
     plot(accuracy_stoch_ttc_exp{i},'color', [0 color_spec(i) 1]);
     plot(ci_stoch_ttc_exp{i},':','color',[0 color_spec(i) 1])
 
-    labels{i,1} = sprintf('stoch ttc, p = %d.%d',floor(par_range(i)), decpart(par_range(i)));
+    legend_labels{i,1} = sprintf('stoch ttc, p = %d.%d',floor(par_range(i)), decpart(par_range(i)));
 end
 ylim([0 2e-3])
 a = plot(ones(1,10)*p_true,'r');
 
-labels{n_ex+1} = 'pc_{nea} true';
+legend_labels{n_ex+1} = 'pc_{nea} true';
 
-title('mean value for exponential transform')
+title('Expected value for exponential transform')
 
-legend([plot_vec a], labels)
+legend([plot_vec a], legend_labels)
 % we can see that there is clearly increase in bias as trans-par increases.
 % specifically, the tendency to overestimate increases. In order to
 % compensate for this increased bias, we have to use higher thresholds.

@@ -30,8 +30,8 @@ a_init = step_mean_init^2/step_var_init;
 b_init = step_var_init/step_mean_init;
 
 % variance of the step-size
-var_step = 0.001;
-var_theta = 0.03;                           % determins the amount of random variability of the step-angle at each iteration.
+var_step = 0.001*4;
+var_theta = 0.03*4;                           % determins the amount of random variability of the step-angle at each iteration.
 
 % parameters relating to detection probability dp; dp = A*exp(-s*(D + d)^p)
 % where D is distance between vehicles
@@ -70,7 +70,7 @@ aa =1;
 bb =1;
 
 for i=1:N
-i
+%i
 %%% initiation of encounter
 nn = 0;
 EA_index = 1;                                                         % variable used to find most dangerous moment during attempt to avoid collision
@@ -346,4 +346,5 @@ all_data{kk,10} = sum(enc_type==-2);                                            
 all_data{kk,11} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N;  % saves p_interactive
 all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                       % saves p_ea
 
+save('data_500enc_r_0_3_extra_rand_safety_level_1','all_data')
  end

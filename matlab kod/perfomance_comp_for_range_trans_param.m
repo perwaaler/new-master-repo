@@ -4,14 +4,10 @@
 % estimate P(collision). Data_matrix  can be either danger_FEA, DAFEA, X,
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
-data_type_list=[1]; %#ok<NBRAK>
-
-for mm=1:length(data_type_list)
-    
-data_type = data_type_list(mm); % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
-
+data_type_list=[6]; %#ok<NBRAK>
+select_trans = 3;
+par_range = [0.5 1 1.5 2 2.5 3 3.5 4];
 safety_level = 1;
-select_trans = 2;
 
 % plotting options
 compute_ci = 0;              % set equal to one if confidence intervals for xi are desired
@@ -21,18 +17,22 @@ save_plot = 0;
 % pausing options
 pause_trans = 0.0;
 qq_pause = 0.0;
-stability_pause = 0;
+stability_pause = 0.0;
 
-for i=1:2
+for mm=1:length(data_type_list)
+    
+data_type = data_type_list(mm); % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
+
+for i=1:length(par_range)
     % transformation parameters
     if select_trans==2
-        p_ex = [0.15 0.25];
+        p_ex = 0.1;%[0.01 .03 .05 .07 .09];
         p_ex = p_ex(i);
         trans_par = p_ex;
     else
-        p_inv = 1 + (i - 1)/2;
+        p_inv = par_range;%3;%[0.1 .3 .5 .7 .9]; %1 + (i - 1)/2;
         d_inv = 3.5;
-        trans_par = [d_inv, p_inv];
+        trans_par = [p_inv(i), d_inv];
     end
 
     if safety_level==1

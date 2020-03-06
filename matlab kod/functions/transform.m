@@ -8,6 +8,6 @@ elseif select_trans == 2
     trans_data = exp( -trans_par*(data_matrix - 2));
     
 elseif select_trans == 3
-    trans_data = 1./(data_matrix + trans_par(1)).^ trans_par(2);
+    trans_data = 1./(data_matrix + trans_par(2)).^ trans_par(1);
 end
 end
