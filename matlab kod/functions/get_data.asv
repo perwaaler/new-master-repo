@@ -6,10 +6,8 @@ function out = get_data(variable, data_type, select_trans, trans_par, safety_lev
 % set variable=4 for param
 % set variable=5 for param_ci
 % if safety 
-
-if length(trans_par)==1 && select_trans==3
-    trans_par=[trans_par 3.5];
-end
+if length(trans_par)==1 & select_trans==3
+    trans_par=[]
 
 if select_trans==1 || select_trans==2
 if variable == 1

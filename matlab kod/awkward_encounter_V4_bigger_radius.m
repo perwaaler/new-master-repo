@@ -1,12 +1,12 @@
 % simulation of encounters between two vehicles.
 
-n = 500;                                % number of encounter-samples desired
+n = 1;                                % number of encounter-samples desired
 all_data = cell(n, 12);                 % collects data from each encounter-sample
-N = 500;                                % number of encounters
+N = 10000;                                % number of encounters
 r = 0.3;                                % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
-est_ttc = 1;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
-compute_X = 1;
+est_ttc = 0;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
+compute_X = 0;
 plotting = 0;                           % set to one if plots of encounters are wanted
 sausage = 0;
 plot_sim_walks = 0;
@@ -30,8 +30,8 @@ a_init = step_mean_init^2/step_var_init;
 b_init = step_var_init/step_mean_init;
 
 % variance of the step-size
-var_step = 0.001*4;
-var_theta = 0.03*4;                           % determins the amount of random variability of the step-angle at each iteration.
+var_step = 0.001*2;
+var_theta = 0.03*2;                           % determins the amount of random variability of the step-angle at each iteration.
 
 % parameters relating to detection probability dp; dp = A*exp(-s*(D + d)^p)
 % where D is distance between vehicles
@@ -70,7 +70,7 @@ aa =1;
 bb =1;
 
 for i=1:N
-%i
+i
 %%% initiation of encounter
 nn = 0;
 EA_index = 1;                                                         % variable used to find most dangerous moment during attempt to avoid collision

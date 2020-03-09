@@ -5,28 +5,28 @@
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 
-data_type = 5; % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
+data_type = 1; % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 safety_level = 1;
-select_trans = 3;
+select_trans = 2;
 
 % plotting options
-compute_ci = 0;              % set equal to one if confidence intervals for xi are desired
-qqplot = 0;
+compute_ci = 1;              % set equal to one if confidence intervals for xi are desired
+qqplot = 1;
 
 % pausing options
 pause_trans = 0.0;
-qq_pause = 0.0;
-stability_pause = 0;
+qq_pause = 0.2;
+stability_pause = 1;
 
 up_frac = 0.80;
 lo_frac = 0.06;
 
 % transformation parameters
 if select_trans==2
-    p_ex = 1;
+    p_ex = 0.25;
     trans_par = p_ex;
 else
-    p_inv = 5;
+    p_inv = 4;
     d_inv = 3.5;
     trans_par = [p_inv, d_inv];
 end
@@ -171,10 +171,10 @@ for jj=1:J
                 line(([0,0]), 1.2,'LineStyle','--');
                 line(get(gca, 'xlim'), [1 1],'Color','green','LineStyle','--');
                 title(sprintf('empirical d.f. vs model d.f. for threshold %d.',k))
-            % save plot
-            if save_plot == 1
-                savefig(sprintf('goodness_of_fit_test_DAFEA_exp_%d_%d_id4',jj,k))
-            end
+
+                  %save plot
+%                savefig(sprintf('goodness_of_fit_test_DAFEA_exp_%d_%d_id4',jj,k))
+
             pause(qq_pause)
         end
 

@@ -1,21 +1,10 @@
 %% analysing hit rate
-load hit_rate_datatype_1_trans_2_transpar_2_safetylevel_2_samplesize_334.mat
-hit_rate2 = hit_rate
-load hit_rate_datatype_1_trans_2_transpar_4_safetylevel_2_samplesize_334.mat
-hit_rate4 = hit_rate
-load hit_rate_datatype_1_trans_2_transpar_6_safetylevel_2_samplesize_334.mat
-hit_rate6 = hit_rate
-load hit_rate_datatype_1_trans_2_transpar_8_safetylevel_2_samplesize_334.mat
-hit_rate8 = hit_rate
-load hit_rate_datatype_1_trans_2_transpar_10_safetylevel_2_samplesize_334.mat
-hit_rate10 = hit_rate
+hit_rate = get_data(1, 1, 2, 0.2, 1, 80, 6);
+hit_rate = get_data(1, 1, 3, [4 3.5], 1, 80, 6);
 
-plot(hit_rate2)
-hold on
-plot(hit_rate4)
-plot(hit_rate6)
-plot(hit_rate8)
-plot(hit_rate10)
+
+plot(hit_rate)
+
 %% analysing mean value
 pc2 = get_data(3, 1, 2, 0.1, 1, 80, 6);
 ci2 = compute_ci_meanest(pc2, 500);

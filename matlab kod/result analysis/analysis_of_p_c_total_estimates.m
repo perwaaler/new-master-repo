@@ -3,19 +3,19 @@
 load 'pc_nea_2mill_r_0_3.mat'
 load 'pc_ea_2mill_r_0_3.mat'
 
-cut_off = 0.8;
+cut_off = 0.5;
 pc_tot = pc_nea + pc_ea;
-save('pc_2mill_r_0_3','p_tot')
-p_exp = 0.8;
+save('pc_2mill_r_0_3','pc_tot')
+p_exp = 0.5;
 
-pc_min_ttc = get_data(3, 4, 1, [], 1, 80, 6);
-pc_split = get_data(3, 5, 1,  [], 1, 80, 6) + get_data(3, 3, 1, [], 1, 80, 6);
-
+% pc_min_ttc = get_data(3, 4, 1, [], 1, 80, 6);
+% pc_split = get_data(3, 5, 1,  [], 1, 80, 6) + get_data(3, 3, 1, [], 1, 80, 6);
+% 
 pc_min_ttc = get_data(3, 8, 1, [], 1, 80, 6);
 pc_split = get_data(3, 6, 1,  [], 1, 80, 6) + get_data(3, 7, 1, [], 1, 80, 6);
 
 % pc_min_ttc = get_data(3, 4, 3, [4 3.5], 1, 80, 6);
-% pc_split = get_data(3, 5, 3,  [4.5 3.5], 1, 80, 6) + get_data(3, 1, 3, [4.5 3.5], 1, 80, 6);
+% pc_split = get_data(3, 5, 3,  [3.5 3.5], 1, 80, 6) + get_data(3, 3, 3, [4 3.5], 1, 80, 6);
 
 p_combined = 1/2*(pc_split + pc_min_ttc);
 
