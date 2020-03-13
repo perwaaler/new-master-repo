@@ -5,7 +5,7 @@ function [succ_rate, fail_rate] = est_succ_fail_rate(matrix1,matrix2)
 % situation of safety level 1 and 2 respectively. Returns estimates of 
 % failure rates for each threshold.
 
-succ_rate = sum(matrix2 > matrix1)/500;   
-fail_rate = sum(matrix2 < matrix1)/500;
+succ_rate = sum(matrix2 < matrix1)/500;   
+fail_rate = sum(matrix1 > matrix2)/500;
 
 end

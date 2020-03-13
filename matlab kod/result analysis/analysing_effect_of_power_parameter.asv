@@ -313,25 +313,31 @@ end
 % that we are better of avoiding the retunr level to estimate.
 
 %% Using return levels to determine which intersection is safer
-m = 50;
+m =2;
 plots = cell(5,2);
+data_type = 3;
+
+par_range = [.1 .2 .3 .4 .5];
+par_range = [1.5];% 1.5 2 2.5 3];
+
 clf
-for k=1:5
+for k=1:1
     
-    p_ex=k*2/10;
+    p_ex = par_range(k);
     
-    param1 = get_data(4, 1, 2, p_ex, 1);
+    param1 = get_data(4, 1, data_type, p_ex, 1, 80, 6);
     xi_matrix1 = imag(param1);
     sigma_matrix1 = real(param1);
-    u_matrix1 = get_data(6, 1, 2, p_ex, 1);
-    p_exceed1 = get_data(7, 1, 2, p_ex, 1);
+    u_matrix1 = get_data(6, 1, data_type, p_ex, 1, 80, 6);
+    p_exceed1 = get_data(7, 1, data_type, p_ex, 1, 80, 6);
+    
     x_m1 = return_level_m(m, sigma_matrix1, xi_matrix1, u_matrix1, p_exceed1);    
     
-    param2 = get_data(4, 1, 2, p_ex, 2);
+    param2 = get_data(4, 1, data_type, p_ex, 2, 80, 6);
     xi_matrix2 = imag(param2);
     sigma_matrix2 = real(param2);
-    u_matrix2 = get_data(6, 1, 2, p_ex, 2);
-    p_exceed2 = get_data(7, 1, 2, p_ex, 2);
+    u_matrix2 = get_data(6, 1, data_type, p_ex, 2, 80, 6);
+    p_exceed2 = get_data(7, 1, data_type, p_ex, 2, 80, 6);
     x_m2 = return_level_m(m, sigma_matrix2, xi_matrix2, u_matrix2, p_exceed2);
 
     [succ_rate, fail_rate] = est_succ_fail_rate(x_m1, x_m2);
@@ -340,19 +346,20 @@ for k=1:5
     ci2_fail = compute_ci_pest(fail_rate, 500);
 
     subplot(211)
-    plots{k,1} = plot(succ_rate, 'color' ,[1 p_ex-0.2 0]);
+    plots{k,1} = plot(succ_rate, 'color' ,[1 0 0]);
     hold on
-    plot(ci2_succ, ':', 'color' ,[1 p_ex-0.2 0])
+    plot(ci2_succ, ':', 'color' ,[1 0 0])
     title('success rate for different transformation parameters')
     xlabel('threshold index')
     legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], '0.2','0.4','0.6','0.8','1')
     
     subplot(212)
-    plots{k,2} = plot(fail_rate, 'color' ,[0 p_ex-0.2 1]);
+    plots{k,2} = plot(fail_rate, 'color' ,[0 0 1]);
     hold on
-    plot(ci2_fail, ':', 'color' ,[0 p_ex-0.2 1])
+    plot(ci2_fail, ':', 'color' ,[0 0 1])
     xlabel('threshold index')
     legend([plots{1,2},plots{2,2},plots{3,2},plots{4,2},plots{5,2}], '0.2','0.4','0.6','0.8','1')
+    pause(3)
 end
 
 %% comments on using return levels for infering safety levels

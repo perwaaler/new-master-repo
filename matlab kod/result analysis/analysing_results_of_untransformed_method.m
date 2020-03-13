@@ -1,13 +1,15 @@
 clf
-pc1 = get_data(3, 1, 2, 0.1, 1, 80, 6);
-pc2 = get_data(3, 1, 2, .3, 1, 80, 6);
-thr = 2;
+pc1 = get_data(3, 1, 3, 1, 1, 80, 6);
+pc2 = get_data(3, 1, 3, 4.5, 1, 80, 6);
+thr = 9;
+p_true=find_true_p(1);
 subplot(211)
 plot(pc1(pc1(:,thr)>0,thr),'.')
 hold on
 plot(ones(1,sum(pc1(:,thr)>0))*p_true*0.5,'g')
 plot(ones(1,sum(pc1(:,thr)>0))*p_true)
 plot(ones(1,sum(pc1(:,thr)>0))*p_true*1.5,'g')
+plot(ones(1,sum(pc1(:,thr)>0))*mean(pc1(pc1(:,thr)>0,thr)),'black');
 
 subplot(212)
 plot(pc2(pc2(:,thr)>0,thr),'.')
@@ -15,7 +17,7 @@ hold on
 plot(ones(1,sum(pc2(:,thr)>0))*p_true*0.5,'g')
 plot(ones(1,sum(pc2(:,thr)>0))*p_true)
 plot(ones(1,sum(pc2(:,thr)>0))*p_true*1.5,'g')
-
+plot(ones(1,sum(pc2(:,thr)>0))*mean(pc2(pc2(:,thr)>0,thr)),'black');
 
 
 %% plot probabilities 
@@ -272,12 +274,12 @@ title(sprintf('comparison of peak performance, cut-off = %s',num2str(cut_off)))
 
 
 cut_off = .5;
-data_type = 6;
+data_type = 1;
 tran = 3;
 
 sev_ind = sev_measure(data_type);
 p_true = find_true_p(data_type);
-% par_range = [1 1.5 2 2.5 3 3.5 4 4.5]; % par range for stoch ttc
+par_range = [1 1.5 2 2.5 3 3.5 4 4.5]; % par range for stoch ttc
 % par_range = [.1 .3 .7 .9 1.2 1.4];     % mindist parameters, inv
 % par_range = [.02 .06 .1 .2 .3 .4 ];     % mindist parameters, exp
 n_ex = length(par_range);
@@ -293,7 +295,7 @@ clf
 hold on
 for i=1:n_ex
 
-    pc_stochttc_exp{i} = get_data(3, data_type, tran, par_range(i), 1, 85, 6);
+    pc_stochttc_exp{i} = get_data(3, data_type, tran, par_range(i), 2, 80, 6);
     accuracy_stoch_ttc_exp{i} = mean(pc_stochttc_exp{i});
     ci_stoch_ttc_exp{i} = compute_ci_meanest(pc_stochttc_exp{i},500);
 

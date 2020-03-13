@@ -1,8 +1,8 @@
 % simulation of encounters between two vehicles.
 
-n = 1;                                % number of encounter-samples desired
+n = 1000;                                % number of encounter-samples desired
 all_data = cell(n, 12);                 % collects data from each encounter-sample
-N = 10000;                                % number of encounters
+N = 2000;                                % number of encounters
 r = 0.3;                                % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 0;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
@@ -30,8 +30,8 @@ a_init = step_mean_init^2/step_var_init;
 b_init = step_var_init/step_mean_init;
 
 % variance of the step-size
-var_step = 0.001*2;
-var_theta = 0.03*2;                           % determins the amount of random variability of the step-angle at each iteration.
+var_step = 0.001;
+var_theta = 0.03;                           % determins the amount of random variability of the step-angle at each iteration.
 
 % parameters relating to detection probability dp; dp = A*exp(-s*(D + d)^p)
 % where D is distance between vehicles
@@ -346,5 +346,7 @@ all_data{kk,10} = sum(enc_type==-2);                                            
 all_data{kk,11} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N;  % saves p_interactive
 all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                       % saves p_ea
 
-save('data_500enc_r_0_3_extra_rand_safety_level_1','all_data')
- end
+%save('data_500enc_r_0_3_extra_rand_safety_level_2','all_data')
+end
+
+ save('data_2millenc_r_0_3_safety_level_2','all_data')
