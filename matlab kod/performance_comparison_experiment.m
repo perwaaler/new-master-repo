@@ -5,18 +5,18 @@
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 
-data_type = 1; % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
+data_type = 6; % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 safety_level = 1;
-select_trans = 2;
+select_trans = 1;
 
 % plotting options
-compute_ci = 1;              % set equal to one if confidence intervals for xi are desired
-qqplot = 1;
+compute_ci = 0;              % set equal to one if confidence intervals for xi are desired
+qqplot = 0;
 
 % pausing options
 pause_trans = 0.0;
-qq_pause = 0.2;
-stability_pause = 1;
+qq_pause = 0.0;
+stability_pause = 0;
 
 up_frac = 0.80;
 lo_frac = 0.06;

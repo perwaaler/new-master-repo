@@ -6,11 +6,12 @@
 % data_type=3 --> danger_max_EA
 % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 
-data_type_list=[8]; %#ok<NBRAK>
-select_trans = 1;
+data_type_list=[1]; %#ok<NBRAK>
+select_trans = 2;
 % par_range = [.1 .3 .5 .7 .9 1.2 1.4 1.5];
-par_range = [3.5 4 4.5];
-safety_level = 1;
+% par_range = [1.5 2 2.5 3 3.5 4 4.5 5];
+par_range = [.1 .2 .3 .4 .5];
+safety_level = 2;
 
 % maximum and minimum fraction of data to use after applying thresholds
 up_frac = 0.8;
@@ -37,15 +38,15 @@ for i=1:length(par_range)
         p_ex = p_ex(i);
         trans_par = p_ex;
     else
-        p_inv = par_range;%3;%[0.1 .3 .5 .7 .9]; %1 + (i - 1)/2;
+        p_inv = par_range(i);%3;%[0.1 .3 .5 .7 .9]; %1 + (i - 1)/2;
         d_inv = 3.5;
-        trans_par = [p_inv(i), d_inv];
+        trans_par = [p_inv, d_inv];
     end
 
     if safety_level==1
         load data_500enc_r_0_3_safety_level_1.mat
     else
-        load data_500enc_r_safety_level_1_v2.mat
+        load data_500enc_r_0_3_safety_level_2.mat
     end
 
     J = size(all_data,1);

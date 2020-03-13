@@ -1,9 +1,29 @@
+clf
+pc1 = get_data(3, 1, 2, 0.1, 1, 80, 6);
+pc2 = get_data(3, 1, 2, .3, 1, 80, 6);
+thr = 2;
+subplot(211)
+plot(pc1(pc1(:,thr)>0,thr),'.')
+hold on
+plot(ones(1,sum(pc1(:,thr)>0))*p_true*0.5,'g')
+plot(ones(1,sum(pc1(:,thr)>0))*p_true)
+plot(ones(1,sum(pc1(:,thr)>0))*p_true*1.5,'g')
+
+subplot(212)
+plot(pc2(pc2(:,thr)>0,thr),'.')
+hold on
+plot(ones(1,sum(pc2(:,thr)>0))*p_true*0.5,'g')
+plot(ones(1,sum(pc2(:,thr)>0))*p_true)
+plot(ones(1,sum(pc2(:,thr)>0))*p_true*1.5,'g')
+
+
+
 %% plot probabilities 
 clf
 pc_neg_stoch_ttc_exp2 = get_data(3, 1, 2, 0.25, 1, 80, 6);
 pc_neg_stoch_ttc_inv30 = get_data(3, 1, 3, [4.5 3.5], 1, 80, 6);
 
-find_true_p(1);
+p_true=find_true_p(1);
 
 subplot(211)
 plot(pc_neg_stoch_ttc_inv30(:,6)/p_true,'.')
@@ -87,7 +107,7 @@ plot(stdinv4, 'color', [0 .2 1])
 plot(stdinv6, 'color', [0 .4 1])
 plot(stdinv8, 'color', [0 .6 1])
 plot(stdinv10, 'color', [0 .8 1])
-legend('0.2','0.4','0.6','0.8','1.0')
+legend('0.1','0.2','0.3','0.4','0.5')
 title('standard deviation')
 xlabel('threshold number')
 
@@ -190,14 +210,14 @@ legend([plot_vec a], legend_labels)%labels)
 
 
 cut_off = .5;
-data_type = 6;
+data_type = 1;
 tran = 3;
 sev_ind = sev_measure(data_type);
 
 p_true = find_true_p(data_type);
 
-% par_range = [1 1.5 2 3 3.5 4 4.5];
-par_range = [.1 .3 .7 .9 1.2 1.4]; % par range for min dist
+par_range = [1 1.5 2 3 3.5 4 4.5];
+% par_range = [.1 .3 .7 .9 1.2 1.4]; % par range for min dist
 % par_range = [1 1.5 2 2.5 3 3.5 4 4.5];
 n_ex = length(par_range);
 data_markers = data_marker();
@@ -214,7 +234,7 @@ clf
 hold on
 for i=1:n_ex
 
-    pc_stochttc_exp{i} = get_data(3, data_type, tran, [par_range(i),3.5], 1, 85, 6);
+    pc_stochttc_exp{i} = get_data(3, data_type, tran, [par_range(i),3.5], 1, 80, 6);
     accuracy_stoch_ttc_exp{i} = accuracy_rate(pc_stochttc_exp{i}, p_true, cut_off);
     ci_stoch_ttc_exp{i} = compute_ci_pest(accuracy_stoch_ttc_exp{i},500);
 
@@ -358,5 +378,77 @@ legend([plot_vec a b], legend_labels)
 % we can see that there is clearly increase in bias as trans-par increases.
 % specifically, the tendency to overestimate increases. In order to
 % compensate for this increased bias, we have to use higher thresholds.
+%% analysing hitrate
+p_true = find_true_p(data_type);
+
+cut_off = .5;
+data_type = 1;
+tran = 2;
+sev_ind = sev_measure(data_type);
+
+par_range = [.1 .15 .2 .25 .3 .4 .5];     % stoch ttc parameters
+% par_range = [.02 .06 .1 .2 .3 .4 ];     % mindist parameters
+n_ex = length(par_range);
+data_markers = data_marker();
+
+hit_rate = cell(1,n_ex);
+hit_rate_ci = cell(1,n_ex);
+legend_labels = cell(n_ex, 1);
+color_spec = linspace(0,1,n_ex);
+plot_vec = zeros(1, n_ex);
+
+clf
+hold on
+for i=1:n_ex
+
+    hit_rate{i} = get_data(1, data_type, tran, par_range(i), 1, 80, 6);
+    hit_rate_ci{i} = compute_ci_pest(hit_rate{i},500);
+
+
+    plot_vec(i)=plot(hit_rate{i}, data_markers{i},'color', [0 color_spec(i) 1]);
+    plot(hit_rate{i},'color', [0 color_spec(i) 1]);
+    %plot(hit_rate_ci{i},':','color',[0 color_spec(i) 1])
+
+    legend_labels{i,1} = sprintf('%s, p = %s', sevme_str(sev_ind) ,num2str(par_range(i)));
+end
+
+hit_rate_notrans = get_data(1, data_type, 1, [], 1, 80, 6);
+% ci_stoch_ttc = compute_ci_pest(hit_rate_notrans,500);
+
+a = plot(hit_rate_notrans, data_markers{i+2},'color', 'r');
+plot(hit_rate_notrans,'color', 'r');
+% plot(ci_stoch_ttc,':','color','r')
+
+
+legend_labels{n_ex+1} = sevme_str(sev_ind);
+
+
+title(sprintf('Expected value for exp. transform, cut-off %s',num2str(cut_off)))
+xlabel('threshold index')
+legend([plot_vec a], legend_labels)
+%% analysing hitrate
+hitratettcstoch = get_data(1, 1, 1, [], 1, 80, 6)
+hitratettc = get_data(1, 3, 1, [], 1, 80, 6)
+hitratemindist = get_data(1, 6, 1, [], 1, 85, 6)
+
+clf
+hold on
+plot(hitratettc)
+plot(hitratettcstoch)
+plot(hitratemindist)
+%% analysing conditional hitrate
+p_true=find_true_p(1);
+pc = get_data(3, 1, 2, 0.1, 1, 80, 6);
+
+n_good_approx = accuracy_rate(pc, p_true, cut_off)*500
+n_NZE = sum(pc>0)
+
+p_good_approx_cond = n_good_approx./n_NZE
+%%
+
+
+
+
+
 
 

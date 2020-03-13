@@ -6,24 +6,27 @@
 %%
 load data_500enc_r_0_3_safety_level_1.mat
 standard_error = cell(200,2);
-sel_tranny = [1 2];
+sel_tranny = [2];
 select_par = [.1 .2];
 %% Initial plots
+for sample=1:10
 
-
-
-data_type = 6;
-select_trans = 1;
-sample = 2;
+sample %#ok<NOPTS>
+for kk=1:2 % loops over parameters
+up_frac = 0.80;
+lo_frac = 0.06;
+safety_level=1;
+data_type = 3;
+sev_ind = sev_measure(data_type);
 data_matrix = all_data{sample,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values
 min_data = data_matrix(min(data_matrix,[],2)<Inf,:);
 min_data = min(min_data,[],2);
-save_plot = 0;
+save_plot = 1;
 % find minimum and maximum thresholds based on amount of data to be used
 
-u_minmax = find_threshold(min_data, 0.06, 0.8);
+u_minmax = find_threshold(min_data, lo_frac, up_frac);
 
 u_l = u_minmax(1);
 u_u = u_minmax(2);
@@ -36,16 +39,15 @@ plot(ones(1,length(min_data))*u_u)
 title('untransformed data')
 % transforming data and plotting transformed data and thresholds
 
-
-
+select_trans = sel_tranny(1);
+ 
 % transformation choice and parameters
-if select_trans==2
-    p_par = 0.2;
-    trans_par = p_ex;
+if select_trans==1
+    trans_par = [];
+elseif select_trans==2
+    trans_par = select_par(kk);%p_ex;
 else
-    p_par = 0.9;
-    d_inv = 3.5;
-    trans_par = [p_par, d_inv];
+    trans_par = 4.5;
 end
 
 trans =@(x) transform(x, select_trans, trans_par);
@@ -88,7 +90,7 @@ pc = zeros(1,m)*nan;                                    % collects estimated col
 ue_save = zeros(1,m)*nan;                                  % collects estimated upper endpoint
 max_data = max(max(trans_data));                              % largest observed value
 negL = @(par, exceed_data,u) -sum( log(gppdf(exceed_data,par(2),par(1),u)) );  %negative log likelihood fcn.
-logit = 0;                                               % set to plot logarithm of p_nea when magnitude of p_nea varies alot
+logit = 1;                                               % set to plot logarithm of p_nea when magnitude of p_nea varies alot
 compute_ci = 1;                    % set equal to one if confidence intervals for xi are desired
 qqplot = 1;
 qq_pause = 0;
@@ -139,14 +141,14 @@ for k=1:m
 
         % evaluate empirical distribution function
         xplot_lower = 0;
-        xplot_upper = max(excess);
+        xplot_upper = max(excess*1.01);
         x_eval = linspace(xplot_lower, xplot_upper, n_eval_cdf);
         femp = weights'*F_emp(x_eval, exceed_data);
 
 
 
         clf
-        sgtitle(sprintf('goodness of fit plots, %s %s %s, threshold %d.',sevme_str(sev_measure(data_type)), trans_str(select_trans),num2str(p_par), k))
+        sgtitle(sprintf('goodness of fit plots, %s %s %s, threshold %d',sevme_str(sev_ind), trans_str(select_trans),num2str(trans_par), k))
         subplot(211)
             qq_plot(exceed,param(1),param(2),U(k),k)
             title('empirical vs model quantiles')
@@ -157,8 +159,8 @@ for k=1:m
             %line(trans([0,0]), 1.2,'LineStyle','--');
             line(get(gca, 'xlim'), [1 1],'Color','green','LineStyle','--');
             title('empirical vs model distribution functions')
-        if save_plot==1
-            saveas(gcf, sprintf('goodness_of_fit_stochttcFEA_thr_%d.png',k))
+        if save_plot==1 && k<=7
+            saveas(gcf, sprintf('goodness_of_fit_sample_%d_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d_trhind_%d.png',sample, data_type,select_trans,100*trans_par,safety_level,up_frac*100,lo_frac*100,k))
             %savefig(sprintf('goodness_of_fit_mindistFEA_thr_%d',k))
         end
         pause(qq_pause)
@@ -220,16 +222,14 @@ for k=1:m
 
 end
 standard_error{sample,kk} = se_p_nea_save;
-clf;
-subplot(221)
-plot(U,param_save(1,:))
-title('sigma_{est}')
+
+
+
+clf
+sgtitle(sprintf('shape paremter and probability estimates, %s %s %s',sevme_str(sev_ind), trans_str(select_trans),num2str(trans_par)))
+subplot(211)
+plot(U, param_save(2,:),'s')
 hold on
-if compute_ci == 1
-    plot(U,ci_sigma_u)
-end
-subplot(222)
-plot(U, param_save(2,:),'s'); hold on
 plot(U, param_save(2,:),'b')
 xlabel('threshold')
 title('xi_{est}')
@@ -237,32 +237,40 @@ if compute_ci == 1
     plot(U,ci_xi_u,':','color','b')
 end
 
-subplot(223)
-if min(param_save(2,:))<0
-    plot(U,ue_save); hold on
-    plot(U,ones(1,m)*max_data)
-    plot(U,ones(1,m)*trans(0))
-    title('upper endpoint estimates')
-end
-subplot(224)
+subplot(212)
 if logit==1
+    plot(U,log10(pc),'s')
+    hold on
     plot(U,log10(pc))
-    title('log(p_{est})')
+    title('log_{10}(p_{est})')
+    xlabel('threshold')
     if compute_ci == 1
         hold on
         %plot(U,ci_p_nea_u)
     end
 else
+    plot(U,pc,'s')
+    hold on
     plot(U,pc)
     title('p_{est}')
     if compute_ci == 1
         hold on
         plot(U,ci_p_nea_u)
     end
-end
-pause(3)
-thr_autofind(ci_xi_u, param_save(2,:),m)
 
+end
+saveas(gcf, sprintf('stab_plots_sample_%d_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d_trhind_%d.png',sample, data_type,select_trans,100*trans_par,safety_level,up_frac*100,lo_frac*100,k))
+
+
+
+%thr_autofind(ci_xi_u, param_save(2,:),m)
+
+
+
+
+
+end
+end
 %% estimating p(collision type i)
 p_interactive = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N; % probability of encounter being interactive
 p_ea = (sum(enc_type==-1)+sum(enc_type==-2))/N
@@ -286,4 +294,3 @@ se_ratios = zeros(100,10);
 for i=1:200
     se_ratios(i,:) = standard_error{i,1}./standard_error{i,2};
 end
-
