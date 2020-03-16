@@ -1,12 +1,12 @@
 % simulation of encounters between two vehicles.
 
-n = 1;                                % number of encounter-samples desired
+n = 500;                                % number of encounter-samples desired
 all_data = cell(n, 12);                 % collects data from each encounter-sample
-N = 10000;                                % number of encounters
+N = 500;                                % number of encounters
 r = 0.3;                                % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
-est_ttc = 0;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
-compute_X = 0;
+est_ttc = 1;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
+compute_X = 1;
 plotting = 0;                           % set to one if plots of encounters are wanted
 sausage = 0;
 plot_sim_walks = 0;
@@ -35,8 +35,8 @@ var_theta = 0.03;                           % determins the amount of random var
 
 % parameters relating to detection probability dp; dp = A*exp(-s*(D + d)^p)
 % where D is distance between vehicles
-Amp = 0.93;      % amplitude; reduce to make dp smaller everywhere
-d = 0;           % determines where dp is made smaller and larger by p; dp gets larger for D smaller than d, and smaller for D greater than d
+Amp = 0.90;      % amplitude; reduce to make dp smaller everywhere
+d = 0;      % determines where dp is made smaller and larger by p; dp gets larger for D smaller than d, and smaller for D greater than d
 s = 0.29;        % increase to make detection less likely
 p = 2;           % makes dp larger r smaller depending on whether D>d or D<d. See above comment.
 % plot(linspace(0,10,100),Amp*exp(-(s * linspace(0,10,100) ).^p))
@@ -70,7 +70,7 @@ aa =1;
 bb =1;
 
 for i=1:N
-i
+%i
 %%% initiation of encounter
 nn = 0;
 EA_index = 1;                                                         % variable used to find most dangerous moment during attempt to avoid collision
@@ -348,5 +348,5 @@ all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                      
 
 %save('data_500enc_r_0_3_extra_rand_safety_level_2','all_data')
 end
-
+%%
 save('data_500enc_r_0_3_safety_level_2','all_data')

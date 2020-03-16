@@ -13,7 +13,7 @@ select_par = [.1 .2];
 
 
 data_type = 6;
-select_trans = 1;
+select_trans = 2;
 sample = 2;
 data_matrix = all_data{sample,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 

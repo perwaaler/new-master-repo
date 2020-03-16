@@ -346,7 +346,7 @@ all_data{kk,10} = sum(enc_type==-2);                                            
 all_data{kk,11} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N;  % saves p_interactive
 all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                       % saves p_ea
 
-%save('data_500enc_r_0_3_extra_rand_safety_level_2','all_data')
+save('data_500enc_r_0_3_extra_rand_safety_level_2','all_data')
 end
-
-save('data_500enc_r_0_3_safety_level_2','all_data')
+%%
+save('data_2millenc_r_0_3_safety_level_2','all_data')

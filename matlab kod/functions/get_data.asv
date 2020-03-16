@@ -10,10 +10,11 @@ function out = get_data(variable, data_type, select_trans, trans_par, safety_lev
 if length(trans_par)==1 && select_trans==3
     trans_par=[trans_par 3.5];
 end
-if select_trans == 1
+if trans == 1
     trans_par=[];
 end
-    
+if data_type ~=
+
 if select_trans==1 || select_trans==2
 if variable == 1
     load(sprintf('hit_rate_datatype_%d_trans_%d_transpar_%d_safetylevel_%d_u_frac_%d_l_frac_%d',data_type, select_trans, trans_par*100, safety_level, up_frac, lo_frac))

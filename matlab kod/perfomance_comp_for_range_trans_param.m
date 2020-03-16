@@ -6,11 +6,12 @@
 % data_type=3 --> danger_max_EA
 % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 
-data_type_list=[1]; %#ok<NBRAK>
-select_trans = 2;
+data_type_list=[5]; %#ok<NBRAK>
+select_trans = 1;
 % par_range = [.1 .3 .5 .7 .9 1.2 1.4 1.5];
 % par_range = [1.5 2 2.5 3 3.5 4 4.5 5];
-par_range = [.1 .2 .3 .4 .5];
+% par_range = [.1 .2 .3 .4 .5];
+if select_trans==1; par_range = 1;end
 safety_level = 2;
 
 % maximum and minimum fraction of data to use after applying thresholds
