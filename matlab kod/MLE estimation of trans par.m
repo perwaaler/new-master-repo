@@ -1,4 +1,4 @@
-%%
+
 load data_500enc_r_0_3_safety_level_1.mat
 %% Initial plots
 data_type = 1;

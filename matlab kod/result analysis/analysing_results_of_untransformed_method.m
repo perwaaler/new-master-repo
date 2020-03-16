@@ -455,7 +455,7 @@ plot(hitratettc)
 plot(hitratettcstoch)
 plot(hitratemindist)
 %% analysing conditional hitrate
-p_true=find_true_p(1);
+p_true=find_true_p(2);
 pc = get_data(3, 1, 2, 0.1, 1, 80, 6);
 
 n_good_approx = accuracy_rate(pc, p_true, cut_off)*500

@@ -271,38 +271,70 @@ ylim([min(100*accuracy_matrix)*0.9, max(100*accuracy_matrix)*1.1])
 %% comments on using automatic threshold selection
 % We see that when using the automatic threshold selection, the successrate
 % is quite low. 
-
-%% comparing succss and failure rates for different transformation parameters
-
+%% PLots of success and failure rates
+m =500;
 plots = cell(5,2);
+data_markers = data_marker();
+data_type = 5;
+
+par_range = [.1 .2 .3 .4 .5];
+par_range = [1.5 3 5];% 1.5 2 2.5 3];
+trans = 3;
+npar = length(par_range);
+leg_str = cell(1,npar); for i=1:npar; leg_str{i} = strcat('p=',num2str(par_range(i)) );end
+leg_str{end+1}='no transform';
+succ_fail_rate = cell(npar+1,2);
+ci = cell(npar+1,2);
+
 clf
-for k=1:5
+for k=1:npar + 1
+    if k == npar + 1
+        trans = 1;
+    else
+        par = par_range(k); 
+    end
     
-    i=k*2/10;
-    pc_safe1 = get_data(3, 1, 2, i, 1);
-    pc_safe2 = get_data(3, 1, 2, i, 2);
+    pc_safe1 = get_data(3, 5, trans, par, 1, 80,6);
+    pc_safe2 = get_data(3, 5, trans, par, 2, 80,6);
 
-    [succ_rate, fail_rate] = est_succ_fail_rate(pc_safe1, pc_safe2);
+    [succ_fail_rate{k,1}, succ_fail_rate{k,2}] = est_succ_fail_rate(pc_safe1, pc_safe2);
 
-    ci2_succ = compute_ci_pest(succ_rate, 500);
-    ci2_fail = compute_ci_pest(fail_rate, 500);
-
-    subplot(211)
-    plots{k,1} = plot(succ_rate, 'color' ,[1 i-0.2 0]);
-    hold on
-    plot(ci2_succ, ':', 'color' ,[1 i-0.2 0])
-    title('success rate for different transformation parameters')
-    xlabel('threshold index')
-    legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], '0.2','0.4','0.6','0.8','1')
-    
-    subplot(212)
-    plots{k,2} = plot(fail_rate, 'color' ,[0 i-0.2 1]);
-    hold on
-    plot(ci2_fail, ':', 'color' ,[0 i-0.2 1])
-    xlabel('threshold index')
-    legend([plots{1,2},plots{2,2},plots{3,2},plots{4,2},plots{5,2}], '0.2','0.4','0.6','0.8','1')
+    ci{k,1} = compute_ci_pest(succ_fail_rate{k,1}, 500);
+    ci{k,2} = compute_ci_pest(succ_fail_rate{k,2}, 500);
 end
 
+clf
+subplot(211)
+hold on
+for k = 1:npar+1
+    if k == npar+1
+        col = 'r';
+    else
+        col = [0 (k-1)/k 1];
+    end
+    plots{k,1} = plot(succ_fail_rate{k,1}*100,data_markers{k}, 'color' ,col);
+    plot(succ_fail_rate{k,1}*100, 'color' ,col);
+    plot(ci{k,1}*100, ':', 'color' ,col)
+    title('fail rate for different transformation parameters')
+    xlabel('threshold index')
+    legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], leg_str)
+end
+
+subplot(212)
+hold on
+for k = 1:npar+1
+    if k == npar+1
+        col = 'r';
+    else
+        col = [0 (k-1)/k 1];
+    end
+    plots{k,2} = plot(succ_fail_rate{k,2}*100, data_markers{k}, 'color' ,col);
+    plot(succ_fail_rate{k,2}*100, 'color' ,col);
+    plot(ci{k,2}*100, ':', 'color' ,col)
+    xlabel('threshold index')
+    legend([plots{1,2},plots{2,2},plots{3,2},plots{4,2},plots{5,2}], leg_str)
+    title('fail rate for different transformation parameters')
+end
 %% comments on success/failure plots
 % Increasing the power parameter seems to have the effect of increasing the
 % success rate. This is likely due to the fact that, as we have observed,
@@ -313,53 +345,80 @@ end
 % that we are better of avoiding the retunr level to estimate.
 
 %% Using return levels to determine which intersection is safer
-m =500;
+m =10;
 plots = cell(5,2);
-data_type = 3;
+data_markers = data_marker();
+data_type = 5;
 
 par_range = [.1 .2 .3 .4 .5];
-par_range = [4.5];% 1.5 2 2.5 3];
+par_range = [1.5 3 5];% 1.5 2 2.5 3];
+trans = 3;
+npar = length(par_range);
+leg_str = cell(1,npar); for i=1:npar; leg_str{i} = strcat('p=',num2str(par_range(i)) );end
+leg_str{end+1}='no transform';
+succ_fail_rate = cell(npar+1,2);
+ci = cell(npar+1,2);
 
 clf
-for k=1:1
+for k=1:npar + 1
+    if k == npar + 1
+        trans = 1;
+    else
+        p_ex = par_range(k); 
+    end
     
-    p_ex = par_range(k);
     
-    param1 = get_data(4, 1, data_type, p_ex, 1, 80, 6);
+    param1 = get_data(4, data_type, trans, p_ex, 1, 80, 6);
     xi_matrix1 = imag(param1);
     sigma_matrix1 = real(param1);
-    u_matrix1 = get_data(6, 1, data_type, p_ex, 1, 80, 6);
-    p_exceed1 = get_data(7, 1, data_type, p_ex, 1, 80, 6);
-    
+    u_matrix1 = get_data(6, data_type, trans, p_ex, 1, 80, 6);
+    p_exceed1 = get_data(7, data_type, trans, p_ex, 1, 80, 6);
     x_m1 = return_level_m(m, sigma_matrix1, xi_matrix1, u_matrix1, p_exceed1);    
     
-    param2 = get_data(4, 1, data_type, p_ex, 2, 80, 6);
+    param2 = get_data(4, data_type, trans, p_ex, 2, 80, 6);
     xi_matrix2 = imag(param2);
     sigma_matrix2 = real(param2);
-    u_matrix2 = get_data(6, 1, data_type, p_ex, 2, 80, 6);
-    p_exceed2 = get_data(7, 1, data_type, p_ex, 2, 80, 6);
+    u_matrix2 = get_data(6, data_type, trans, p_ex, 2, 80, 6);
+    p_exceed2 = get_data(7, data_type, trans, p_ex, 2, 80, 6);
     x_m2 = return_level_m(m, sigma_matrix2, xi_matrix2, u_matrix2, p_exceed2);
 
-    [succ_rate, fail_rate] = est_succ_fail_rate(x_m1, x_m2);
+    [succ_fail_rate{k,1}, succ_fail_rate{k,2}] = est_succ_fail_rate(x_m1, x_m2);
 
-    ci2_succ = compute_ci_pest(succ_rate, 500);
-    ci2_fail = compute_ci_pest(fail_rate, 500);
+    ci{k,1} = compute_ci_pest(succ_fail_rate{k,1}, 500);
+    ci{k,2} = compute_ci_pest(succ_fail_rate{k,2}, 500);
+end
 
-    subplot(211)
-    plots{k,1} = plot(succ_rate, 'color' ,[1 0 0]);
-    hold on
-    plot(ci2_succ, ':', 'color' ,[1 0 0])
-    title('success rate for different transformation parameters')
+clf
+subplot(211)
+hold on
+for k = 1:npar+1
+    if k == npar+1
+        col = 'r';
+    else
+        col = [0 (k-1)/k 1];
+    end
+    plots{k,1} = plot(succ_fail_rate{k,1}*100,data_markers{k}, 'color' ,col);
+    plot(succ_fail_rate{k,1}*100, 'color' ,col);
+    plot(ci{k,1}*100, ':', 'color' ,col)
+    title(sprintf('success rate for different transformation parameters, return period = %d',m))
     xlabel('threshold index')
-    legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], '0.2','0.4','0.6','0.8','1')
-    
-    subplot(212)
-    plots{k,2} = plot(fail_rate, 'color' ,[0 0 1]);
-    hold on
-    plot(ci2_fail, ':', 'color' ,[0 0 1])
+    legend([plots{1,1},plots{2,1},plots{3,1},plots{4,1},plots{5,1}], leg_str)
+end
+
+subplot(212)
+hold on
+for k = 1:npar+1
+    if k == npar+1
+        col = 'r';
+    else
+        col = [0 (k-1)/k 1];
+    end
+    plots{k,2} = plot(succ_fail_rate{k,2}*100, data_markers{k}, 'color' ,col);
+    plot(succ_fail_rate{k,2}*100, 'color' ,col);
+    plot(ci{k,2}*100, ':', 'color' ,col)
     xlabel('threshold index')
-    legend([plots{1,2},plots{2,2},plots{3,2},plots{4,2},plots{5,2}], '0.2','0.4','0.6','0.8','1')
-    pause(3)
+    legend([plots{1,2},plots{2,2},plots{3,2},plots{4,2},plots{5,2}], leg_str)
+    title(sprintf('fail rate for different transformation parameters, return period = %d',m))
 end
 
 %% comments on using return levels for infering safety levels
