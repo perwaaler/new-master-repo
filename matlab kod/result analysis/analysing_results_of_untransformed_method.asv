@@ -121,7 +121,7 @@ plot(stdinv30, 'color', [0 .4 1])
 plot(stdinv35, 'color', [0 .5 1])
 plot(stdinv40, 'color', [0 .6 1])
 plot(stdinv45, 'color', [0 .7 1])
-legend('1','1.5','2.0','2.5','3','3.5','4.0','4.5')
+legend('1','1.5','2.0','2.5','3','3.5','')
 title('standard deviation, inv. transform')
 xlabel('threshold number')
 

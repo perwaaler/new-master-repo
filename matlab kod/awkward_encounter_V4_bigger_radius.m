@@ -113,7 +113,7 @@ counter = 0;
                     sausage = sausage+1
                     ttc_FEA(i)
                     min(stoch_ttc_FEA(i,:))
-                    pause(1)
+                    
                                     xlim([-xinit,xinit])
                     ylim([-4,4])
                     Apast = A0 - stepsize(1)*exp(1i*theta(1));
