@@ -1,3 +1,5 @@
+
+%% plot estimated probabilities
 clf
 pc1 = get_data(3, 1, 3, 1, 1, 80, 6);
 pc2 = get_data(3, 1, 3, 4.5, 1, 80, 6);
@@ -9,6 +11,7 @@ hold on
 plot(ones(1,sum(pc1(:,thr)>0))*p_true*0.5,'g')
 plot(ones(1,sum(pc1(:,thr)>0))*p_true)
 plot(ones(1,sum(pc1(:,thr)>0))*p_true*1.5,'g')
+% mean value conditional on NZE
 plot(ones(1,sum(pc1(:,thr)>0))*mean(pc1(pc1(:,thr)>0,thr)),'black');
 
 subplot(212)
@@ -30,20 +33,20 @@ p_true=find_true_p(1);
 subplot(211)
 plot(pc_neg_stoch_ttc_inv30(:,6)/p_true,'.')
 hold on
-plot(ones(1,500)*0.5)
-plot(ones(1,500)*1.5)
+plot(ones(1,500)*0.5,'r')
+plot(ones(1,500)*1.5,'r')
 subplot(212)
 plot(pc_neg_stoch_ttc_exp2(:,6)/p_true,'.')
 hold on
-plot(ones(1,500)*0.5)
-plot(ones(1,500)*1.5)
-%% analysing mean value
-pc_stochttc = get_data(3, 1, 1, [], 1, 80, 6);
-pc_ttc =       get_data(3, 3, 1, [], 1, 80, 6);
+plot(ones(1,500)*0.5,'r')
+plot(ones(1,500)*1.5,'r')
+%% analysing mean value for untransformed methods
+pc_stochttc =      get_data(3, 1, 1, [], 1, 80, 6);
+pc_ttc     =       get_data(3, 2, 1, [], 1, 80, 6);
 pc_stoch_ttc_exp = get_data(3, 1, 2, 0.1, 1, 80, 6);
 
 ci_stoch_ttc = compute_ci_meanest(pc_stochttc, 500);
-ci_ttc = compute_ci_meanest(pc_ttc, 500)
+ci_ttc = compute_ci_meanest(pc_ttc, 500);
 ci_stoch_ttc_exp = compute_ci_meanest(pc_stoch_ttc_exp, 500);
 
 
@@ -74,14 +77,14 @@ pc3 = get_data(3, 1, 2, 0.3, 1, 80, 6);
 pc4 = get_data(3, 1, 2, 0.4, 1, 80, 6);
 pc5 = get_data(3, 1, 2, 0.5, 1, 80, 6);
 
-pcinv10 = get_data(3, 1, 3, [1 3.5], 1, 80, 6);
-pcinv15 = get_data(3, 1, 3, [1.5 3.5], 1, 80, 6);
-pcinv20 = get_data(3, 1, 3, [2 3.5], 1, 80, 6);
-pcinv25 = get_data(3, 1, 3, [2.5 3.5], 1, 80, 6);
-pcinv30 = get_data(3, 1, 3, [3 3.5], 1, 80, 6);
-pcinv35 = get_data(3, 1, 3, [3.5 3.5], 1, 80, 6);
-pcinv40 = get_data(3, 1, 3, [4 3.5], 1, 80, 6);
-pcinv45 = get_data(3, 1, 3, [4.5 3.5], 1, 80, 6);
+pcinv10 = get_data(3, 1, 3, 1, 1, 80, 6);
+pcinv15 = get_data(3, 1, 3, 1.5 , 1, 80, 6);
+pcinv20 = get_data(3, 1, 3,  2 , 1, 80, 6);
+pcinv25 = get_data(3, 1, 3, 2.5, 1, 80, 6);
+pcinv30 = get_data(3, 1, 3, 3 , 1, 80, 6);
+pcinv35 = get_data(3, 1, 3, 3.5, 1, 80, 6);
+pcinv40 = get_data(3, 1, 3, 4 , 1, 80, 6);
+pcinv45 = get_data(3, 1, 3, 4.5, 1, 80, 6);
 
 
 std1 = std(pc1);
@@ -108,7 +111,7 @@ plot(std3, 'color', [0 .4 1])
 plot(std4, 'color', [0 .6 1])
 plot(std5, 'color', [0 .8 1])
 
-legend('0.1','0.2','0.3','0.4','0.5')
+legend('p = 0.1','p = 0.2','p = 0.3','p = 0.4','p = 0.5')
 title('standard deviation, exp. transform')
 xlabel('threshold number')
 subplot(212)
@@ -121,7 +124,7 @@ plot(stdinv30, 'color', [0 .4 1])
 plot(stdinv35, 'color', [0 .5 1])
 plot(stdinv40, 'color', [0 .6 1])
 plot(stdinv45, 'color', [0 .7 1])
-legend('1','1.5','2.0','2.5','3','3.5','4.0','4.5')
+legend('p = 1','p = 1.5','p = 2.0','p = 2.5','p = 3','p = 3.5','p = 4.0','p = 4.5')
 title('standard deviation, inv. transform')
 xlabel('threshold number')
 
@@ -165,10 +168,11 @@ legend([a b c], sev_measure{1},sev_measure{2},sev_measure{3})
 % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 
 cut_off = .5;
-data_type = 6;
+data_type = 2;
 tran = 2;
+par_range = [.1 .2 .3 .4 .5];
 % par_range = [.1 .15 .2 .25 .3 .4 .5];  % ttc parameters
-par_range = [.02 .06 .1 .2 .3 .4 ]; % mindist parameters
+% par_range = [.02 .06 .1 .2 .3 .4 ]; % mindist parameters
 % par_range = [];
 % par_range = [1 1.5 2 2.5 3 3.5 4 4.5];
 
@@ -221,21 +225,23 @@ legend_labels{end + 1} = sevme_str(sev_ind);
 
 title(sprintf('accuracy plots for %s, %s transform, cut-off = 0.%d',sevme_str(sev_ind), trans_str(tran), cut_off*10))
 xlabel('threshold index')
-ylim([0,17])
+% ylim([0,17])
 legend([plot_vec a], legend_labels)%labels)
 %% accuracy inv transform
-%
+% 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
+
 
 
 cut_off = .5;
-data_type = 6;
+data_type = 2;
 tran = 3;
 sev_ind = sev_measure(data_type);
 
 p_true = find_true_p(data_type);
 
-% par_range = [1 1.5 2 3 3.5 4 4.5];
+par_range = [ 1.5 2 3 3.5 4 4.5];
 par_range = [.1 .3 .7 .9 1.2 1.4]; % par range for min dist
+par_range = [1.5 3 4.5 5 5.5];
 % par_range = [1 1.5 2 2.5 3 3.5 4 4.5];
 n_ex = length(par_range);
 data_markers = data_marker();
@@ -252,7 +258,7 @@ clf
 hold on
 for i=1:n_ex
 
-    pc_stochttc_exp{i} = get_data(3, data_type, tran, [par_range(i),3.5], 1, 85, 6);
+    pc_stochttc_exp{i} = get_data(3, data_type, tran, [par_range(i),3.5], 1, 80, 6);
     accuracy_stoch_ttc_exp{i} = accuracy_rate(pc_stochttc_exp{i}, p_true, cut_off);
     ci_stoch_ttc_exp{i} = compute_ci_pest(accuracy_stoch_ttc_exp{i},500);
 
@@ -270,7 +276,7 @@ a = plot_acc_w_ci(data_type, 1, [], p_true, cut_off, 'r', data_markers{end-1}, .
 legend_labels{n_ex+1} = 'no trans.';
 
 title(sprintf('accuracy plots for %s, %s transform, cut-off = %s', sevme_str(sev_ind),trans_str(tran) ,num2str(cut_off)) );
-ylim([0 25])
+%ylim([0 25])
 legend([plot_vec a], legend_labels)
 
 %% comparison of peak performance between exponential and inverse transform
@@ -406,6 +412,7 @@ sev_ind = sev_measure(data_type);
 
 par_range = [.1 .15 .2 .25 .3 .4 .5];     % stoch ttc parameters
 % par_range = [.02 .06 .1 .2 .3 .4 ];     % mindist parameters
+% par_range = [1 1.5 2.0 2.5 3 3.5 4 4.5];
 n_ex = length(par_range);
 data_markers = data_marker();
 
@@ -427,7 +434,7 @@ for i=1:n_ex
     plot(hit_rate{i},'color', [0 color_spec(i) 1]);
     %plot(hit_rate_ci{i},':','color',[0 color_spec(i) 1])
 
-    legend_labels{i,1} = sprintf('%s, p = %s', sevme_str(sev_ind) ,num2str(par_range(i)));
+    legend_labels{i,1} = sprintf('p = %s' ,num2str(par_range(i)));
 end
 
 hit_rate_notrans = get_data(1, data_type, 1, [], 1, 80, 6);
@@ -438,10 +445,10 @@ plot(hit_rate_notrans,'color', 'r');
 % plot(ci_stoch_ttc,':','color','r')
 
 
-legend_labels{n_ex+1} = sevme_str(sev_ind);
+legend_labels{n_ex+1} = 'no trans.';
 
 
-title(sprintf('NZE rate for exp. transform, cut-off %s',num2str(cut_off)))
+title(sprintf('P(NZE) for %s transform, cut-off %s',trans_str(tran) ,num2str(cut_off)))
 xlabel('threshold index')
 legend([plot_vec a], legend_labels)
 %% analysing hitrate

@@ -11,10 +11,15 @@ select_par = [.1 .2];
 %% Initial plots
 
 
-
-data_type = 6;
+% clf
+data_type = 1;
 select_trans = 2;
-sample = 2;
+tit_str = 'inverse trans., p = 4.5';
+trans_par = [0.03,4.5];
+n_sp = 4;
+plot_dis = 1;
+
+sample = 1;
 data_matrix = all_data{sample,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values
@@ -32,21 +37,9 @@ clf;
 plot(min_data,'.'); hold on 
 plot(ones(1,length(min_data))*u_l) 
 plot(ones(1,length(min_data))*u_u)
-%ylim([-1,100])
+ylim([-1,100])
 title('untransformed data')
 % transforming data and plotting transformed data and thresholds
-
-
-
-% transformation choice and parameters
-if select_trans==2
-    p_par = 0.2;
-    trans_par = p_ex;
-else
-    p_par = 0.9;
-    d_inv = 3.5;
-    trans_par = [p_par, d_inv];
-end
 
 trans =@(x) transform(x, select_trans, trans_par);
 
@@ -60,20 +53,22 @@ U = sort(trans(linspace(u_l, u_u,m)));
 trans_data = trans(data_matrix);
 
 clf; plot(trans(min_data),'.'); hold on
-plot(1:length(min_data),U'*ones(1,length(min_data)), 'k');plot(ones(1,length(min_data))*trans(0));ylim([trans(30),trans(0)*1.1])
+plot(1:length(min_data),U'*ones(1,length(min_data)), 'k');plot(ones(1,length(min_data))*trans(0));ylim([trans(30),trans(0)*1.2])
 title('transformed data')
 legend('transformed thresholds')
-% ensure good initial value!
+%ensure good initial value!
+%%
 trans_data = trans_data(:);
 exceed = trans_data(trans_data > u_l_trans);
 negL = @(par,exceed_data,u) -sum( log(gppdf(exceed_data,par(2),par(1),u)) );
-init = fminsearch(@(par) negL(par, exceed, u_l_trans), [3 0.3]);
+init = fminsearch(@(par) negL(par, exceed, u_l_trans), [3 0.3])
 
+%%
 % Fit models for range of thresholds and show diagnostic plots
 shake_guess = 0.1;                 % variance of noise that gets added to initial guess when stuck
 Nenc = length(data_matrix(:,1));   % number of encounters
 Nexp = length(data_matrix(1,:));   % number of values per row. If surrogate-measure is deterministic, then Nexp=1.
-Nbs = 200;                          % number of bootstrapped samples to compute standard error
+Nbs = 100;                          % number of bootstrapped samples to compute standard error
 trans_data = trans(data_matrix);                                                  % number of thresholds used for estimation
                    % vector containing thresholds'
 
@@ -88,16 +83,17 @@ pc = zeros(1,m)*nan;                                    % collects estimated col
 ue_save = zeros(1,m)*nan;                                  % collects estimated upper endpoint
 max_data = max(max(trans_data));                              % largest observed value
 negL = @(par, exceed_data,u) -sum( log(gppdf(exceed_data,par(2),par(1),u)) );  %negative log likelihood fcn.
-logit = 0;                                               % set to plot logarithm of p_nea when magnitude of p_nea varies alot
+logit = 1;                                               % set to plot logarithm of p_nea when magnitude of p_nea varies alot
 compute_ci = 1;                    % set equal to one if confidence intervals for xi are desired
 qqplot = 1;
-qq_pause = 0;
+qq_pause = 1;
 % limits for plots of empirical and model distribution functions
 xplot_lower = 0;
 xplot_upper = 1;
 n_eval_cdf = 1000;    % number of points where cdf gets evaluated
 
 for k=1:m
+    k
     data = trans_data(:);
     exceed = data(data>U(k));
     param = fminsearch(@(par) negL(par,exceed,U(k)),init);
@@ -139,29 +135,35 @@ for k=1:m
 
         % evaluate empirical distribution function
         xplot_lower = 0;
-        xplot_upper = max(excess);
+        xplot_upper = max(excess)*5;
         x_eval = linspace(xplot_lower, xplot_upper, n_eval_cdf);
         femp = weights'*F_emp(x_eval, exceed_data);
 
 
 
-        clf
-        sgtitle(sprintf('goodness of fit plots, %s %s %s, threshold %d.',sevme_str(sev_measure(data_type)), trans_str(select_trans),num2str(p_par), k))
-        subplot(211)
-            qq_plot(exceed,param(1),param(2),U(k),k)
-            title('empirical vs model quantiles')
-        subplot(212)
-            plot(x_eval,femp,'.')
-            hold on
-            plot(x_eval, gpcdf(x_eval, param(2), param(1), 0))
-            %line(trans([0,0]), 1.2,'LineStyle','--');
-            line(get(gca, 'xlim'), [1 1],'Color','green','LineStyle','--');
-            title('empirical vs model distribution functions')
-        if save_plot==1
-            saveas(gcf, sprintf('goodness_of_fit_stochttcFEA_thr_%d.png',k))
-            %savefig(sprintf('goodness_of_fit_mindistFEA_thr_%d',k))
-        end
-        pause(qq_pause)
+     
+%        sgtitle(sprintf('goodness of fit plots, %s %s %s, threshold %d.',sevme_str(sev_measure(data_type)), trans_str(select_trans),num2str(p_par), k))
+         clf  
+%         title('empirical vs model quantiles')
+%         title('empirical vs model distributio functions, threshold 3')
+
+               
+        plot(x_eval,femp,'.')
+        hold on
+        plot(x_eval, gpcdf(x_eval, param(2), param(1), 0))
+        line(trans([0,0]), 1.2,'LineStyle','--');
+        line(get(gca, 'xlim'), [1 1],'Color','green','LineStyle','--');
+        title('empirical vs model distribution functions')
+        title(tit_str)
+        ylim([0,1.1])
+        pause(0.5)
+%         end
+%         
+% %         if save_plot==1
+% %             saveas(gcf, sprintf('goodness_of_fit_stochttcFEA_thr_%d.png',k))
+% %             %savefig(sprintf('goodness_of_fit_mindistFEA_thr_%d',k))
+% %         end
+% %         pause(qq_pause)
     end
 
     init = param;
@@ -219,6 +221,8 @@ for k=1:m
     end
 
 end
+
+
 standard_error{sample,kk} = se_p_nea_save;
 clf;
 subplot(221)
@@ -228,11 +232,11 @@ hold on
 if compute_ci == 1
     plot(U,ci_sigma_u)
 end
-subplot(222)
+subplot(2,2,2)
 plot(U, param_save(2,:),'s'); hold on
 plot(U, param_save(2,:),'b')
 xlabel('threshold')
-title('xi_{est}')
+title(tit_str)
 if compute_ci == 1
     plot(U,ci_xi_u,':','color','b')
 end

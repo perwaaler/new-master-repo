@@ -1,13 +1,16 @@
 % simulation of encounters between two vehicles.
+h = figure;
+axis tight manual % this ensures that getframe() returns a consistent size
+filename = 'testAnimated.gif';
 
-n = 20;                                % number of encounter-samples desired
+n = 1;                                % number of encounter-samples desired
 all_data = cell(n, 12);                 % collects data from each encounter-sample
-N = 10000;                                % number of encounters
+N = 10;                                % number of encounters
 r = 0.3;                                % collision radius of each person
 NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 0;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 0;
-plotting = 0;                           % set to one if plots of encounters are wanted
+plotting = 1;                           % set to one if plots of encounters are wanted
 sausage = 0;
 plot_sim_walks = 0;
 
@@ -69,6 +72,7 @@ B_stepsize_save = ones(N,1);
 aa =1;
 bb =1;
 
+
 for i=1:N
 i;
 %%% initiation of encounter
@@ -92,6 +96,7 @@ encounter_classifier = 1; % tracks status: sign indicates interaction status (+ 
 danger_enc_i = [];        % saves danger index associated with each timestep
 ttc_enc_i = [];        % saves danger index associated with each timestep
 counter = 0;
+
     while real(A0) < xinit && real(B0) > -xinit
         counter = counter + 1;
         nn = nn + 1;
@@ -173,6 +178,17 @@ counter = 0;
                 plot([r*cos(linspace(0,2*pi,50))+real(B1)]+1i*[r*sin(linspace(0,2*pi,50))+imag(B1)])
                 xlim([-xinit,xinit])
                 ylim([-4,4])
+                drawnow 
+                
+                
+                    % Capture the plot as an image 
+                    frame = getframe(h); 
+                    im = frame2im(frame); 
+                    [imind,cm] = rgb2ind(im,256); 
+                    % Write to the GIF File 
+                        imwrite(imind,cm,filename,'gif','WriteMode','append'); 
+                    
+                    
                 hold off
                 pause(pause_length)
             end
@@ -214,9 +230,22 @@ counter = 0;
                 plot([r*cos(linspace(0,2*pi,50))+real(B1)]+1i*[r*sin(linspace(0,2*pi,50))+imag(B1)])
                 xlim([-xinit,xinit])
                 ylim([-4,4])
+                drawnow 
+                
+%               Capture the plot as an image 
+                frame = getframe(h); 
+                im = frame2im(frame); 
+                [imind,cm] = rgb2ind(im,256); 
+%                Write to the GIF File 
+                if nn == 1 && i==1
+                    nn
+                  imwrite(imind,cm,filename,'gif', 'Loopcount',inf); 
+                else 
+                  imwrite(imind,cm,filename,'gif','WriteMode','append'); 
+                end 
                 hold off
-                %saveas(gcf,sprintf('fig_%d_%d.jpg',i,counter))
-                %savefig(sprintf('fig_%d_%d',i,counter))
+%                 saveas(gcf,sprintf('fig_%d_%d.jpg',i,counter))
+%                 savefig(sprintf('fig_%d_%d',i,counter))
                 pause(pause_length)
             end
             if D < 2*r                                           % collision has occured before evasive action is taken
@@ -258,6 +287,20 @@ counter = 0;
 
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 sum(enc_type==-2)
 sum(enc_type==2)
 % remove all elements/rows corresponding to encounters with no EA
