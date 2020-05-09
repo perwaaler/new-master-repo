@@ -15,6 +15,6 @@ d_min = norm(s_delta0 + t_min*v_delta0 );
 
 %p = 1/(1+exp(pow_d*(d_min - shift_d)))* 1/(1+exp(pow_t*(d_min - shift_t)));
 p = amp*exp(-pow_d*(d_min - shift_d))*exp(-pow_t*(d_min - shift_t));
-p = exp(-pow_t*(norm(A0-B0) - shift_d))
+%p = exp(-pow_t*(norm(A0-B0) - shift_d));
 end
 

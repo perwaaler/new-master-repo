@@ -129,18 +129,20 @@ title('standard deviation, inv. transform')
 xlabel('threshold number')
 
 %% analysing Mean-Square-Error
-pc_stochttc = get_data(3, 1, 3, [3 3.5], 1, 80, 6);
-load 'pc_ea_2mill_r_0_3.mat'
+pc_stochttc = get_data(3, 3, 1, [3 3.5], 1, 80, 6);
+%load 'pc_ea_2mill_r_0_3.mat'
 p_true = pc_nea;
 
 rmse2 = sqrt(sum((pc_stochttc-p_true).^2)/500);
 
-clf
+hold on
+% clf
 plot(rmse2)
 title('root-mean-square-error')
 xlabel('threshold number')
 %% comparison of severity measures at FEA
-load 'pc_nea_2mill_r_0_3.mat'
+% load 'pc_nea_2mill_r_0_3.mat'
+load 'pc_nea_1mill.mat'
 p_true = pc_nea;
 data_markers = data_marker();
 sev_measure = cell(3,1);
@@ -153,12 +155,12 @@ trans_string{1} = [];
 trans_string{2} = 'exponential';
 trans_string{3} = 'inverse';
 
-cut_off = .5;
+cut_off = .9;
 
 clf
-a = plot_acc_w_ci(1 , 1, [], p_true, cut_off, 'r', data_markers{1});
-b = plot_acc_w_ci(3, 1, [], p_true, cut_off, 'b', data_markers{2});
-c = plot_acc_w_ci(6, 1, [], p_true, cut_off, 'm', data_markers{3});
+a = plot_acc_w_ci(1 , 1, [3], p_true, cut_off, 'r', data_markers{1});
+b = plot_acc_w_ci(3, 1, [.1], p_true, cut_off, 'b', data_markers{2});
+c = plot_acc_w_ci(6, 1, [0.1], p_true, cut_off, 'm', data_markers{3});
 title(sprintf('accuracy plots for severity measures, cut-off %s',num2str(cut_off)))
 legend([a b c], sev_measure{1},sev_measure{2},sev_measure{3})
 
@@ -168,16 +170,16 @@ legend([a b c], sev_measure{1},sev_measure{2},sev_measure{3})
 % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 
 cut_off = .5;
-data_type = 2;
+data_type = 1;
 tran = 2;
 par_range = [.1 .2 .3 .4 .5];
 % par_range = [.1 .15 .2 .25 .3 .4 .5];  % ttc parameters
 % par_range = [.02 .06 .1 .2 .3 .4 ]; % mindist parameters
-% par_range = [];
+par_range = [0.2];
 % par_range = [1 1.5 2 2.5 3 3.5 4 4.5];
 
 sev_ind = sev_measure(data_type);
-p_true = find_true_p(data_type);
+%p_true = find_true_p(data_type);
 n_ex = length(par_range);
 data_markers = data_marker();
 

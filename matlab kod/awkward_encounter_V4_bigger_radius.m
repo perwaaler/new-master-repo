@@ -1,10 +1,10 @@
 % simulation of encounters between two vehicles.
 
-n = 20;                                % number of encounter-samples desired
+n = 1;                                % number of encounter-samples desired
 all_data = cell(n, 12);                 % collects data from each encounter-sample
 N = 10000;                                % number of encounters
 r = 0.3;                                % collision radius of each person
-NTTC = 100;                             % Number of TTC to sample at first evasive action for each encounter
+NTTC = 10;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 0;                            % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 0;
 plotting = 0;                           % set to one if plots of encounters are wanted

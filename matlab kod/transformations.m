@@ -13,13 +13,13 @@ select_par = [.1 .2];
 
 % clf
 data_type = 1;
-select_trans = 2;
+select_trans = 3;
 tit_str = 'inverse trans., p = 4.5';
-trans_par = [0.03,4.5];
+trans_par = [3,10];
 n_sp = 4;
 plot_dis = 1;
 
-sample = 1;
+sample = 3;
 data_matrix = all_data{sample,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 
 % find encounters with finite ttc values

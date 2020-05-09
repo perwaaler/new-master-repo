@@ -40,7 +40,7 @@ rudeness_driverA = 0.5; % increasing this factor will increase preference of A t
 line_y = imag(B0) + rudeness_driverA*stepsize(1)/stepsize(2)^0.9*(real(A0) - real(B0));
 decision_dist = imag(A0) - line_y;
 % if decision_dist 
-rotation_sign = sign(decision_dist);
+rotation_sign = sign(decision_dist)
 
 
 %rotation_sign = sign(y_diff + 2*stepsize(1)*x_dist);
@@ -50,11 +50,11 @@ if rotation_sign < 0 && decision_state == 0
     mod_thetaB = s_function(abs(y_diff/x_diff),2.5,4)*s_function(imag(B0),2,3)*min(pi/25,          0.0007*exp(-0.5*(t_min-9))*exp(-1.5*(d_min-3)) );
     mod_theta = [mod_thetaA mod_thetaB];
     mod_step = [1 0]*stepsize(1)*min(0.08, 0.15*exp(-0.9*(t_min-5))*exp(-4*(d_min-2.8)) );
-else % driver B goes for it, and B slows down
+else % driver B goes for it, and B slows 
     mod_thetaA = min(pi/30, 0.01*exp(-0.3*(t_min-5))*exp(-2.5*(d_min-2)) );
-    mod_thetaB = min(pi/30, 0.01*exp(-0.3*(t_min-5))*exp(-2.8*(d_min-2)) );
+    mod_thetaB = min(pi/30, -0.01*exp(-0.3*(t_min-5))*exp(-2.5*(d_min-2)) );
     mod_theta = [mod_thetaA mod_thetaB];
-    mod_step =  [0,stepsize(2)*min(0.07, 0.2*exp(-0.3*(t_min-7))*exp(-2.5*(d_min-4)) )];
+    mod_step =  [0,stepsize(2)*min(0.15, 0.2*exp(-0.3*(t_min-7))*exp(-2.5*(d_min-4)) )];
     decision_state = 1;
 end
 

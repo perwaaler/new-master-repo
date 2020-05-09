@@ -10,7 +10,7 @@ compute_X = 0;
 plot_enc = 0;                            % set to one if plots of encounters are wanted
 plot_pred_path = 0;                      % enable to simulate each predicted path
 disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
-pause_length = 2^-5;
+pause_length = 0*2^-5;
 use_history = 1;
 
 for kk = 1:n
@@ -75,7 +75,7 @@ bb =1;
 
 for i=1:N
 decision_state = 0;
-i;
+i
 %%%%%%%%%%%%%5 initiation of encounter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nn = 0;
 EA_index = 1;                                                  % tracks number of EA frame
