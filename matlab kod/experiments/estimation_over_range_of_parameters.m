@@ -1,12 +1,12 @@
-
 %% Estimation of P(collision) using different transformation parameters
 % this code is used to take simulated data and perform POT method to
 % estimate P(collision). Data_matrix  can be either danger_FEA, DAFEA, X,
 % or danger_max_EA. data_type=1 --> danger_FEA or DAFEA, data_type=2 --> X,
 % data_type=3 --> danger_max_EA
 % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
-load all_data_empirical_NTTC_5_15_25_highTol.mat
-data_type_list=[13]; %#ok<NBRAK>
+
+%%
+data_type_list=[1]; %#ok<NBRAK>
 select_trans = 1;
 % par_range = [.1 .3 .5 .7 .9 1.2 1.4 1.5];
 par_range = [3];
@@ -88,7 +88,7 @@ for i=1:length(par_range)
         % generate sample of encounters
         jj %#ok<NOPTS>
 
-        data_matrix = all_data{jj,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
+        %data_matrix = all_data{jj,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
         data_matrix(jj,:);
         % find encounters with finite ttc values
         min_data = data_matrix(min(data_matrix,[],2)<Inf,:);
@@ -108,14 +108,14 @@ for i=1:length(par_range)
         trans_data = trans(data_matrix);
 
         % plot transformed data with transformed thresholds
-%         clf
-%         plot(trans(min_data),'.')
-%         hold on
-%         plot(1:length(min_data),U'*ones(1,length(min_data)), 'k')
-%         plot(ones(1,length(min_data))*trans(0))
-%         ylim([trans(30),trans(0)*1.1])
-%         title('transformed data')
-%         pause(pause_trans)
+        clf
+        plot(trans(min_data),'.')
+        hold on
+        plot(1:length(min_data),U'*ones(1,length(min_data)), 'k')
+        plot(ones(1,length(min_data))*trans(0))
+        ylim([trans(30),trans(0)*1.1])
+        title('transformed data')
+        pause(pause_trans)
 
         %%% ensure good initial value!
         init = est_par(trans_data(:), init_val, U(1));
@@ -137,8 +137,8 @@ for i=1:length(par_range)
         max_data = max(max(trans_data));                                                 % largest observed value
         logit = 1;
 
-        p_inter = all_data{jj,11};
-        p_ea = all_data{jj, 12};
+        p_inter = 1;
+        p_ea = 1;
 
         % limits for plots of empirical and model distribution functions
         xplot_lower = 0;
@@ -307,19 +307,19 @@ for i=1:length(par_range)
     end
 
     % save information
-    hit_rate = sum(pc_save_matrix>0,1)/500*100;
-
-    % save results
-    variables = cell(1,7);
-    variables{1,1} = hit_rate;
-    variables{1,2} = pc_save_matrix;
-    variables{1,3} = p_c_save_matrix;
-    variables{1,4} = thr_save_matrix;
-    variables{1,5} = param_save_matrix;
-    variables{1,6} = ci_xi_u_matrix;
-    variables{1,7} = p_exceed_matrix;
+%     hit_rate = sum(pc_save_matrix>0,1)/500*100;
+% 
+%     % save results
+%     variables = cell(1,7);
+%     variables{1,1} = hit_rate;
+%     variables{1,2} = pc_save_matrix;
+%     variables{1,3} = p_c_save_matrix;
+%     variables{1,4} = thr_save_matrix;
+%     variables{1,5} = param_save_matrix;
+%     variables{1,6} = ci_xi_u_matrix;
+%     variables{1,7} = p_exceed_matrix;
     
-    save_result(variables, 13, select_trans, trans_par, safety_level, up_frac, lo_frac)
+    %save_result(variables, 13, select_trans, trans_par, safety_level, up_frac, lo_frac)
     
 end
 

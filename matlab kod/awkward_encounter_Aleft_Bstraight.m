@@ -1,11 +1,15 @@
 % simulation of encounters between two vehicles.
-
-n = 500;                                 % number of encounter-samples desired
+load 'historyA_30k.mat'
+n = 4000;                                 % number of encounter-samples desired
 N = 500;                               % number of encounters
-all_data = cell(n, 12);                % collects data from each encounter-sample
+all_data = cell(n, 12+2);                % collects data from each encounter-sample
 r = 0.3;                               % collision radius of each person
-NTTC = 10;                              % Number of TTC to sample at first evasive action for each encounter
-est_ttc = 1;                             % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
+NTTC = 25;                              % Number of TTC to sample at first evasive action for each encounter
+NTTC1 = 5;
+NTTC2 = 15;
+NTTC3 = 25;
+est_ttc = 1;                           % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
+
 compute_X = 0;
 plot_enc = 0;                            % set to one if plots of encounters are wanted
 plot_pred_path = 0;                      % enable to simulate each predicted path
@@ -13,8 +17,9 @@ disable_crash = 0;                       % disable collision and EA mode to reco
 pause_length = 2^-5;
 use_history = 1;
 
+
 for kk = 1:n
-kk
+kk %#ok<NOPTS>
 % parameters for distribution of stepsize. EX = a*b, VX = a*b^2
 step_par = [0.30*2 0.2/2];
 
@@ -44,6 +49,7 @@ thetamod_p = 3;                % amplifies difference in reaction between small 
 dist_FEA = inf*ones(N,1);               % saves danger index at time of first evasive action
 ttc_FEA = inf*ones(N,1);                % saves TTC at FEA
 stoch_ttc_FEA = inf*ones(N, NTTC);      % saves estimates of TTC distributions; each row contains NTTC simulated ttc values
+
 dist_min_EA = inf*ones(N,1000);         % saves min sep. dist. over EA frames
 ttc_min_EA = inf*ones(N,1000);          % saves min TTC over EA frames
 dist_min_NEA = inf*ones(1,N);           % saves mim sep. dist. for encounters of type NEA
@@ -93,7 +99,10 @@ pow_t = 2;          % determines how quickly ttc factor goes to 1 as ttc goes to
 detec_amp = 0.45;
 detec_par = [shift_d, pow_d, shift_t, pow_t, detec_amp];
 
-tolerance = 0.4*[0.16*0.1, 0.03, 0.08];
+%               [pos,     speed,   theta]
+%tolerance = 0.4*[0.16*0.1, 0.03, 0.08];
+tolerance = 0.4*[0.16*0.1*3, 0.03, 0.08*2];
+
 
 % determine inertia of each driver; how twitchy can they be in their
 % movements?
@@ -391,8 +400,14 @@ end
 X(enc_type==1,:) = ttc_dist_save;   % vector that contains ttc-data from all encounters.
 end
 
+
+
+stoch_ttc_FEA1 = stoch_ttc_FEA(1:end,1:NTTC1);
+stoch_ttc_FEA2 = stoch_ttc_FEA(1:end,1:NTTC2);
+stoch_ttc_FEA3 = stoch_ttc_FEA(1:end,1:NTTC3);
+
 % ttc and stochastic-ttc measurements
-all_data{kk,1} = stoch_ttc_FEA;
+all_data{kk,1} = stoch_ttc_FEA1;
 all_data{kk,2} = X;
 all_data{kk,3} = ttc_FEA;
 all_data{kk,4} = ttc_min';
@@ -410,6 +425,9 @@ all_data{kk,11} = (sum(enc_type==-1) + sum(enc_type==-2) + sum(enc_type==2))/N; 
 all_data{kk,12} = (sum(enc_type==-1)+sum(enc_type==-2))/N;                       % saves p_ea
 
 
+all_data{kk,13} = stoch_ttc_FEA2;
+all_data{kk,14} = stoch_ttc_FEA3;
+
 end
 
-
+save('all_data_empirical_NTTC_5_15_25_highTol.mat','all_data')

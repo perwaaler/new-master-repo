@@ -142,11 +142,11 @@ title('root-mean-square-error')
 xlabel('threshold number')
 %% comparison of severity measures at FEA
 % load 'pc_nea_2mill_r_0_3.mat'
-load 'pc_nea_1mill.mat'
+load 'pc_nea_3mill.mat'
 p_true = pc_nea;
 data_markers = data_marker();
 sev_measure = cell(3,1);
-sev_measure{1} = 'stoch. TTC';
+sev_measure{1} = 'stoch. TTC';w
 sev_measure{2} = 'TTC';
 sev_measure{3} = 'min. dist.';
 
@@ -158,7 +158,7 @@ trans_string{3} = 'inverse';
 cut_off = .9;
 
 clf
-a = plot_acc_w_ci(1 , 1, [3], p_true, cut_off, 'r', data_markers{1});
+a = plot_acc_w_ci(1 , 1, [3], p_true, cut_off, 'black', data_markers{1});
 b = plot_acc_w_ci(3, 1, [.1], p_true, cut_off, 'b', data_markers{2});
 c = plot_acc_w_ci(6, 1, [0.1], p_true, cut_off, 'm', data_markers{3});
 title(sprintf('accuracy plots for severity measures, cut-off %s',num2str(cut_off)))
