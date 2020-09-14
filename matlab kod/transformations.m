@@ -12,25 +12,15 @@ select_par = [.1 .2];
 
 
 % clf
-<<<<<<< HEAD
-data_type = 4;
+data_type = 3;
 select_trans = 2;
 tit_str = 'inverse trans., p = 4.5';
-trans_par = [.1 3.5];
+trans_par = [.2 3.5];
 n_sp = 4;
 plot_dis = 1;
 
 sample = 1;
-=======
-data_type = 13;
-select_trans = 2;
-tit_str = 'inverse trans., p = 4.5';
-trans_par = 0.1;
-n_sp = 4;
-plot_dis = 1;
 
-sample =6;
->>>>>>> 12249eb4234c713dfd193ae48745062510f013e6
 data_matrix = all_data{sample,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
 % data_matrix = delta_dist_min'.^2;
 % find encounters with finite ttc values
@@ -64,7 +54,7 @@ U = sort((linspace(trans(u_l), trans(u_u),m)));
 trans_data = trans(data_matrix);
     
 clf; plot(trans(min_data),'.'); hold on
-plot(1:length(min_data),U'*ones(1,length(min_data)), 'k');plot(ones(1,length(min_data))*trans(0));ylim([trans(1),trans(0)*1.2])
+plot(1:length(min_data),U'*ones(1,length(min_data)), 'k');plot(ones(1,length(min_data))*trans(0));ylim([trans(30),trans(0)*1.2])
 title('transformed data')
 legend('transformed thresholds')
 %ensure good initial value!

@@ -31,7 +31,7 @@ else
                 % generate new step
                 newstep = take_NEA_step(A0, B0, stepsize, theta, driver_prop);
                 A1 = newstep{1}(1);    
-                B1 = newstep{2}(2);
+                B1 = newstep{1}(2);
                 stepsize = newstep{2};
                 theta = newstep{3};
 
@@ -59,13 +59,13 @@ else
                 xlim([-6,6])
                 ylim([-4,4])
                 plot([r*cos(linspace(0,2*pi,50))+real(A1)]+1i*[r*sin(linspace(0,2*pi,50))+imag(A1)])
-                title("simulated walks, generated")
+                title(sprintf("simulated walks, generated, %d",stepcounter))
                 hold on
                 plot([r*cos(linspace(0,2*pi,50))+real(B1)]+1i*[r*sin(linspace(0,2*pi,50))+imag(B1)])
                 xlim([-6,6])
                 ylim([-4,4])
                 hold off
-                pause(2^-5)
+                pause(.1)%2^-5)
                 end
                     
     end
