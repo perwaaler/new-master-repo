@@ -3,6 +3,8 @@ function acc_rate = accuracy_rate(estimate, true_val, cut_off)
 % by less that cut_off*100 percent.
 
 est_to_truth_ratio = estimate/true_val;
-acc_rate = mean( abs(est_to_truth_ratio - 1) < cut_off);
+acc_rate = mean( abs(log10(est_to_truth_ratio)) < cut_off);
+
+%acc_rate = mean( abs(est_to_truth_ratio - 1) < cut_off);
 
 end

@@ -12,48 +12,48 @@ select_par = [.1 .2];
 
 
 % clf
-data_type = 1;
-select_trans = 3;
+data_type = 4;
+select_trans = 2;
 tit_str = 'inverse trans., p = 4.5';
-trans_par = [3,10];
+trans_par = [.1 3.5];
 n_sp = 4;
 plot_dis = 1;
 
-sample = 3;
+sample = 1;
 data_matrix = all_data{sample,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
-
+% data_matrix = delta_dist_min'.^2;
 % find encounters with finite ttc values
 min_data = data_matrix(min(data_matrix,[],2)<Inf,:);
 min_data = min(min_data,[],2);
 save_plot = 0;
 % find minimum and maximum thresholds based on amount of data to be used
 
-u_minmax = find_threshold(min_data, 0.06, 0.8);
+u_minmax = find_threshold(min_data, 0.1, 0.8);
 
 u_l = u_minmax(1);
 u_u = u_minmax(2);
 
-clf;
-plot(min_data,'.'); hold on 
-plot(ones(1,length(min_data))*u_l) 
-plot(ones(1,length(min_data))*u_u)
-ylim([-1,100])
-title('untransformed data')
+% clf;
+% plot(min_data,'.'); hold on 
+% plot(ones(1,length(min_data))*u_l) 
+% plot(ones(1,length(min_data))*u_u)
+% ylim([-1,100])
+% title('untransformed data')
 % transforming data and plotting transformed data and thresholds
 
 trans =@(x) transform(x, select_trans, trans_par);
 
-% transform thresholds
+%transform thresholds
 u_min_max = sort(trans([u_l,u_u]));
 u_l_trans = u_min_max(1);
 u_u_trans = u_min_max(2);
 m=10;
-U = sort(trans(linspace(u_l, u_u,m)));
+U = sort((linspace(trans(u_l), trans(u_u),m)));
 
 trans_data = trans(data_matrix);
-
+    
 clf; plot(trans(min_data),'.'); hold on
-plot(1:length(min_data),U'*ones(1,length(min_data)), 'k');plot(ones(1,length(min_data))*trans(0));ylim([trans(30),trans(0)*1.2])
+plot(1:length(min_data),U'*ones(1,length(min_data)), 'k');plot(ones(1,length(min_data))*trans(0));ylim([trans(1),trans(0)*1.2])
 title('transformed data')
 legend('transformed thresholds')
 %ensure good initial value!

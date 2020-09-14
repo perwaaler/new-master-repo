@@ -30,10 +30,10 @@ else
                 
                 % generate new step
                 newstep = take_NEA_step(A0, B0, stepsize, theta, driver_prop);
-                A1 = newstep{1};    
-                B1 = newstep{2};
-                stepsize = newstep{3};
-                theta = newstep{4};
+                A1 = newstep{1}(1);    
+                B1 = newstep{2}(2);
+                stepsize = newstep{2};
+                theta = newstep{3};
 
                 % collision has occured:_
                 % if real(A1+r)<real(B1-r)

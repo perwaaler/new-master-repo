@@ -38,6 +38,5 @@ for k=1:farsight
 end
 [d_min, t_min] = min(dist);
 
-p = amp*s_function(d_min, shift_d, pow_d) * s_function(t_min-1, shift_t, pow_t);
+p = 1./(1+exp(-(2 - 0.17*t_min - 1.9624*d_min)));
 end
-

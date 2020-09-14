@@ -1,4 +1,4 @@
-function [p,t_min,d_min] = p_engage_EA_v2(A0,B0,stepsize,theta, driver_prop, detec_par, farsight)
+function [p,t_min,d_min] = p_engage_separate_reaction(A0,B0,stepsize,theta, driver_prop, detec_par, farsight)
 % function that computes the probability of EA mode being engaged
 stepsize0 = driver_prop{1};
 stability_fac = driver_prop{4};
@@ -12,13 +12,6 @@ d2   = speed_mod_par(1);
 p2   = speed_mod_par(2);
 amp2 = speed_mod_par(3);
 
-shift_d = detec_par(1);
-pow_d   = detec_par(2);
-shift_t = detec_par(3);
-pow_t   = detec_par(4);
-amp     = detec_par(5);
-%future_pos = zeros(6,2);
-%future_pos(1,:) = [A0,B0];
 dist = zeros(1,farsight+1);
 dist(1) = norm(A0-B0);
 
@@ -38,6 +31,5 @@ for k=1:farsight
 end
 [d_min, t_min] = min(dist);
 
-p = amp*s_function(d_min, shift_d, pow_d) * s_function(t_min-1, shift_t, pow_t);
+p = 1./(1+exp(-(2 - 0.17*t_min - 1.9624*d_min)));
 end
-

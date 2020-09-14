@@ -27,5 +27,6 @@ stepsize(2) = stepsize(2) + normrnd(0,var_step);
 stepsize = max(min_stepsize, stepsize);
 A1 = A0 + stepsize(1)*exp(1i*theta(1));
 B1 = B0 - stepsize(2)*exp(1i*theta(2));
-out = {A1,B1,stepsize,theta};
+newpos = [A1,B1];
+out = {newpos,stepsize,theta};
 end

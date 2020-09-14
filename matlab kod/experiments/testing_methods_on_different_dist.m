@@ -48,7 +48,7 @@ u_u = u_minmax(2);
 % title('untransformed data')
 % transforming data and plotting transformed data and thresholds
 
-select_trans =3;    
+select_trans =1;    
  
 % transformation choice and parameters
 if select_trans==1
@@ -108,6 +108,7 @@ xplot_lower = 0;
 xplot_upper = 1;
 n_eval_cdf = 1000;    % number of points where cdf gets evaluated
 
+
 for k=1:m
     data = trans_data(:);
     exceed = data(data>U(k));
@@ -126,7 +127,7 @@ for k=1:m
     param_save(:,k) = param;
     p_u = length(exceed)/length(data);
     pc(k) = p_u*(1 - gpcdf(trans(0), param(2), param(1),U(k)) );
-    ue = U(k) - param(1)/param(2);
+    ue_save(k) = U(k) - param(1)/param(2);
     if param(2)<0; ue_save(k) = ue; end
 
     if qqplot == 1
@@ -150,7 +151,7 @@ for k=1:m
 
         % evaluate empirical distribution function
         xplot_lower = 0;
-        xplot_upper = max(excess*1.01);
+        xplot_upper = max(excess*1.4);
         x_eval = linspace(xplot_lower, xplot_upper, n_eval_cdf);
         femp = weights'*F_emp(x_eval, exceed_data);
 
@@ -158,11 +159,12 @@ for k=1:m
 
         
 %        sgtitle(sprintf('goodness of fit plots, %s %s %s, threshold %d',sevme_str(sev_ind), trans_str(select_trans),num2str(trans_par), k))
-%         subplot(211)
-%             qq_plot(exceed,param(1),param(2),U(k),k)
-%             title('empirical vs model quantiles')
-
-            clf
+        clf        
+        subplot(211)
+            qq_plot(exceed,param(1),param(2),U(k),k)
+            title('empirical vs model quantiles')
+        subplot(212)
+            
             plot(x_eval,femp,'.')
             hold on
             plot(x_eval, gpcdf(x_eval, param(2), param(1), 0))

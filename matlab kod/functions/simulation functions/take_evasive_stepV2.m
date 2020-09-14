@@ -63,17 +63,16 @@ var_theta = driver_prop{3};
 
 step = take_NEA_step(A0,B0, stepsize, theta, driver_prop);
 theta_mod = normrnd(rotation_sign*mod_theta, var_theta);
-stepsize = step{3};
-theta = step{4};
+stepsize = step{2};
+theta = step{3};
 theta = theta + theta_mod;
 %theta = sign(theta).*max(abs(theta), pi/15)
 stepsize = max(0.08*min_stepsize, stepsize - mod_step);
 A1 = A0 + stepsize(1)*exp(1i*theta(1));
 B1 = B0 - stepsize(2)*exp(1i*theta(2));
-step{1} = A1;
-step{2} = B1;
-step{3} = stepsize;
-step{4} = theta;
+step{1} = [A1,B1];
+step{2} = stepsize;
+step{3} = theta;
 out = {step, decision_state, rotation_sign};
 
 end

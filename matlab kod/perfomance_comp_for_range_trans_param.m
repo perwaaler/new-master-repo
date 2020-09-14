@@ -6,12 +6,13 @@
 % data_type=3 --> danger_max_EA
 % 1=DAFEA 2=X 3=ttc_FEA 4=ttc_min ttc_min_EA=5 danger_FEA=6 dist_min_EA=7 dist_min=8
 
-data_type_list=[3]; %#ok<NBRAK>
-select_trans = 3;
+data_type_list=[1 3 6];
+select_trans = 2;
 % par_range = [.1 .3 .5 .7 .9 1.2 1.4 1.5];
-par_range = [3];
+par_range = [.1 .2 .3];
 % par_range = [5];
 % par_range = [.1 .2 .3 .4 .5];
+
 if select_trans==1 
     par_range = 1;
 end
@@ -20,27 +21,28 @@ safety_level = 1;
 
 % maximum and minimum fraction of data to use after applying thresholds
 up_frac = 0.8;
-lo_frac = 0.06;
+lo_frac = 0.1;
+fixed_thr = 0;
 
 
 % plotting options
-compute_ci = 1;              % set equal to one if confidence intervals for xi are desired
+compute_ci = 0;              % set equal to one if confidence intervals for xi are desired
 qqplot = 1;
 save_plot = 0;
 
 % pausing options
-pause_trans = .5;
+transdata_pause= 4;
 qq_pause = 1;
-stability_pause = 1;
+diagnostic_pause = 1;
 
 dont_be_fancy = 1;
 if dont_be_fancy == 1
     compute_ci = 0;              % set equal to one if confidence intervals for xi are desired
     qqplot = 0;
     save_plot = 0;
-    pause_trans = 0;
+    transdata_pause = 0;
     qq_pause = 0;
-    stability_pause = 0;
+    diagnostic_pause = 0;
 end
 
 for mm=1:length(data_type_list)
@@ -93,29 +95,42 @@ for i=1:length(par_range)
         % find encounters with finite ttc values
         min_data = data_matrix(min(data_matrix,[],2)<Inf,:);
         min_data = min(min_data,[],2);
-
+        
         % find minimum and maximum thresholds based on amount of data to be used
-        u_minmax = find_threshold(min_data, lo_frac, up_frac);
-        u_l = u_minmax(1);
-        u_u = u_minmax(2);
+        if fixed_thr == 1
+            if jj == 1
+                u_minmax = find_threshold(min_data, lo_frac, up_frac);
+                thr_bounds = trans(u_minmax);
+                U = sort(linspace(thr_bounds(1), thr_bounds(2), n_u));
+            end
+        else
+            u_minmax = find_threshold(min_data, lo_frac, up_frac);
+            
+            u_l = u_minmax(1);
+            u_u = u_minmax(2);
+            % transform thresholds and data
+            u_min_max = sort(trans([u_l,u_u]));
+            u_l_trans = u_min_max(1);
+            u_u_trans = u_min_max(2);
+            %U = sort(trans(linspace(u_l, u_u, n_u)));
+            U = sort(linspace(trans(u_l), trans(u_u), n_u));
+        end
 
-        % transform thresholds and data
-        u_min_max = sort(trans([u_l,u_u]));
-        u_l_trans = u_min_max(1);
-        u_u_trans = u_min_max(2);
-        U = sort(trans(linspace(u_l, u_u, n_u)));
+
         thr_save_matrix(jj,:) = U;
         trans_data = trans(data_matrix);
 
-        % plot transformed data with transformed thresholds
-%         clf
-%         plot(trans(min_data),'.')
-%         hold on
-%         plot(1:length(min_data),U'*ones(1,length(min_data)), 'k')
-%         plot(ones(1,length(min_data))*trans(0))
-%         ylim([trans(30),trans(0)*1.1])
-%         title('transformed data')
-%         pause(pause_trans)
+%         plot transformed data with transformed thresholds
+        if dont_be_fancy == 0
+            clf
+            plot(trans(min_data),'.')
+            hold on
+            plot(1:length(min_data),U'*ones(1,length(min_data)), 'k')
+            plot(ones(1,length(min_data))*trans(0))
+            ylim([trans(30),trans(0)*1.1])
+            title('transformed data')
+            pause(transdata_pause)
+        end
 
         %%% ensure good initial value!
         init = est_par(trans_data(:), init_val, U(1));
@@ -229,48 +244,50 @@ for i=1:length(par_range)
             end
 
         end
-
-        %%%%% diagnostic plots %%%%%
-        clf;
-        subplot(221)%%%%%%%%%%%%%%%%%%%%%%
-        plot(U,param_save(1,:))
-        title('sigma_{est}')
-        hold on
-        if compute_ci == 1
-            plot(U,ci_sigma_u)
-        end
-
-        subplot(222)%%%%%%%%%%%%%%%%%%%%%%
-        plot(U   , param_save(2,:))
-        title('xi_{est}')
-        hold on
-        if compute_ci == 1
-            plot(U,ci_xi_u)
-            thr_index = thr_autofind(ci_xi_u, param_save(2,:), n_u);
-            plot(U(thr_index), param_save(2,thr_index),'*');
-        end
-
-        subplot(223)%%%%%%%%%%%%%%%%%%%%%%
-        if min(param_save(2,:))<0
-            plot(U,ue_save); hold on
-            plot(U,ones(1,n_u)*max_data)
-            plot(U,ones(1,n_u)*trans(0))
-            title('upper endpoint estimates')
-        end
-        subplot(224)%%%%%%%%%%%%%%%%%%%%%%
-        if logit==1
-            plot(U,log10(pc))
-            title('log(p_{est})')
+        
+        if dont_be_fancy==0
+            %%%%% diagnostic plots %%%%%
+            clf;
+            subplot(221)%%%%%%%%%%%%%%%%%%%%%%
+            plot(U,param_save(1,:))
+            title('sigma_{est}')
+            hold on
             if compute_ci == 1
-                hold on
-                %plot(U,ci_p_nea_u)
+                plot(U,ci_sigma_u)
             end
-        else
-            plot(U,pc)
-            title('p_{est}')
+
+            subplot(222)%%%%%%%%%%%%%%%%%%%%%%
+            plot(U   , param_save(2,:))
+            title('xi_{est}')
+            hold on
             if compute_ci == 1
-                hold on
-                %plot(U,ci_p_nea_u)
+                plot(U,ci_xi_u)
+                thr_index = thr_autofind(ci_xi_u, param_save(2,:), n_u);
+                plot(U(thr_index), param_save(2,thr_index),'*');
+            end
+            
+            subplot(223)%%%%%%%%%%%%%%%%%%%%%%
+            if min(param_save(2,:))<0
+                plot(U,ue_save); hold on
+                plot(U,ones(1,n_u)*max_data)
+                plot(U,ones(1,n_u)*trans(0))
+                title('upper endpoint estimates')
+            end
+            subplot(224)%%%%%%%%%%%%%%%%%%%%%%
+            if logit==1
+                plot(U,log10(pc))
+                title('log(p_{est})')
+                if compute_ci == 1
+                    hold on
+                    %plot(U,ci_p_nea_u)
+                end
+            else
+                plot(U,pc)
+                title('p_{est}')
+                if compute_ci == 1
+                    hold on
+                    %plot(U,ci_p_nea_u)
+                end
             end
         end
 
@@ -279,7 +296,7 @@ for i=1:length(par_range)
         pc_save_matrix(jj,:) = pc;
         ci_xi_u_matrix{jj,1} = ci_xi_u;
 
-        pause(stability_pause)
+        pause(diagnostic_pause)
 
         %%% estimating p(collision) %%%
 

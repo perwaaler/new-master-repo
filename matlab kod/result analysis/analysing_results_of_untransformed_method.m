@@ -1,10 +1,10 @@
 
 %% plot estimated probabilities
 clf
-pc1 = get_data(3, 1, 3, 1, 1, 80, 6);
-pc2 = get_data(3, 1, 3, 4.5, 1, 80, 6);
-thr = 9;
-p_true=find_true_p(1);
+pc1 = get_data(3, 1, 2, 0.4, 1, 80, 8);
+pc2 = get_data(3, 3, 2, 0.1, 1, 80, 8);
+thr = 1;
+%p_true=find_true_p(1);
 subplot(211)
 plot(pc1(pc1(:,thr)>0,thr),'.')
 hold on
@@ -41,8 +41,8 @@ hold on
 plot(ones(1,500)*0.5,'r')
 plot(ones(1,500)*1.5,'r')
 %% analysing mean value for untransformed methods
-pc_stochttc =      get_data(3, 1, 1, [], 1, 80, 6);
-pc_ttc     =       get_data(3, 2, 1, [], 1, 80, 6);
+pc_stochttc =      get_data(3, 1, 1, [], 1, 80, 10);
+pc_ttc     =       get_data(3, 1, 1, [], 1, 80, 10);
 pc_stoch_ttc_exp = get_data(3, 1, 2, 0.1, 1, 80, 6);
 
 ci_stoch_ttc = compute_ci_meanest(pc_stochttc, 500);
@@ -51,8 +51,9 @@ ci_stoch_ttc_exp = compute_ci_meanest(pc_stoch_ttc_exp, 500);
 
 
 
-load 'pc_nea_2mill_r_0_3.mat'
-p_true = pc_nea;
+%load 'pc_nea_2mill_r_0_3.mat'
+% p_true = pc_nea;
+p_true =p_true_temp
 
 clf
 a = plot(mean(pc_stochttc), 'color' ,[0 .0 1]);
@@ -155,11 +156,12 @@ trans_string{1} = [];
 trans_string{2} = 'exponential';
 trans_string{3} = 'inverse';
 
-cut_off = .9;
+cut_off = 1;
 
 clf
-a = plot_acc_w_ci(1 , 1, [3], p_true, cut_off, 'r', data_markers{1});
-b = plot_acc_w_ci(3, 1, [.1], p_true, cut_off, 'b', data_markers{2});
+hold on
+a = plot_acc_w_ci(1 , 2, [.4], p_true, cut_off, 'r', data_markers{1},0.8,0.10);
+b = plot_acc_w_ci(3, 2, [.4], p_true, cut_off, 'b', data_markers{2},0.8,0.10);
 c = plot_acc_w_ci(6, 1, [0.1], p_true, cut_off, 'm', data_markers{3});
 title(sprintf('accuracy plots for severity measures, cut-off %s',num2str(cut_off)))
 legend([a b c], sev_measure{1},sev_measure{2},sev_measure{3})
