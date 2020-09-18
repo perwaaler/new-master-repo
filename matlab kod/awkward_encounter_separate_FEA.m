@@ -4,13 +4,13 @@ n = 1;                                 % number of encounter-samples desired
 N = 500;                               % number of encounters
 all_data = cell(n, 12);                % collects data from each encounter-sample
 r = 0.3;                               % collision radius of each person
-NTTC = 1;                              % Number of TTC to sample at first evasive action for each encounter
+NTTC = 30;                              % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 1;                             % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 0;
 plot_enc = 0;                            % set to one if plots of encounters are wanted
 plot_pred_path =0;                      % enable to simulate each predicted path
 disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
-pause_length = 2^-5;
+pause_length = 2^-10;
 use_history = 0;
 use_dp_model = 0;                        % set to 1 if you want to use estimated reaction model
 
@@ -42,12 +42,12 @@ thetamod_p = 3;                % amplifies difference in reaction between small 
 
 
 % variables that collects data about encounters
-dist_FEA = inf*ones(N,1);               % saves danger index at time of first evasive action
-ttc_FEA = inf*ones(N,1);                % saves TTC at FEA
-stoch_ttc_FEA = inf*ones(N, NTTC);      % saves estimates of TTC distributions; each row contains NTTC simulated ttc values
-dist_min_EA = inf*ones(N,1000);         % saves min sep. dist. over EA frames
-ttc_min_EA = inf*ones(N,1000);          % saves min TTC over EA frames
-dist_min_NEA = inf*ones(1,N);           % saves min sep. dist. for encounters of type NEA
+dist_fea = inf*ones(N,1);               % saves danger index at time of first evasive action
+ttc_fea = inf*ones(N,1);                % saves TTC at FEA
+stoch_ttc_fea = nan*ones(N, NTTC);      % saves estimates of TTC distributions; each row contains NTTC simulated ttc values
+dist_min_ea = inf*ones(N,1000);         % saves min sep. dist. over EA frames
+ttc_min_ea = inf*ones(N,1000);          % saves min TTC over EA frames
+dist_min_nea = inf*ones(1,N);           % saves min sep. dist. for encounters of type NEA
 dist_min = inf*ones(1,N);               % saves min sep. dist. for all encounters
 ttc_min = inf*ones(1,N);                % saves min TTC for all encounters
 enc_status = ones(0);                   % saves interaction status of each timeframe
@@ -205,20 +205,24 @@ counter = 0;              % keeps track of the current frame
                 end
                 
                 for k=1:NTTC 
+                    %pred_paths = inf*ones(NTTC,500);
                     if k>length(row) || use_history==0 %number of observed walks satisfying init. cond.
                         ttc = ttc_simulator_double_momentumV2(A0,B0, stepsize, theta, r, driver_prop, plot_pred_path);
-                        stoch_ttc_FEA(i,k) = ttc;
+                        stoch_ttc_fea(i,k) = ttc;
+%                         ttc
+%                         pause(.1)
                     else
                         ttc = ttc_simulator_history(A0,B0,stepsize,theta,r,driver_prop,historyA{1},row,col,k,plot_pred_path);
-                        stoch_ttc_FEA(i,k) = ttc;
-                        %pause(0.1)
+                        stoch_ttc_fea(i,k) = ttc;
+%                         ttc;
+%                         pause(1)
                         %                     ttc = ttc_simulator_double_momentumV2(A0,B0, stepsize, theta, r, driver_prop, plot_setting);
                     end
                 end
-                ttc_FEA(i) = compute_ttc(A0,B0,stepsize,theta,r);
-                dist_FEA(i) = norm(A0-B0) - 2*r;
+                ttc_fea(i) = compute_ttc(A0,B0,stepsize,theta,r);
+                dist_fea(i) = norm(A0-B0) - 2*r;
                 dist_min_EA(i,EA_index) = norm(A0-B0) - 2*r;
-                ttc_min_EA(i,EA_index) = compute_ttc(A0,B0,stepsize,theta,r);
+                ttc_min_ea(i,EA_index) = compute_ttc(A0,B0,stepsize,theta,r);
                 EA_index = EA_index + 1;
                 
             end
@@ -257,7 +261,7 @@ counter = 0;              % keeps track of the current frame
             end
                 
             dist_min_EA(i,EA_index) = norm(A1-B1) - 2*r;
-            ttc_min_EA(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
+            ttc_min_ea(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
             EA_index = EA_index + 1;
 
             plot_pos(A1, B1, pause_length, xinit, r, plot_enc,detec_stat_A, detec_stat_B) 
@@ -303,9 +307,9 @@ counter = 0;              % keeps track of the current frame
                 %%% compute ttc (which will now be negative) and danger_FEA
                 ttc = ttc_simulator_double_momentum_improved(A1,B1,stepsize,theta,min_stepsize,var_step,r, var_theta, stability_fac);
 
-                dist_FEA(i) = danger_index;
-                ttc_FEA(i) = ttc;
-                stoch_ttc_FEA(i,:) = ttc*ones(1,NTTC);
+                dist_fea(i) = danger_index;
+                ttc_fea(i) = ttc;
+                stoch_ttc_fea(i,:) = ttc*ones(1,NTTC);
                 danger_enc_i(length(danger_enc_i) + 1) = danger_index; %#ok<*SAGROW>
                 ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A1,B1,stepsize,theta,r);
                 dist_min(i) = danger_index;
@@ -333,7 +337,7 @@ counter = 0;              % keeps track of the current frame
     ttc_min(i) = min(ttc_enc_i);
 
     if encounter_classifier == 1  % no evasive action and no collision has occured
-        dist_min_NEA(i) = min(danger_enc_i);
+        dist_min_nea(i) = min(danger_enc_i);
     end
     sum(enc_type==2);
 
@@ -379,14 +383,14 @@ end
 sum(enc_type==-2)
 sum(enc_type==2)
 % remove all elements/rows corresponding to encounters with no EA
-dist_FEA(enc_type==1,:) =[];
-X = stoch_ttc_FEA;
-stoch_ttc_FEA(enc_type==1,:) = [];
+dist_fea(enc_type==1,:) =[];
+X = stoch_ttc_fea;
+stoch_ttc_fea(enc_type==1,:) = [];
 dist_min_EA(enc_type>0,:) = [];
 dist_min_EA = min(dist_min_EA,[],2);
-ttc_min_EA( enc_type > 0 ,:) = [];
-ttc_min_EA = min(ttc_min_EA,[],2);
-dist_min_NEA = dist_min_NEA( enc_type > 0 );
+ttc_min_ea( enc_type > 0 ,:) = [];
+ttc_min_ea = min(ttc_min_ea,[],2);
+dist_min_nea = dist_min_nea( enc_type > 0 );
 
 %%%%%%% Compute minimum ttc for all encounters where there was no evasive action
 if est_ttc == 1 && compute_X ==1
@@ -446,15 +450,18 @@ end
 X(enc_type==1,:) = ttc_dist_save;   % vector that contains ttc-data from all encounters.
 end
 
+avg_cond_ttc = mean(stoch_ttc_fea,2,'omitnan');
+p_hypo_coll = sum(1-isnan(stoch_ttc_fea'))'/NTTC;
+weighted_ttc_fea = avg_cond_ttc.*(1+exp(-3*p_hypo_coll));
 % ttc and stochastic-ttc measurements
-all_data{kk,1} = stoch_ttc_FEA;
-all_data{kk,2} = X;
-all_data{kk,3} = ttc_FEA;
+all_data{kk,1} = stoch_ttc_fea;
+all_data{kk,2} = weighted_ttc_fea;
+all_data{kk,3} = ttc_fea;
 all_data{kk,4} = ttc_min';
-all_data{kk,5} = ttc_min_EA;
+all_data{kk,5} = ttc_min_ea;
 
 % minim distance measurements
-all_data{kk,6} = dist_FEA;
+all_data{kk,6} = dist_fea;
 all_data{kk,7} = dist_min_EA;
 all_data{kk,8} = dist_min';
 

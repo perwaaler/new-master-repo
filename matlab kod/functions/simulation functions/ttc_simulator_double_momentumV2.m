@@ -72,7 +72,7 @@ else
     
     %if no collision has occured, set:
     if abs( imag(ttc(1)) ) > 0
-        out = Inf;
+        out = nan;
     end
 end
 end

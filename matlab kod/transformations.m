@@ -12,7 +12,7 @@ select_par = [.1 .2];
 
 
 % clf
-data_type = 3;
+data_type = 2;
 select_trans = 2;
 tit_str = 'inverse trans., p = 4.5';
 trans_par = [.2 3.5];
@@ -22,7 +22,7 @@ plot_dis = 1;
 sample = 1;
 
 data_matrix = all_data{sample,data_type}; % select data. row i should correspond to encounter i, and column j to j'th simulated ttc value (in case of stochastic ttc)
-% data_matrix = delta_dist_min'.^2;
+% data_matrix = weighted_ttc_fea;
 % find encounters with finite ttc values
 min_data = data_matrix(min(data_matrix,[],2)<Inf,:);
 min_data = min(min_data,[],2);

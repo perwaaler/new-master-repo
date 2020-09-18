@@ -1,5 +1,5 @@
 % simulation of encounters between two vehicles.
-<<<<<<< HEAD
+
 
 n = 1;                                 % number of encounter-samples desired
 N = 200;                             % number of encounters
@@ -7,19 +7,6 @@ all_data = cell(n, 12);                % collects data from each encounter-sampl
 r = 0.3;                               % collision radius of each person
 NTTC = 1;                              % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 1;                             % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
-=======
-load 'historyA_30k.mat'
-n = 4000;                                 % number of encounter-samples desired
-N = 500;                               % number of encounters
-all_data = cell(n, 12+2);                % collects data from each encounter-sample
-r = 0.3;                               % collision radius of each person
-NTTC = 25;                              % Number of TTC to sample at first evasive action for each encounter
-NTTC1 = 5;
-NTTC2 = 15;
-NTTC3 = 25;
-est_ttc = 1;                           % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
-
->>>>>>> 12249eb4234c713dfd193ae48745062510f013e6
 compute_X = 0;
 plot_enc = 0;                            % set to one if plots of encounters are wanted
 plot_pred_path = 0;                      % enable to simulate each predicted path
