@@ -2,7 +2,7 @@
 
 
 n = 1;                                 % number of encounter-samples desired
-N = 200;                             % number of encounters
+N = 4000;                             % number of encounters
 all_data = cell(n, 12);                % collects data from each encounter-sample
 r = 0.3;                               % collision radius of each person
 NTTC = 1;                              % Number of TTC to sample at first evasive action for each encounter
@@ -84,7 +84,7 @@ bb =1;
 
 for i=1:N
 decision_state = 0;
-i;
+i
 %%%%%%%%%%%%% initiation of encounter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nn = 0;
 EA_index = 1;                                                  % tracks number of EA frame
@@ -295,6 +295,8 @@ counter = 0;              % keeps track of frame
                 break
             end
         end
+        react_A_save(i,nn) = detection_status;
+        react_B_save(i,nn) = detection_status;
         A_save(i,nn) = A1;
         B_save(i,nn) = B1;
         A_theta_save(i,nn) = theta(1);
@@ -326,11 +328,11 @@ if disable_crash == 1
 end
 
 
+react_B_save
 
+% plot_encounter(A_save, B_save, react_A_save, react_B_save, find(enc_type==-2), .15, xinit, r)
 
-
-
-
+%%
 
 
 
@@ -455,4 +457,4 @@ all_data{kk,14} = stoch_ttc_FEA3;
 
 end
 
-save('all_data_empirical_NTTC_5_15_25_highTol.mat','all_data')
+%save('all_data_empirical_NTTC_5_15_25_highTol.mat','all_data')

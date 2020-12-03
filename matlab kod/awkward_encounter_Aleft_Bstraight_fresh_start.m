@@ -1,7 +1,5 @@
-% simulation of encounters between two vehicles.
-
 n = 1;                                 % number of encounter-samples desired
-N = 500;                               % number of encounters
+N = 2000;                               % number of encounters
 all_data = cell(n, 12);                % collects data from each encounter-sample
 r = 0.3;                               % collision radius of each person
 NTTC = 30;                              % Number of TTC to sample at first evasive action for each encounter
@@ -9,8 +7,8 @@ est_ttc = 1;                             % tells the algorithm whether or not yo
 compute_X = 0;
 plot_enc = 1;                            % set to one if plots of encounters are wanted
 plot_pred_path =0;                      % enable to simulate each predicted path
-disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
-pause_length = 2^-10;
+disable_crash = 1;                       % disable collision and EA mode to record free movement patterns
+pause_length = 2^-5;
 use_history = 0;
 use_dp_model = 0;                        % set to 1 if you want to use estimated reaction model
 
@@ -72,6 +70,8 @@ if disable_crash==1
     save_pos_A = inf*ones(N,500);
     save_step_A = inf*ones(N,500);
     save_theta_A = inf*ones(N,500);
+    save_dtheta_A = inf*ones(N,500);
+    save_dtheta_A(:,1) = 0;
     save_pos_B = inf*ones(N,500);
     save_step_B = inf*ones(N,500);
     save_theta_B = inf*ones(N,500);
@@ -89,8 +89,8 @@ EA_index = 1;                                                  % tracks number o
 first_detec = 0;                                           % 0 --> have not detected yet
 stepsize = min_stepsize*[1 1] + gamrnd(a_init*[1 1],b_init);   % determines average speed of each vehicle
 stepsize0 = stepsize;
-theta = normrnd([0,0], theta_var_init);
-
+theta = normrnd([0,pi], theta_var_init);
+dtheta = [0,0];
 % detection parameters
 farsight = 40;      % determines how far drivers extrapolate into future to determine if EA is necessary
 shift_d = 2*0.3*2.5;% determines the inflection point of the dist. factor
@@ -119,6 +119,10 @@ alertness = betarnd(40,3,[1,2]);                      % determines how likely ea
 theta_mod_par = [d1_theta, p1_theta, amp1_theta];      % parameters of s-function that computes exp_theta(A0)
 speed_mod_par = [d1_step, p1_step, amp1_step];         % parameters of exp-function that computes exp_step(A0,theta)
 
+% where does A start and end turn
+x0 = normrnd(-4.8,0.04);
+par = logpar(5,0.5);    
+x1 =  x0 + lognrnd(par(1),par(2));
 % collect properties characterizing each driver
 driver_prop = {stepsize0, var_step, var_theta, ...
                stability_fac, min_stepsize, theta_mod_par, speed_mod_par};
@@ -193,9 +197,9 @@ counter = 0;              % keeps track of the current frame
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % if          "drivers are in EA mode"    OR     "EA is engaged by dp roll"
         % and         "they have not yet passed each other"
-        if  detec_stat==1 && real(A0) < real(B0) && imag(A0)<imag(B0)+0.5
+        if  detec_stat==1 && real(A0) < real(B0) && imag(A0)<imag(B0)+0.5 && disable_crash==0
             % saving information in vectors, and updating status
-            
+            nn
             if first_detec == 0 && est_ttc == 1 % a loop that collects information at first moment of evasive action
                 
                 if use_history==1
@@ -235,30 +239,29 @@ counter = 0;              % keeps track of the current frame
             ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
             
             % take next step
-            if detec_stat_A==1 && detec_stat_B==1
-                newstep = take_evasive_stepV2(A0,B0, stepsize, theta, driver_prop, decision_state);
-                decision_state = newstep{2};
-                A1 = newstep{1}{1}(1);    
-                B1 = newstep{1}{1}(2);
-                stepsize = newstep{1}{2};
-                theta = newstep{1}{3};
+%            if detec_stat_A==1 && detec_stat_B==1
+                newstep =  evasive_step_coulombs_law(A0,B0,stepsize,theta, 5, 5);
+                A1 = newstep{1}(1);
+                B1 = newstep{1}(2);
+                theta = newstep{3};
+               
 
-            elseif detec_stat_A==1 && detec_stat_B==0
-                newstepA = take_evasive_stepV2(A0,B0, stepsize, theta, driver_prop, decision_state);
-                newstepB = take_NEA_step(A0,B0, stepsize, theta, driver_prop);
-                A1 = newstepA{1}{1}(1);    
-                B1 = newstepB{1}(2); 
-                stepsize = [newstepA{1}{2}(1), newstepB{2}(2)];
-                theta =    [newstepA{1}{3}(1), newstepB{3}(2)];
-                
-            elseif detec_stat_A==0 && detec_stat_B==1
-                newstepB = take_evasive_stepV2(A0,B0, stepsize, theta, driver_prop, decision_state);
-                newstepA = take_NEA_step(A0,B0, stepsize, theta, driver_prop);
-                A1 = newstepA{1}(1);    
-                B1 = newstepB{1}{1}(2); 
-                stepsize = [newstepA{2}(1), newstepB{1}{2}(2)];
-                theta =    [newstepA{3}(1), newstepB{1}{3}(2)];
-            end
+%            elseif detec_stat_A==1 && detec_stat_B==0
+%                 newstep =  evasive_step_coulombs_law(A0,A_save(i,nn-1),B0,B_save(i,nn-1),stepsize, 1, 1);
+%                 decision_state = newstep{2};
+%                 A1 = newstep{1}(1);    
+%                 B1 = newstep{1}(2);
+%                 stepsize = newstep{2};
+%                 theta = newstep{3};
+%                 
+%             elseif detec_stat_A==0 && detec_stat_B==1
+%                 newstep =  evasive_step_coulombs_law(A0,A_save(i,nn-1),B0,B_save(i,nn-1),stepsize, 1, 1);
+%                 decision_state = newstep{2};
+%                 A1 = newstep{1}(1);    
+%                 B1 = newstep{1}(2);
+%                 stepsize = newstep{2};
+%                 theta = newstep{3};
+%             end
                 
             dist_min_EA(i,EA_index) = norm(A1-B1) - 2*r;
             ttc_min_ea(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
@@ -289,12 +292,28 @@ counter = 0;              % keeps track of the current frame
             danger_enc_i(length(danger_enc_i) + 1) = danger_index;
             ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
  
+            E_thetaA = normrnd(expected_angle_A(real(A0), x0, x1), var_theta0);
+            % add small value to argument to make cars slow down before
+            % they start to make turn
+            E_speedA = normrnd(expected_speed_A(real(A0) + .3, x0, x1, stepsize0(1)), var_step0);
             
-            newstep = take_NEA_step(A0,B0, stepsize, theta, driver_prop);
-            A1 = newstep{1}(1);    
-            B1 = newstep{1}(2); 
-            stepsize = newstep{2};
-            theta = newstep{3};
+            E_thetaB = normrnd(pi,0.1);
+            E_speedB = normrnd(stepsize0(2),0.01);
+
+            state_A = take_step(A0, stepsize(1), theta(1), dtheta(1), E_speedA, E_thetaA, [0.005, 0.1]); 
+            state_B = take_step(B0, stepsize(2), theta(2), dtheta(2), E_speedB, E_thetaB, [0.005, 0.1]);
+            
+            A1          = state_A(1);
+            stepsize(1) = max(0.08, state_A(2));
+            dtheta(1)      = theta(1) - state_A(3);
+            theta(1)    = state_A(3);
+            
+            
+            B1 =          state_B(1);
+            stepsize(2) = state_B(2);
+            dtheta(2)      = theta(2) - state_B(3);
+            theta(2) =    state_B(3);
+            
             D = norm(A1-B1);
             ttc = compute_ttc(A1,B1,stepsize,theta,r);
             
@@ -318,12 +337,15 @@ counter = 0;              % keeps track of the current frame
                 break
             end
         end
-        react_A_save(i,nn) = detec_stat_A;
-        react_B_save(i,nn) = detec_stat_B;
+        react_A_save(i,nn)  = detec_stat_A;
+        react_B_save(i,nn)  = detec_stat_B;
         A_save(i,nn) = A1;
         B_save(i,nn) = B1;
-        A_theta_save(i,nn) = theta(1);
-        B_theta_save(i,nn) = theta(2);
+        A_theta_save(i,nn)  = theta(1);
+        B_theta_save(i,nn)  = theta(2);
+        if nn>1
+            A_dtheta_save(i,nn) = A_theta_save(i,nn) - A_theta_save(i,nn-1);
+        end
 
         A0 = A1;
         B0 = B1;
@@ -350,12 +372,12 @@ if disable_crash == 1
 end
 
 
-%plot_encounter(A_save, B_save,react_A_save, react_B_save, find(enc_type==-2), .25, xinit, r)
+%plot_encounter(A_save, B_save,react_A_save, react_B_save, find(enc_type==-2), .15, xinit, r)
 
 
 
 
-
+sum(A_save(enc_id(i),:)<inf)
 
 
 

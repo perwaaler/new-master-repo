@@ -1,7 +1,5 @@
-% simulation of encounters between two vehicles.
-
 n = 1;                                 % number of encounter-samples desired
-N = 500;                               % number of encounters
+N = 2000;                               % number of encounters
 all_data = cell(n, 12);                % collects data from each encounter-sample
 r = 0.3;                               % collision radius of each person
 NTTC = 30;                              % Number of TTC to sample at first evasive action for each encounter
@@ -10,7 +8,7 @@ compute_X = 0;
 plot_enc = 1;                            % set to one if plots of encounters are wanted
 plot_pred_path =0;                      % enable to simulate each predicted path
 disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
-pause_length = 2^-10;
+pause_length = 2^-5;
 use_history = 0;
 use_dp_model = 0;                        % set to 1 if you want to use estimated reaction model
 
@@ -235,30 +233,29 @@ counter = 0;              % keeps track of the current frame
             ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
             
             % take next step
-            if detec_stat_A==1 && detec_stat_B==1
-                newstep = take_evasive_stepV2(A0,B0, stepsize, theta, driver_prop, decision_state);
-                decision_state = newstep{2};
-                A1 = newstep{1}{1}(1);    
-                B1 = newstep{1}{1}(2);
-                stepsize = newstep{1}{2};
-                theta = newstep{1}{3};
+%            if detec_stat_A==1 && detec_stat_B==1
+                newstep =  evasive_step_coulombs_law(A0,B0,stepsize,theta, 5, 5);
+                A1 = newstep{1}(1);
+                B1 = newstep{1}(2);
+                theta = newstep{3};
+               
 
-            elseif detec_stat_A==1 && detec_stat_B==0
-                newstepA = take_evasive_stepV2(A0,B0, stepsize, theta, driver_prop, decision_state);
-                newstepB = take_NEA_step(A0,B0, stepsize, theta, driver_prop);
-                A1 = newstepA{1}{1}(1);    
-                B1 = newstepB{1}(2); 
-                stepsize = [newstepA{1}{2}(1), newstepB{2}(2)];
-                theta =    [newstepA{1}{3}(1), newstepB{3}(2)];
-                
-            elseif detec_stat_A==0 && detec_stat_B==1
-                newstepB = take_evasive_stepV2(A0,B0, stepsize, theta, driver_prop, decision_state);
-                newstepA = take_NEA_step(A0,B0, stepsize, theta, driver_prop);
-                A1 = newstepA{1}(1);    
-                B1 = newstepB{1}{1}(2); 
-                stepsize = [newstepA{2}(1), newstepB{1}{2}(2)];
-                theta =    [newstepA{3}(1), newstepB{1}{3}(2)];
-            end
+%            elseif detec_stat_A==1 && detec_stat_B==0
+%                 newstep =  evasive_step_coulombs_law(A0,A_save(i,nn-1),B0,B_save(i,nn-1),stepsize, 1, 1);
+%                 decision_state = newstep{2};
+%                 A1 = newstep{1}(1);    
+%                 B1 = newstep{1}(2);
+%                 stepsize = newstep{2};
+%                 theta = newstep{3};
+%                 
+%             elseif detec_stat_A==0 && detec_stat_B==1
+%                 newstep =  evasive_step_coulombs_law(A0,A_save(i,nn-1),B0,B_save(i,nn-1),stepsize, 1, 1);
+%                 decision_state = newstep{2};
+%                 A1 = newstep{1}(1);    
+%                 B1 = newstep{1}(2);
+%                 stepsize = newstep{2};
+%                 theta = newstep{3};
+%             end
                 
             dist_min_EA(i,EA_index) = norm(A1-B1) - 2*r;
             ttc_min_ea(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
@@ -350,12 +347,12 @@ if disable_crash == 1
 end
 
 
-%plot_encounter(A_save, B_save,react_A_save, react_B_save, find(enc_type==-2), .25, xinit, r)
+%plot_encounter(A_save, B_save,react_A_save, react_B_save, find(enc_type==-2), .15, xinit, r)
 
 
 
 
-
+sum(A_save(enc_id(i),:)<inf)
 
 
 
