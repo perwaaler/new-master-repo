@@ -3,7 +3,7 @@ function out = find_quantiles(x, data, weights)
 % empirical cdf's of data, where data is a matrix of observations, each row 
 % corresponding to a sample. Weights is an argument that determines the weight
 % given to each cdf as they get added together to form the empirical cdf.
-% of the exceedence data. note that 0<x<1. NOte that data excesses only,
+% of the exceedence data. note that 0<x<1. Note that data excesses only,
 % and have nan's for elements where data did not exceed threshold.
 
 % find the points where the cdf jumps

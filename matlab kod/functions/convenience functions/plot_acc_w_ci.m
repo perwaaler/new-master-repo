@@ -1,4 +1,5 @@
 function a = plot_acc_w_ci(data_type, transform, trans_par, p_true, cut_off, color, data_mark, u_u, u_l)
+% plots accuracy together with 95% confidence intervals.
 if nargin==7 
     pc = get_data(3, data_type, transform, trans_par, 1, 80, 6);
     accuracy = accuracy_rate(pc, p_true, cut_off);

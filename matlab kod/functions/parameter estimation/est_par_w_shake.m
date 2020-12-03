@@ -1,5 +1,7 @@
 function param = est_par_w_shake(data, init_val, u, shake_var)
-% function that keeps estimating new
+% similar to est_par, but will check if algorithm is stuck on initial
+% guess. If it is stuck, it will randomly modify the initial guess to
+% attempt to get unstuck.
 
 param =  est_par(data(:), init_val, u);
 

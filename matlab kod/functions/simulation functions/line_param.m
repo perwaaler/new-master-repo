@@ -1,4 +1,5 @@
 function line = line_param(A0, Ap)
+% computes the parameter of the line passing through A0 and Ap
 x0 = real(A0);
 y0 = imag(A0);
 xp = real(Ap);

@@ -1,5 +1,6 @@
-function ttc = compute_ttc(A0,B0,stepsize0,theta0,r)
-if A0<B0
+function ttc = calc_ttc(sa,sb,r)
+% computes ttc assuming constant velocity
+if sa.pos<sb.pos
     delta0 = A0-B0;
     delta_step = stepsize0(1)*exp(1i*theta0(1)) + stepsize0(2)*exp(1i*theta0(2));
     eta = real(delta0*conj(delta_step))/norm(delta_step)^2;

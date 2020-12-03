@@ -1,5 +1,5 @@
 function save_result(variables, data_type, select_trans, par, safety_level, up_frac, lo_frac)
-
+% saves variables
 hit_rate =          variables{1};
 pc_save_matrix =    variables{2}; %#ok<*NASGU>
 p_c_save_matrix =   variables{3};

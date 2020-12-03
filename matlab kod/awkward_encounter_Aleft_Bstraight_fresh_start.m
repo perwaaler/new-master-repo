@@ -14,17 +14,15 @@ use_dp_model = 0;                        % set to 1 if you want to use estimated
 
 for kk = 1:n
 kk %#ok<NOPTS>
-% parameters for distribution of stepsize. EX = a*b, VX = a*b^2
-step_par = [0.30*2 0.2/2];
 
-% parameters for the gamma distribution for the INITIAL steps
-step_mean_init = 0.16;
-step_var_init = 0.0015;
-theta_var_init = 0.015;                      % variance of initial theta
+% parameters for the gamma distribution for the initial steps
+speed_mean_0 = 0.16;
+speed_var_0  = 0.0015;                     % variance of initial speed
+theta_var_0  = 0.015;                      % variance of initial theta
 
 % gamma parametes for initial step as fcn of mean and variance
-a_init = step_mean_init^2/step_var_init;
-b_init = step_var_init/step_mean_init;
+a_init = speed_mean_0^2/speed_var_0;
+b_init = speed_var_0/speed_mean_0;
 xinit = 6;                                  % determines how far apart they are at the start
 sigma_var0 = 0.3;                           % variance of initial starting position
 
@@ -82,14 +80,14 @@ bb =1;
 
 for i=1:N
 decision_state = 0;
-i %#ok<NOPTS>
+i
 %%%%%%%%%%%%% initiation of encounter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nn = 0;
-EA_index = 1;                                                  % tracks number of EA frame
-first_detec = 0;                                           % 0 --> have not detected yet
-stepsize = min_stepsize*[1 1] + gamrnd(a_init*[1 1],b_init);   % determines average speed of each vehicle
-stepsize0 = stepsize;
-theta = normrnd([0,pi], theta_var_init);
+EA_index = 1;                                                   % tracks number of EA frame
+first_detec = 0;                                                % 0 --> neither have not detected yet
+speed = min_stepsize*[1 1] + gamrnd(a_init*[1 1], b_init);   % determines average speed of each vehicle
+stepsize0 = speed;
+theta = normrnd([0,pi], theta_var_0);
 dtheta = [0,0];
 % detection parameters
 farsight = 40;      % determines how far drivers extrapolate into future to determine if EA is necessary
@@ -123,11 +121,11 @@ speed_mod_par = [d1_step, p1_step, amp1_step];         % parameters of exp-funct
 x0 = normrnd(-4.8,0.04);
 par = logpar(5,0.5);    
 x1 =  x0 + lognrnd(par(1),par(2));
-% collect properties characterizing each driver
+% collect properties characterizing each driver into singe cell array
 driver_prop = {stepsize0, var_step, var_theta, ...
                stability_fac, min_stepsize, theta_mod_par, speed_mod_par};
-
-%%% initial positions
+           
+%%% simulate initial state
 A_real = -xinit;
 B_real = xinit;
 A_im = normrnd(-2.5,sigma_var0);
@@ -135,6 +133,9 @@ B_im = normrnd(0,sigma_var0);
 A0 = A_real + 1i*A_im;
 B0 = B_real + 1i*B_im;
 
+% collect information about states of drivers
+[sa.pos,sa.theta,sa.speed,sa.dtheta] = deal(A0, theta(1), stepsize0(1), dtheta(1)); 
+[sb.pos,sb.theta,sb.speed,sb.dtheta] = deal(B0, theta(2), stepsize0(2), dtheta(2));
 
 
 %%% data collection variables
@@ -144,27 +145,22 @@ encounter_classifier = 1; % tracks status: sign indicates interaction status
                           % + --> no interaction, - --> interaction); 1 --> no collision, 2 --> collision
 danger_enc_i = [];        % saves danger index associated with each timestep
 ttc_enc_i = [];           % saves danger index associated with each timestep
-counter = 0;              % keeps track of the current frame
-
 
 % if disable_crash==1
 %   engage_EA = double(imag(A0)<4 || real(B0)>-xinit); 
 % else
 %   engage_EA = double(real(A0) < xinit   && imag(A0)<4 && real(B0) > -xinit && imag(A0)<imag(B0)+1.5 && real(A0)<real(B0)+1.5);
 % end
-
 %     while  imag(A0)<4 || real(B0)>-xinit 
     while continue_simulation(A0,B0,xinit,disable_crash)==1
-        counter = counter + 1;
         nn = nn + 1;
         D = norm(A0-B0);
-        
         if disable_crash==1
             save_pos_A(i,nn) = A0;
-            save_step_A(i,nn) = stepsize(1);
+            save_step_A(i,nn) = speed(1);
             save_theta_A(i,nn) = theta(1);
             save_pos_B(i,nn) = B0;
-            save_step_B(i,nn) = stepsize(2);
+            save_step_B(i,nn) = speed(2);
             save_theta_B(i,nn) = theta(2);
         end
         
@@ -203,7 +199,7 @@ counter = 0;              % keeps track of the current frame
             if first_detec == 0 && est_ttc == 1 % a loop that collects information at first moment of evasive action
                 
                 if use_history==1
-                    [row, col] = find_sim_sit(A0, stepsize(1),theta(1), historyA, tolerance);
+                    [row, col] = find_sim_sit(A0, speed(1),theta(1), historyA, tolerance);
                 else
                     row=0;
                 end
@@ -211,22 +207,22 @@ counter = 0;              % keeps track of the current frame
                 for k=1:NTTC 
                     %pred_paths = inf*ones(NTTC,500);
                     if k>length(row) || use_history==0 %number of observed walks satisfying init. cond.
-                        ttc = ttc_simulator_double_momentumV2(A0,B0, stepsize, theta, r, driver_prop, plot_pred_path);
+                        ttc = ttc_simulator_double_momentumV2(A0,B0, speed, theta, r, driver_prop, plot_pred_path);
                         stoch_ttc_fea(i,k) = ttc;
 %                         ttc
 %                         pause(.1)
                     else
-                        ttc = ttc_simulator_history(A0,B0,stepsize,theta,r,driver_prop,historyA{1},row,col,k,plot_pred_path);
+                        ttc = ttc_simulator_history(A0,B0,speed,theta,r,driver_prop,historyA{1},row,col,k,plot_pred_path);
                         stoch_ttc_fea(i,k) = ttc;
 %                         ttc;
 %                         pause(1)
                         %                     ttc = ttc_simulator_double_momentumV2(A0,B0, stepsize, theta, r, driver_prop, plot_setting);
                     end
                 end
-                ttc_fea(i) = compute_ttc(A0,B0,stepsize,theta,r);
+                ttc_fea(i) = compute_ttc(A0,B0,speed,theta,r);
                 dist_fea(i) = norm(A0-B0) - 2*r;
                 dist_min_EA(i,EA_index) = norm(A0-B0) - 2*r;
-                ttc_min_ea(i,EA_index) = compute_ttc(A0,B0,stepsize,theta,r);
+                ttc_min_ea(i,EA_index) = compute_ttc(A0,B0,speed,theta,r);
                 EA_index = EA_index + 1;
                 
             end
@@ -236,11 +232,11 @@ counter = 0;              % keeps track of the current frame
             encounter_classifier = -1;
             danger_index = D - 2*r;
             danger_enc_i(length(danger_enc_i) + 1) = danger_index;
-            ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
+            ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,speed,theta,r);
             
             % take next step
 %            if detec_stat_A==1 && detec_stat_B==1
-                newstep =  evasive_step_coulombs_law(A0,B0,stepsize,theta, 5, 5);
+                newstep =  evasive_step_coulombs_law(A0,B0,speed,theta, 5, 5);
                 A1 = newstep{1}(1);
                 B1 = newstep{1}(2);
                 theta = newstep{3};
@@ -264,7 +260,7 @@ counter = 0;              % keeps track of the current frame
 %             end
                 
             dist_min_EA(i,EA_index) = norm(A1-B1) - 2*r;
-            ttc_min_ea(i,EA_index) = compute_ttc(A1,B1,stepsize,theta,r);
+            ttc_min_ea(i,EA_index) = compute_ttc(A1,B1,speed,theta,r);
             EA_index = EA_index + 1;
 
             plot_pos(A1, B1, pause_length, xinit, r, plot_enc,detec_stat_A, detec_stat_B) 
@@ -275,9 +271,9 @@ counter = 0;              % keeps track of the current frame
                 hold off
                 danger_index = norm(A1-B1) - 2*r;
                 dist_min(i) = danger_index;
-                ttc_min(i) = compute_ttc(A1,B1,stepsize,theta,r);
+                ttc_min(i) = compute_ttc(A1,B1,speed,theta,r);
                 danger_enc_i(length(danger_enc_i) + 1) = danger_index;
-                ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A1,B1,stepsize,theta,r);
+                ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A1,B1,speed,theta,r);
                 encounter_classifier = -2;             % set encounter to type crash with attempted evasive action
                 break
             end
@@ -290,49 +286,53 @@ counter = 0;              % keeps track of the current frame
 
             danger_index = D - 2*r;
             danger_enc_i(length(danger_enc_i) + 1) = danger_index;
-            ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,stepsize,theta,r);
- 
+            ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A0,B0,speed,theta,r);
+            
+            % find desired angle and speed
             E_thetaA = normrnd(expected_angle_A(real(A0), x0, x1), var_theta0);
             % add small value to argument to make cars slow down before
             % they start to make turn
             E_speedA = normrnd(expected_speed_A(real(A0) + .3, x0, x1, stepsize0(1)), var_step0);
-            
             E_thetaB = normrnd(pi,0.1);
             E_speedB = normrnd(stepsize0(2),0.01);
-
-            state_A = take_step(A0, stepsize(1), theta(1), dtheta(1), E_speedA, E_thetaA, [0.005, 0.1]); 
-            state_B = take_step(B0, stepsize(2), theta(2), dtheta(2), E_speedB, E_thetaB, [0.005, 0.1]);
             
-            A1          = state_A(1);
-            stepsize(1) = max(0.08, state_A(2));
-            dtheta(1)      = theta(1) - state_A(3);
-            theta(1)    = state_A(3);
+            % take step and update states
+            sa = take_step(sa, E_speedA, E_thetaA, [0.005, 0.1]); 
+            sb = take_step(sb, E_speedB, E_thetaB, [0.005, 0.1]);
             
+            A1          = sa.pos;
+            speed(1)    = sa.speed;
+            dtheta(1)   = theta(1) - sa.theta;
+            theta(1)    = sa.theta;
             
-            B1 =          state_B(1);
-            stepsize(2) = state_B(2);
-            dtheta(2)      = theta(2) - state_B(3);
-            theta(2) =    state_B(3);
+            B1          = sb.pos;
+            speed(2)    = sb.speed;
+            dtheta(2)   = theta(2) - sb.theta;
+            theta(2)    = sb.theta;
             
-            D = norm(A1-B1);
-            ttc = compute_ttc(A1,B1,stepsize,theta,r);
+            if min(sa.speed,sb.speed)<=1e-4
+                break
+            end
             
-            plot_pos(A1, B1, pause_length, xinit, r, plot_enc, detec_stat_A, detec_stat_B)
+            D = norm(sa.pos - sb.pos);
+            ttc = calc_ttc(sa,sb,r);
+            
+            plot_pos(sa.pos, sb.pos, pause_length, xinit, r, plot_enc, detec_stat_A, detec_stat_B)
             
             if D < 2*r && disable_crash==0% if satisfied, collision has occured before evasive action is taken
                 hold on; title("collision"); hold off
                 danger_index = D - 2*r;
 
                 %%% compute ttc (which will now be negative) and danger_FEA
-                ttc = ttc_simulator_double_momentum_improved(A1,B1,stepsize,theta,min_stepsize,var_step,r, var_theta, stability_fac);
+                ttc = ttc_simulator_double_momentum_improved(A1,B1,speed,theta,min_stepsize,var_step,r, var_theta, stability_fac);
 
                 dist_fea(i) = danger_index;
                 ttc_fea(i) = ttc;
                 stoch_ttc_fea(i,:) = ttc*ones(1,NTTC);
                 danger_enc_i(length(danger_enc_i) + 1) = danger_index; %#ok<*SAGROW>
-                ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A1,B1,stepsize,theta,r);
+                ttc_enc_i(length(ttc_enc_i) + 1) = compute_ttc(A1,B1,speed,theta,r);
                 dist_min(i) = danger_index;
-                ttc_min(i) = compute_ttc(A1,B1,stepsize,theta,r);
+                ttc_min(i) = compute_ttc(A1,B1,speed,theta,r);
                 encounter_classifier = 2;                                  % indicates a collision with no evasive action attempted
                 break
             end
@@ -351,8 +351,8 @@ counter = 0;              % keeps track of the current frame
         B0 = B1;
     end
     
-    A_stepsize_save(i) = stepsize(1);
-    B_stepsize_save(i) = stepsize(2);
+    A_stepsize_save(i) = speed(1);
+    B_stepsize_save(i) = speed(2);
 
     enc_type(i) = encounter_classifier;
     dist_min(i) = min(danger_enc_i);
@@ -440,10 +440,10 @@ for i=1:N_enc_type1
                 A0 = A_NEA(i,j);
                 B0 = B_NEA(i,j);
                 theta = [A_theta_save(i,j), B_theta_save(i,j)];
-                stepsize = [A_stepsize_save(i), B_stepsize_save(i)];
+                speed = [A_stepsize_save(i), B_stepsize_save(i)];
 
                 for k=1:NTTC
-                    ttc = ttc_simulator_double_momentum_improved(A0,B0,stepsize,theta,min_stepsize,var_step*aa,r, var_theta*bb, stability_fac,plot_sim_walks);
+                    ttc = ttc_simulator_double_momentum_improved(A0,B0,speed,theta,min_stepsize,var_step*aa,r, var_theta*bb, stability_fac,plot_sim_walks);
                     if ttc< Inf
                         pause(0.0)
                     end
@@ -456,7 +456,7 @@ for i=1:N_enc_type1
                         TTC = 0;
                         AA = A0;
                         BB = B0;
-                        step0 = stepsize;
+                        step0 = speed;
                         theta0 = theta;
                     end
 
