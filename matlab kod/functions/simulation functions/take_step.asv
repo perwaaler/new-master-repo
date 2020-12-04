@@ -1,26 +1,31 @@
-function new_state = take_step(state, desired_speed, desired_angle, max_change)
+function new_state = take_step(S, desired_speed, desired_angle, max_delta)
 % Takes a step given current state and desired state.
-% position A0, speed, direction (angle0), 
-max_delta_speed = max_change(1);
-max_delta_theta = max_change(2);
-max_delta_dtheta = deg2rad(4);
+% position A0, speed, direction (angle0),
 
-angle_diff = desired_angle - state.theta;
-%angle_acc  = angle_diff - dtheta0;
-speed_diff = desired_speed - state.speed;
+% discrepency between desired and current angle:
+des_delta_theta = desired_angle - S.theta;
+des_delta2_theta = des_delta_theta - S.dtheta;
 
-angle_diff_diff =  sign(angle_diff)*min(max_delta_dtheta, abs(angle_diff - state.theta));
+% ensure maximum change is not violated
+delta2_theta = cap(des_delta2_theta, max_delta.d2theta);
+delta_theta = S.dtheta + delta2_theta;
+% ensure maximum change is not violated
+delta_theta = cap(delta_theta, max_delta.dtheta);
+
+% compute new theta
+theta = S.theta + delta_theta;
+
+speed_diff = desired_speed - S.speed;
 
 
-angle_diff = state.dtheta + angle_diff_diff;
 
 % compute new angle and speed, and take next step
-theta1 = state.theta + sign(angle_diff)*min(max_delta_theta, abs(angle_diff));
-speed1 = state.speed + sign(speed_diff)*min(max_delta_speed, abs(speed_diff));
-A1 = state.pos + speed1*exp(1i*theta1);
-dtheta1 = theta1 - state.theta;
+% theta1 = S.theta + sign(des_delta_theta)*min(max_delta.theta, abs(des_delta_theta));
+speed1 = S.speed + sign(speed_diff)*min(max_delta.dspeed, abs(speed_diff));
+A1 = S.pos + speed1*exp(1i*theta);
+% dtheta1 = theta1 - S.theta;
 
-[state.pos, state.theta, state.speed, state.dtheta] = deal(A1,theta1,speed1,dtheta1);
+[S.pos, S.theta, S.speed, S.dtheta] = deal(A1,theta,speed1,delta_theta);
 
-new_state = state;
+new_state = S;
 end

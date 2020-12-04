@@ -1,26 +1,33 @@
-function new_state = take_step(state, desired_speed, desired_angle, max_change)
+function new_state = take_step(S, desired_speed, desired_angle, max_delta)
 % Takes a step given current state and desired state.
-% position A0, speed, direction (angle0), 
-max_delta_speed = max_change(1);
-max_delta_theta = max_change(2);
-max_delta_dtheta = deg2rad(4);
-angle_diff = desired_angle - state.theta;
+% position A0, speed, direction (angle0),
 
-%angle_acc  = angle_diff - dtheta0;
-speed_diff = desired_speed - state.speed;
+% discrepency between desired and current angle:
+des_delta_theta = desired_angle - S.theta;
+% compute how the driver wants to steer wheel to avoid collision:
+des_delta2_theta = des_delta_theta - S.dtheta;
 
-angle_diff_diff =  sign(angle_diff)*min(max_delta_dtheta, abs(angle_diff - state.dtheta));
+% ensure maximum change is not violated
+delta2_theta = cap(des_delta2_theta, max_delta.d2theta);
+delta_theta = S.dtheta + delta2_theta;
+% ensure maximum change is not violated
+delta_theta = cap(delta_theta, max_delta.dtheta);
 
+% compute new theta
+theta = S.theta + delta_theta;
 
-angle_diff = state.dtheta + angle_diff_diff;
+% desired change in speed
+des_delta_speed = desired_speed - S.speed;
+% ensure maximum change is not violated
+delta_speed = cap(des_delta_speed, max_delta.dspeed);
+% compute new speed
+speed = S.speed + delta_speed;
 
-% compute new angle and speed, and take next step
-theta1 = state.theta + sign(angle_diff)*min(max_delta_theta, abs(angle_diff));
-speed1 = state.speed + sign(speed_diff)*min(max_delta_speed, abs(speed_diff));
-A1 = state.pos + speed1*exp(1i*theta1);
-dtheta1 = theta1 - state.theta;
+% compute next position based on new angle and speed
+A = S.pos + speed*exp(1i*theta);
 
-[state.pos, state.theta, state.speed, state.dtheta] = deal(A1,theta1,speed1,dtheta1);
+% update state
+[S.pos, S.theta, S.speed, S.dtheta] = deal(A,theta,speed,delta_theta);
+new_state = S;
 
-new_state = state;
 end

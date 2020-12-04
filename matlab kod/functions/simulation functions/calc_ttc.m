@@ -1,15 +1,15 @@
-function ttc = calc_ttc(sa,sb,r)
+function ttc = calc_ttc(S,r)
 % computes ttc assuming constant velocity
 
-% extract variables form states
-A0 = sa.pos;
-B0 = sb.pos;
-stepsize0  = [sa.speed,sb.speed];
-theta0     = [sa.theta,sb.theta];
+% extract variables from state
+A0 = S(1).pos;
+B0 = S(2).pos;
+speed0 = [S(1).speed,S(2).speed];
+theta0 = [S(1).theta,S(2).theta];
 
 if A0<B0
     delta0 = A0-B0;
-    delta_step = stepsize0(1)*exp(1i*theta0(1)) + stepsize0(2)*exp(1i*theta0(2));
+    delta_step = speed0(1)*exp(1i*theta0(1)) + speed0(2)*exp(1i*theta0(2));
     eta = real(delta0*conj(delta_step))/norm(delta_step)^2;
     %r_scaled = sqrt(norm(delta0)^2 - eta^2*norm(delta_step)^2 )/2;
     mu = (norm(delta0)^2 - 4*r^2)/norm(delta_step)^2;
