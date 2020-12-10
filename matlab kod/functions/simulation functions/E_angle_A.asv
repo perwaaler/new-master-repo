@@ -1,4 +1,5 @@
 function angle = expected_angle_A(S, x0, x1)
+%
 x = real(S(1).pos);
 if x<x0
     angle = 0;

@@ -5,7 +5,10 @@ if nargin == 2
     n_rnd = 1;
 end
 
-[k,theta] = gammapar(meanx,sigmax);
+% reparametrize
+k = meanx.^2./sigmax.^2;
+theta = sigmax.^2./meanx;
+
 out = gamrnd(k,theta,1,n_rnd);
 
 end

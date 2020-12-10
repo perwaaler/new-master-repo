@@ -1,5 +1,0 @@
-function out = gam_rnd(meanx,sigmax,n_rnd)
-% same as gamrnd, but takes mean and standard deviation as parameters
-[k,theta] = gammapar(meanx,sigmax);
-out = gamrnd(k,theta);
-end

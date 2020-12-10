@@ -1,6 +1,5 @@
 function new_state = take_step(S, desired_speed, desired_angle, max_delta)
 % Takes a step given current state and desired state.
-% position A0, speed, direction (angle0),
 
 % discrepency between desired and current angle:
 des_delta_theta = desired_angle - S.theta;
