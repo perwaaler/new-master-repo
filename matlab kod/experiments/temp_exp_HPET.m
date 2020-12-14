@@ -32,7 +32,7 @@ pathB(1) = B0;
 % neighbourhood size and disc radius
 w = 7;
 r = 0.3;
-max_iter = 30;
+max_iter = 60;
 time_travel = 6;
 path_div = 5;
 % define structure that contains previous time_travel positions and current
@@ -48,11 +48,13 @@ pathB = NaN(1,500);
 ZZ = cell(1,500); 
 D0 = 100;
 tik = 0;
+first_contact = 0;
 
 % initiate
 ZZ{1}    = Z;
 candidatesB = 1;
 candidatesA = 1;
+hold on
 clf
 plot_pos(Z, plots, init_x,["blue","green"])
 
@@ -75,7 +77,7 @@ for k=1:max_iter
     candidatesB = closest{2}-w:closest{2}+w;
     
     %%%% path B
-    % remove elements with indeces that spill over 
+    % remove indeces that spill over 
     candidatesA = candidatesA(candidatesA>=1);
     candidatesA = candidatesA(candidatesA<=k);
     
@@ -90,56 +92,59 @@ for k=1:max_iter
     % recenter around new candidate
     candidatesA = closest{1}-w:closest{1}+w;
     
-    % RU2 is the RU that arrives lates at the collision point
+    % RU2 is the RU that arrives lates at the collision point. A is RU1 by
+    % default
     [D,RU2] = min([min_distA, min_distB]);
     
-    % check if paths are approaching each other
+    % tiks every time distance grows; ends loop if paths diverge
     if D > D0 + 1e-6
         tik = tik + 1;
         if tik > path_div
-            k = max_iter; %#ok<*FXSET>
+            k = max_iter; %#ok<FXSET>
             break
         end
     end
-    pause(.1)
+%     pause(.1)
     
-    if D < 2*r
-        steps_taken = k-1;
-        RU1 = 3-RU2;
+    if D < 2*r || first_contact==1
         
-        % extract states from list of saved states
-        F(1) = ZZ{closest{RU1}}(RU1);
-        F(2) = ZZ{k}(RU2);
-        t = calc_ttc(F,RUprop.r);
-
+        if first_contact == 0
+            first_contact = 1;
+            % save index for first contact
+            RU1 = 3-RU2;
+            fc_ru1 = k;
+            fc_ru2 = closest{RU1};
+            
+        elseif D > 2*r
+            % both RUs have left the conflict region
+            % recenter around new candidate
+            x = fc_ru2-3:fc_ru2+3;
+            x = x(x>=1);
+            x = x(x<=k);
+            
+            
+            break
+        end
         
-        % first road user to enter collision point
-        RU1 = 3-RU2;
-        time_separation = steps_taken - time_travel + t;
-        % time to collision pointTTCP = closest{RU1} + t - time_travel;
-        % Time advantage
-        Tadv = time_separation - TTCP;
-        break
+        
+        
+%         % extract states from list of saved states
+%         F(1) = ZZ{closest{RU1}}(RU1);
+%         F(2) = ZZ{k}(RU2);
+%         t = calc_ttc(F,RUprop.r);
+% 
+%         
+%         % first road user to enter collision point
+%         RU1 = 3-RU2;
+%         time_separation = steps_to_coll - time_travel + t;
+%         % time to collision pointTTCP = closest{RU1} + t - time_travel;
+%         % Time advantage
+%         Tadv = time_separation - TTCP;
+%         break
 
     end
     
     D0 = D;
-    
-%     %%%% take new step
-%     E_speedA = normrnd(E_speed_A(Z, RUprop), RUprop.speed_std(1));
-%     E_thetaA = normrnd(E_theta_A(Z, RUprop), RUprop.theta_std(1));
-%     E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.speed_std(2));
-%     E_thetaB = normrnd(pi,                   RUprop.theta_std(2));
-%     
-%     % take step and update states
-%     if k > time_travel
-%         % generate new step
-%         Z(1) = take_step(Z(1), E_speedA, E_thetaA, max_delta(1)); 
-%         Z(2) = take_step(Z(2), E_speedB, E_thetaB, max_delta(2));
-%     else
-%         Z(1) = prev_states{k+1}(1);
-%         Z(2) = prev_states{k+1}(2);
-%     end
     
         % take step and update states
     if k > time_travel
@@ -185,8 +190,15 @@ for k=1:max_iter
     
 end
 %%
-hold on
-plot_pos(Z,D, plots, init_x, r,["black","black"])
+hold on 
+for i=fc_ru1: k - 1
+plot(pathB(i) + r*exp(1i*linspace(0,2*pi,100)),'red')
+end
+%%
+
+plot(pathA(fc_ru2) + r*exp(1i*linspace(0,2*pi,100)),'black')
+
+
 
 %%
 

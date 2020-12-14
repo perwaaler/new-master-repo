@@ -6,7 +6,7 @@ est_ttc = 0;                           % tells the algorithm whether or not you 
 compute_X = 0;
 [plots.enc, plots.predpath, plots.pause] =  deal(1, 0, 2^-5); % plot settings
 
-disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
+disable_crash = 1;                       % disable collision and EA mode to record free movement patterns
 use_history = 0;
 use_dp_model = 0;                        % set to 1 if you want to use estimated reaction model
 
@@ -33,9 +33,10 @@ for i=1:N_enc
 
 %%%% initiate encounter %%%%
 % determines average and initial speed of each vehicle
-speed0 = max(0.01, gam_rnd(0.26, 0.05, 2)); speed  = speed0;
+speed0 = max(0.01, gam_rnd(0.20, 0.05, 2)); speed  = speed0;
 theta  = normrnd([0,pi], deg2rad(7));
 dtheta = [0,0];
+dspeed = [0,0];
 % determine initial x values
 init_x = 6;
 A_real = -init_x;
@@ -49,7 +50,7 @@ B0 = B_real + 1i*B_im;
 tolerance = 0.4*[0.16*0.1, 0.03, 0.08]; 
 
 
-% set parameters for probability to engage in Evasive Action(EA)
+% set regression parameters for probability to engage in Evasive Action(EA)
 beta_EA.int   = -2.8;
 beta_EA.dist  = .8;
 beta_EA.speed = -.4;
@@ -58,15 +59,20 @@ beta_EA.speed = -.4;
 % radius of Road Users
 RUprop.r         = 0.3;
 % determine steadiness/smoothness of Road Users (RU)
-RUprop.theta_std = beta_rnd(deg2rad(3),deg2rad(.5),2); 
-RUprop.speed_std = beta_rnd(0.05, 0.01,2);
+RUprop.Etheta_std      = beta_rnd(deg2rad(3),deg2rad(.5),2); 
+RUprop.Espeed_std      = beta_rnd(0.05, 0.01,2);
+RUprop.d2theta_std     = beta_rnd(deg2rad(7),deg2rad(2),2);
+% set how accurately the drivers can predict future positions
+RUprop.pred_speed_err = beta_rnd(0.0005, 0.005,2);
+RUprop.pred_theta_err = beta_rnd(deg2rad(.5),deg2rad(.5),2);
+% set minimum speed
 RUprop.speed_min = 0.01;
 RUprop.avg_speed = speed0;
 % determine how much A brakes during left turn
 RUprop.turn_brake = beta_rnd(0.03,0.003);
 RUprop.start_brake = beta_rnd(0.03,0.003);
 % weight determines momentum of drivers
-RUprop.weight    = gam_rnd(1,0.09,2);
+RUprop.weight    = gam_rnd(1.0,0.09,2);
 % where does A start and end turn
 RUprop.turnstart = normrnd(-5.2,0.5);
 RUprop.turnend   =  RUprop.turnstart + gam_rnd(5,0.5);
@@ -75,23 +81,28 @@ RUprop.alert = beta_rnd(.8,.08,2);
 
 
 %%%% set laws of movement / laws of momentum %%%%
-max_delta(1).dspeed = beta_rnd(0.01*RUprop.weight(1), 1e-4);
-max_delta(2).dspeed = beta_rnd(0.01*RUprop.weight(2), 1e-4);
-max_delta(1).dtheta = beta_rnd(0.03*RUprop.weight(1), 8e-4);
-max_delta(2).dtheta = beta_rnd(0.03*RUprop.weight(2), 8e-4);
-max_delta(1).d2theta = deg2rad(5);
-max_delta(2).d2theta = deg2rad(5);
+max_delta(1).dspeed = beta_rnd(0.01*RUprop.weight(1)^-1, 1e-4);
+max_delta(2).dspeed = beta_rnd(0.01*RUprop.weight(2)^-1, 1e-4);
+max_delta(1).dtheta = beta_rnd(0.3*RUprop.weight(1)^-1, 8e-4);
+max_delta(2).dtheta = beta_rnd(0.3*RUprop.weight(2)^-1, 8e-4);
+max_delta(1).d2theta = deg2rad(9);
+max_delta(2).d2theta = deg2rad(9);
 
 
 %%%% set state of each Road User (RU) %%%%
-[S(1).pos,    S(2).pos]       = deal(A0,B0);
-[S(1).theta,  S(2).theta]     = deal(theta(1),theta(2));
-[S(1).speed,  S(2).speed]     = deal(speed0(1), speed0(2));
-[S(1).dtheta, S(2).dtheta]    = deal(dtheta(1),dtheta(2));
-[S(1).EA,     S(2).EA]        = deal(0,0);
+[S(1).pos,    S(2).pos]        = deal(A0,B0);
+[S(1).theta,  S(2).theta]      = deal(theta(1),theta(2));
+[S(1).speed,  S(2).speed]      = deal(speed0(1), speed0(2));
+[S(1).dtheta, S(2).dtheta]     = deal(dtheta(1),dtheta(2));
+[S(1).dspeed, S(2).dspeed]     = deal(dspeed(1),dspeed(2));
+[S(1).EA,     S(2).EA]         = deal(0,0);
+[S(1).decision, S(2).decision] = deal(0,0);
+[S(1).RUprop, S(2).RUprop]     = deal(RUprop,RUprop);
+[S(1).id,     S(2).id     ]    = deal(1,2);
 
 % save state
 enc.states = cell(N_enc,500); 
+enc.states{1} = S;
 
 %%%% variables that track status %%%%
 % track frame
@@ -117,8 +128,6 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
 
     while continue_simulation(S,init_x) == 1
         
-        stat.frame = stat.frame + 1;
-        
         % compute probability of A or B reacting
         pea = p_interact(S,beta_EA);
   
@@ -142,10 +151,10 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
 
         % if  "drivers are in interaction mode" OR "interaction is engaged by pea roll"
         % and  "they have not yet passed each other"
-        if  engage_EA(S,stat) == 1 
+        if  S(1).EA == 1 || S(2).EA==1 && disable_crash==0
             
             % estimate stochastic TTC at First Evasive Action
-            if stat.first_int == 0 && est_ttc == 1 
+            if stat.first_int == 0
                 
                 if use_history==1
                     [row, col] = find_sim_sit(A0, speed(1),theta(1), historyA, tolerance);
@@ -153,58 +162,91 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
                     row=0;
                 end
                 
-                for k=1:NTTC 
+                if est_ttc == 1
+                    for k=1:NTTC 
 
-                    if k>length(row) || use_history==0 %number of observed walks satisfying init. cond.
-                        ttc = ttc_simulator_double_momentumV2(S, r, driver_prop, plot_pred_path);
-                        fea.stoch_ttc(i,k) = ttc;
-                    else
-                        ttc = ttc_simulator_history(A0,B0,speed,theta,r,driver_prop,historyA{1},row,col,k,plot_pred_path);
-                        fea.stoch_ttc(i,k) = ttc;
+                        if k>length(row) || use_history==0 %number of observed walks satisfying init. cond.
+                            ttc = ttc_simulator_double_momentumV2(S, r, driver_prop, plot_pred_path);
+                            fea.stoch_ttc(i,k) = ttc;
+                        else
+                            ttc = ttc_simulator_history(A0,B0,speed,theta,r,driver_prop,historyA{1},row,col,k,plot_pred_path);
+                            fea.stoch_ttc(i,k) = ttc;
+                        end
                     end
+                    fea.ttc(i) = calc_ttc(S,RUprop.r);
+                    fea.dist(i) = D;
+                    ea.mindist(i,stat.EAframe) = D;
+                    ea.minttc(i,stat.EAframe) = fea.ttc(i);
                 end
-                fea.ttc(i) = calc_ttc(S,RUprop.r);
-                fea.dist(i) = D;
-                ea.mindist(i,stat.EAframe) = D;
-                ea.minttc(i,stat.EAframe) = fea.ttc(i);
+                
+                
             end
             
             % update status of encounter
             stat.EAframe = stat.EAframe + 1;
-            stat.first_int = 1; % set to 1 so that above loop only runs on first interaction
-            S(1).EA = 1;
             enc.type(i) = -1;
 
             %%%% take evasive step
-            E_speedA = normrnd(E_speed_A(S, RUprop), RUprop.speed_std(1));
-            E_thetaA = normrnd(E_theta_A(S, RUprop), RUprop.theta_std(1));
-            E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.speed_std(2));
-            E_thetaB = normrnd(pi,                   RUprop.theta_std(2));
+            E_speedA = normrnd(E_speed_A(S, RUprop), RUprop.Espeed_std(1));
+            E_thetaA = normrnd(E_theta_A(S, RUprop), RUprop.Etheta_std(1));
+            E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
+            E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
             
-            time_diff = temporal_sep(S,RUprop,max_delta);
+            time_diff = temporal_sep(enc,RUprop,max_delta,stat);
             % positive Tadv means that A has a time advantage
-            Tadv      = (time_diff.Tadv)*-1^(1+time_diff.RU1);
-            
-            if S(1).EA==1 %&& S(2).EA==0  
-                p_strat = logistic_fcn()
+            T2        = time_diff.T2;
+            Tadv      = time_diff.Tadv;
+            TTCP      = time_diff.TTCP;
+
+            if S(1).EA==1
                 
-                if time_diff.RU1 == 1
-                    S(1) = take_step(S(1), E_speedA, E_thetaA+.5, max_delta(1));
-                    S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
+                % probability of A to attempt to cross first
+                p_strat = logistic_fcn(-Tadv,2,.01);
+%                 pause(.2)
+                % stick to previous decision
+                roll = rand(1) < p_strat;
+                S(1).decision = max(S(1).decision, roll);
+                
+                % A attempts to go first
+                if S(1).decision == 1 
+                    S(1) = take_step(S(1), E_speedA, E_thetaA+10, max_delta(1));
+                % A decides to play it safe and let B pass first
                 else
-                    S(1) = take_step(S(1), 0*E_speedA, -.4, max_delta(1));
-                    S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
-%                     pause(.1)
-                    time_diff.RU1
-                    time_diff.Tadv
+                    S(1) = take_step(S(1), 0, -.6, max_delta(1));
+                    stat.frame
+
                 end
+                
+            else
+                S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1));
             end
             
-            A0 = S(1).pos;
-            B0 = S(2).pos;
-            %%%%
+            if S(2).EA==1
+                
 
+                % probability of A to attempt to cross first
+                p_strat = logistic_fcn(Tadv,-2,0.001);
+                % stick to previous decision
+                roll = rand(1) < p_strat;
+                S(1).decision = max(S(2).decision, roll);
+ 
+                % B attempts to go first
+                if S(1).decision == 1 
+                    S(2) = take_step(S(2), E_speedB, E_thetaB-10, max_delta(2));
+                % B decides to play it safe and let A pass first 
+                else
+                    S(2) = take_step(S(2), 0, E_thetaB+.4, max_delta(2));
+                end
+                
+            else
+                S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
+            end
+                
+            stat.first_int = 1; % set to 1 so that above loop only runs on first interaction
             
+            % plot drivers
+            plot_pos(S, plots, init_x,["blue","green"],time_diff.Tadv)
+
             
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%% NO DETECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -214,19 +256,24 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             % find desired angle and speed of each driver
             % (add small value to argument to make driver A slow down before
             % he starts to make turn)
-            E_speedA = normrnd(E_speed_A(S, RUprop), RUprop.speed_std(1));
-            E_thetaA = normrnd(E_theta_A(S, RUprop), RUprop.theta_std(1));
-            E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.speed_std(2));
-            E_thetaB = normrnd(pi,                   RUprop.theta_std(2));
+            E_speedA = normrnd(E_speed_A(S, RUprop), RUprop.Espeed_std(1));
+            E_thetaA = normrnd(E_theta_A(S, RUprop), RUprop.Etheta_std(1));
+            E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
+            E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
             
             % take step and update states
             S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1)); 
             S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
 %             pause(.5)
-            A0 = S(1).pos;
-            B0 = S(2).pos;
-            
+
+            % plot drivers
+            plot_pos(S, plots, init_x,["blue","green"])
+
         end
+        
+        stat.frame = stat.frame + 1;
+        A0 = S(1).pos;
+        B0 = S(2).pos;
         
         % save data from frame i of encounter kk
         D = norm(A0-B0) - 2*RUprop.r;
@@ -234,9 +281,9 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
         ttc_enc_i(stat.frame) = calc_ttc(S,RUprop.r);
         
         % save state
-        enc.states{i} = S;
-        % plot drivers
-        plot_pos(S,D, plots, init_x, RUprop.r)
+        enc.states{stat.frame} = S;
+
+
         
         if D<0 % collision has occurred!
             if enc.type==-1
@@ -252,9 +299,6 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
         
     end
     
-    % save data from encounter kk
-    enc.speedA(i) = S(1).speed;
-    enc.speedB(i) = S(2).speed;
 
     enc.mindist(i) = min(D_enc_i);
     enc.minttc(i) = min(ttc_enc_i);
@@ -266,8 +310,8 @@ if disable_crash == 1
     historyA{2} = enc.speedA;
     historyA{3} = enc.thetaA;
 end
-
-
+end
+%%
 %plot_encounter(enc.posA, enc.posB,enc.int_stateA, enc.int_stateB, find(enc.type==-2), .15, xinit, RUprop.r)
 
 
@@ -315,4 +359,3 @@ all_data{kk,11} = (sum(enc.type==-1) + sum(enc.type==-2) + sum(enc.type==2))/N_e
 all_data{kk,12} = (sum(enc.type==-1)+sum(enc.type==-2))/N_enc;                       % saves p_ea
 
 
-end

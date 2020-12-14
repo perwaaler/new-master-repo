@@ -1,28 +1,55 @@
-function time_sep = temporal_sep(S,RUprop,max_delta,search_width,max_iter)
+function time_sep = temporal_sep(enc,RUprop,max_delta,stat,...
+                                  w,max_iter,time_travel, path_div)
 % simulates predicted paths for each road user and returns which road user
 % arrives first at the collision point along with time separation and time
 % advantage.
 
 % set default values
-if nargin == 3
-    search_width = 3;
-    max_iter = 50;
-elseif nargin == 4
-    max_iter = 50;
+if nargin == 4
+    w = 10;
+    max_iter = 80;
+    time_travel = 6;
+    path_div = 20;
+    
+elseif nargin == 5
+    max_iter = 80;
+    time_travel = 6;
+    path_div = 20;
+    
+elseif nargin == 6
+    time_travel = 6;
+    path_div = 20;
+    
+elseif nargin == 7
+    path_div = 20;
 end
+
+% in case interaction starts early
+if stat.frame <= time_travel
+    time_travel = stat.frame - 1;
+end
+
+% define structure that contains previous time_travel positions and current
+% position
+prev_states = enc.states(stat.frame-time_travel:stat.frame); 
+Z = prev_states{1};
 
 % variables that save positions at each iteration
 pathA = NaN(1,500);
 pathB = NaN(1,500);
 
 % structure that saves field states for each iteration
-SS = cell(1,500); 
+ZZ = cell(1,500); 
+
+% initiate variables used to end loop if paths diverge
+D0 = 100;
+tik = 0;
 
 % initiate
-SS{1}    = S;
+ZZ{1}    = Z;
 candidatesB = 1;
 candidatesA = 1;
-
+clf
 for k=1:max_iter
     
     %%%% path A
@@ -39,7 +66,7 @@ for k=1:max_iter
     closest{2} = candidatesB(closest{2});
 
     % recenter around new candidate
-    candidatesB = closest{2}-search_width:closest{2}+search_width;
+    candidatesB = closest{2}-w:closest{2}+w;
     
     %%%% path B
     % remove elements with indeces that spill over 
@@ -51,66 +78,100 @@ for k=1:max_iter
     diffB = sqrt(diffB.*conj(diffB));
     
     % update closest position in B
-    [min_distB,closest{1}] = min(diffB);
+    [min_distB, closest{1}] = min(diffB);
     closest{1} = candidatesA(closest{1});
 
     % recenter around new candidate
-    candidatesA = closest{1}-search_width:closest{1}+search_width;
+    candidatesA = closest{1}-w:closest{1}+w;
     
     % RU2 is the RU that arrives latest at the collision point
     [D,RU2] = min([min_distA, min_distB]);
+    % check if paths are approaching each other
+    if D0 - D < 1e-4
+        tik = tik + 1
+        pause(3)
+        
+        if tik > path_div
+            k = max_iter; %#ok<*NASGU,FXSET>
+            break
+        end
+    end
     
     if D < 2*RUprop.r
+        k
         % first road user to reach collision point
-        RU1 = 3-RU2;
+        RU1 = 3 - RU2;
+        steps_taken = k - 1;
         
         % extract states for time TTCP and Tsep
-        F(1) = SS{closest{RU1}}(RU1);
-        F(2) = SS{k}(RU2);
+        F(1) = ZZ{closest{RU1}}(RU1);
+        F(2) = ZZ{k}(RU2);
         % reverse time to find exact moment of collision
         t = calc_ttc(F,RUprop.r);
         
         % Time separation
-        Tsep = k + t;
+        Tsep =  steps_taken - time_travel + t;
         % Time To Collision Point
-        TTCP = closest{RU1} + t;
+        TTCP = closest{RU1} + t - time_travel;
         % time to collision point
         Tadv = Tsep - TTCP;
         
         % save variables
         time_sep.RU1    = RU1;
-        time_sep.total  = Tsep;
+        time_sep.T2     = Tsep;
         time_sep.TTCP   = TTCP;
-        time_sep.Tadv   = Tadv;
+        time_sep.Tadv   = (-1)^(RU1+1)*Tadv;
         break
     end
     
     %%%% take new step
-    E_speedA = normrnd(E_speed_A(S, RUprop), RUprop.speed_std(1));
-    E_thetaA = normrnd(E_theta_A(S, RUprop), RUprop.theta_std(1));
-    E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.speed_std(2));
-    E_thetaB = normrnd(pi,                   RUprop.theta_std(2));
+
+
 
     % take step and update states
-    S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1)); 
-    S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
+    if k > time_travel
+        
+        % generate new step A
+        if Z(1).EA == 0
+            % take NEA step
+            E_speedA = normrnd(E_speed_A(Z, RUprop), RUprop.speed_std(1));
+            E_thetaA = normrnd(E_theta_A(Z, RUprop), RUprop.theta_std(1));
+            Z(1) = take_step(Z(1), E_speedA, E_thetaA, max_delta(1)); 
+        else
+            % predict step assuming constant behaviour
+            Z(1) = take_step(Z(1));
+        end
+        
+        % generate new step B
+        if Z(2).EA == 0
+            % take NEA step
+            E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.speed_std(2));
+            E_thetaB = normrnd(pi,                   RUprop.theta_std(2));
+            Z(2) = take_step(Z(2), E_speedB, E_thetaB, max_delta(2));
+        else
+            % predict step assuming constant behaviour
+            Z(2) = take_step(Z(2));
+        end
+    end
     
     % save positions
-    pathA(k+1) = S(1).pos;
-    pathB(k+1) = S(2).pos;
-    
-    % save state
-    SS{k+1}    = S;
+    pathA(k+1) = Z(1).pos;
+    pathB(k+1) = Z(2).pos;
 
+    % save state
+    ZZ{k+1}    = Z;
+%     
+%     hold on
+%     plot_pos(Z, plots, init_x, RUprop.r,["blue","green"])
 end
 
-if k == max_iter
+if D > 2*RUprop.r && k==max_iter
     time_sep.RU1  = nan;
     time_sep.TTCP = nan;
     time_sep.Tadv = nan;
     time_sep.T2   = nan;
 end
-
+%%
 end
 
 

@@ -21,7 +21,7 @@ x_boundaryB = real(B) > -xinit;
 ydiff       = imag(A) < imag(B) + margin(1);
 xdiff       = real(A) < real(B) + margin(2);
 % speed condition
-speed    = min(S(1).speed,S(2).speed) > min_speed;
+speed    = max(S(1).speed,S(2).speed) > min_speed;
 
 
 % all above must be satisfied to continue
