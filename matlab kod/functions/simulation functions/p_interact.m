@@ -11,5 +11,5 @@ D = norm(A-B);
 X1 = [1, D, speedA];
 X2 = [1, D, speedB];
 X = [X1;X2];
-pea = 1./(1 + exp(X*beta) );
+pea = 1./(1 + exp(X*beta));
 end

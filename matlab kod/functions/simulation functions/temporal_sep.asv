@@ -61,7 +61,6 @@ ZZ{1}    = Z;
 candidatesB = 1;
 candidatesA = 1;
 candidates.index = {1,1};
-%%
 
 for k=1:max_iter
 
@@ -77,12 +76,12 @@ for k=1:max_iter
 
     % if RU starts getting further away from other RUs trajectory, save
     % information for classification of encounter
-    if D_diff(1) >= 0 && first_div(1)==0
+    if D_diff(1) > 0 && first_div(1)==0
         divA_candidates = candidates;
         first_div(1)= k;
         D_divA = candidates.min_dist(1);
     end
-    if D_diff(2) >= 0 && first_div(2)==0
+    if D_diff(2) > 0 && first_div(2)==0
         divB_candidates = candidates;
         first_div(2) = k;
         D_divB = candidates.min_dist(2);
@@ -161,7 +160,7 @@ for k=1:max_iter
         % Time To Path Overlap
         TTPO =   steps_taken - t_prev + t - 1;
         % Time To Potential Collision
-        TTPC = candidates.closest{RU1} + t - (t_prev+1);
+        TTPC = candidates.closest{RU1} + t - t_prev;
         % Time advantage
         Tadv = TTPC - TTPO;
 
@@ -169,7 +168,7 @@ for k=1:max_iter
         time_sep.RU1    = RU1;
         time_sep.TTPC   = TTPC;
         time_sep.TTPO   = TTPO;
-        time_sep.Tadv   = (-1)^(RU1+1)*Tadv;
+        time_sep.Tadv   = (-1)^(RU1+1)*Tadv
         break
     end
 
@@ -226,6 +225,7 @@ for k=1:max_iter
             hold on
             plot_pos(Z, plots)    
         end
+        pause(1)
     end
 
 if D > 2*RUprop.r && k==max_iter
@@ -239,4 +239,6 @@ end
 
 end
 %%
+pause(5)
+
 end
