@@ -47,8 +47,8 @@ function out = evasive_step_coulombs_law(A0,B0,stepsize,theta, reactivityA, reac
         % mean and standard deviation of delta theta and delta speed
         mu_thetaA = delta_theta_max*(1 - exp(-1*abs(delta_thetaA)));
         mu_thetaB = delta_theta_max*(1 - exp(-1*abs(delta_thetaB)));
-        sigma_thetaA  = degtorad(1) + exp(-abs(delta_thetaA)*30);
-        sigma_thetaB  = degtorad(1) + exp(-abs(delta_thetaB)*30);
+        sigma_thetaA  = deg2rad(1) + exp(-abs(delta_thetaA)*30);
+        sigma_thetaB  = deg2rad(1) + exp(-abs(delta_thetaB)*30);
         logn_parA = lognormal_par(mu_thetaA, sigma_thetaA);
         logn_parB = lognormal_par(mu_thetaB, sigma_thetaB);
 

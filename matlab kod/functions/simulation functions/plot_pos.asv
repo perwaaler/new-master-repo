@@ -1,4 +1,4 @@
-function plot_pos(S, plots, col, time_diff, decision) 
+function plot_pos(S, plots, time_diff, decision) 
 % plots position of each disc based on their positions in state S.
 
 % unpack variables
@@ -12,23 +12,36 @@ init_x = plots.xinit;
 % Tadv = -1*-1^time_diff.RU1*time_diff.Tadv;
 
 if nargin == 2
-    col = ["red", "blue"];
     title_str = sprintf("reactA = %d, reactB = %d", reactA, reactB);
     
 elseif nargin == 3
-    title_str = sprintf("reactA = %d, reactB = %d", reactA, reactB);
-    
-elseif nargin == 5
+    if isempty(time_diff)
+        Tadv = nan;
+        TTPC = nan;
+    else
+        Tadv = time_diff.Tadv;
+        TTPC = time_diff.TTPC;
+    end
     title_str = sprintf("reactA = %d, reactB = %d, Tadv=%d, TTPC=%d", ...
-        reactA, reactB, time_diff.Tadv, time_diff.TTPC);
+        reactA, reactB, Tadv, TTPC);
     
-elseif nargin == 6
-    title_str = sprintf("reactA = %d, reactB = %d, TTPC=%.1f, Tadv=%.1f, decision=%s", ...
-        reactA, reactB, time_diff.TTPC, time_diff.Tadv, dec2str(decision));
+elseif nargin == 4
+    if isempty(time_diff)
+        Tadv = nan;
+        TTPC = nan;
+    else
+        Tadv = time_diff.Tadv;
+        TTPC = time_diff.TTPC;
+    end
+    col = decision2col(decision);
+    
+    title_str = sprintf("reactA = %d, reactB = %d, TTPC=%.0f, Tadv=%.1f, decision=%s", ...
+        reactA, reactB, TTPC, Tadv, dec2str(decision(1)));
 end
 
 xlimit = [-init_x, init_x];
-ylimit = [-5,5];
+ylimit = [-7,7];
+
 
 if plots.enc == 1
     
@@ -37,18 +50,21 @@ if plots.enc == 1
 
     plot(r*exp(1i*linspace(0,2*pi,50)) + A, 'color', col(1))
     
-    title(title_str)
-    hold on 
-
+    if plots.EAmode==0
+        title(title_str)
+    end
+    
+    hold on
     plot(r*exp(1i*linspace(0,2*pi,50)) + B,'color', col(2))
 
     xlim(xlimit)
     ylim(ylimit)
     hold off
-    pause(plots.pause)
     
-    if norm(A - B) < 2*r
-        hold on; title("collision"); hold off
+    if max(S.EA)==0
+        pause(plots.pause)
+    else
+        pause(plots.pred_pause)
     end
 end
 end

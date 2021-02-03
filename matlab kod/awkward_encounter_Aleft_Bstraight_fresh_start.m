@@ -1,14 +1,15 @@
 n_est_sets = 1;                        % number of encounter-samples desired
-N_enc = 100;                           % number of encounters
+N_enc = 300;                           % number of encounters
 all_data = cell(n_est_sets, 12);       % collects data from each encounter-sample
 NTTC = 30;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 0;                           % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 0;
 % plot settings
-plots.enc        = 1;
+plots.enc        = 0;
 plots.predpath   = 0;
+plots.overlap    = 1;
 plots.pause      = 2^-5;
-plots.pred_pause = 2^-5; 
+plots.pred_pause = 2^-5;
 plots.radius     = 0.3;
 plots.xinit      = 6;
 plots.EAmode     = 0;
@@ -17,12 +18,10 @@ disable_crash = 0;                       % disable collision and EA mode to reco
 use_history = 0;
 use_dp_model = 0;                        % set to 1 if you want to use estimated reaction model
 
+
 for kk = 1:n_est_sets
 kk %#ok<NOPTS>
-
-% EA behaviour modification parameters
-
-
+    
 % variables that collects severity meausures and data for each encounter
 % FEA
 fea.dist = inf*ones(N_enc,1);              % saves separation distance at time of first evasive action
@@ -36,9 +35,13 @@ enc.mindist = inf*ones(1,N_enc);           % saves min sep. dist.
 enc.minttc = inf*ones(1,N_enc);            % saves min TTC
 % + --> no EA, - --> EA); 1 --> no collision, 2 --> collision
 
+% cell structure that saves the encounters
+save_enc.states = cell(N_enc,1);
+save_enc.type   = zeros(N_enc,1);
+save_enc.decisions = cell(N_enc,1);
 
 for i=1:N_enc
-    
+i
 plots.col        = ["black","black"];
 %%%% initiate encounter %%%%
 % determines average and initial speed of each vehicle
@@ -54,6 +57,9 @@ A_im = normrnd(-2.3,0.5);
 B_im = normrnd(0,   0.5);
 A0 = A_real + 1i*A_im;
 B0 = B_real + 1i*B_im;
+% set initial decision states
+decisionA = 0;
+decisionB = 0;
 
 % choose how similar a trajectory has to be in order to be "similar"
 tolerance = 0.4*[0.16*0.1, 0.03, 0.08]; 
@@ -97,28 +103,31 @@ max_delta(1).dspeed = beta_rnd(0.01*RUprop.weight(1)^-1, 1e-4);
 max_delta(2).dspeed = beta_rnd(0.01*RUprop.weight(2)^-1, 1e-4);
 max_delta(1).dtheta = beta_rnd(0.3*RUprop.weight(1)^-1, 8e-4);
 max_delta(2).dtheta = beta_rnd(0.3*RUprop.weight(2)^-1, 8e-4);
-max_delta(1).d2theta = deg2rad(12);
-max_delta(2).d2theta = deg2rad(12);
+max_delta(1).d2theta = deg2rad(15);
+max_delta(2).d2theta = deg2rad(15);
 
 
 %%%% set state of each Road User (RU) %%%%
-[S(1).pos,    S(2).pos]        = deal(A0,B0);
-[S(1).theta,  S(2).theta]      = deal(theta(1),theta(2));
-[S(1).speed,  S(2).speed]      = deal(speed0(1), speed0(2));
-[S(1).dtheta, S(2).dtheta]     = deal(dtheta(1),dtheta(2));
-[S(1).dspeed, S(2).dspeed]     = deal(dspeed(1),dspeed(2));
-[S(1).EA,     S(2).EA]         = deal(0,0);
-[S(1).decision, S(2).decision] = deal(0,0);
-[S(1).RUprop, S(2).RUprop]     = deal(RUprop,RUprop);
-[S(1).id,     S(2).id     ]    = deal(1,2);
+[S(1).pos,    S(2).pos]          = deal(A0,B0);
+[S(1).theta,  S(2).theta]        = deal(theta(1),theta(2));
+[S(1).speed,  S(2).speed]        = deal(speed0(1), speed0(2));
+[S(1).dtheta, S(2).dtheta]       = deal(dtheta(1),dtheta(2));
+[S(1).dspeed, S(2).dspeed]       = deal(dspeed(1),dspeed(2));
+[S(1).EA,     S(2).EA]           = deal(0,0);
+[S(1).decision, S(2).decision]   = deal(0,0);
+[S(1).RUprop, S(2).RUprop]       = deal(RUprop,RUprop);
+[S(1).id,     S(2).id     ]      = deal(1,2);
 
-% save state
-enc.states = cell(N_enc,500); 
+% enc is a field that saves information for the encounter as a whole
+enc.states = cell(150,1); 
 enc.states{1} = S;
+enc.time_diff = cell(150,1);
+enc.decisions = zeros(2,150);
+enc.decisions(:,1) = [0;0]; % decisions==0 --> no interaction yet
 
 %%%% variables that track status %%%%
 % track frame
-stat.frame     = 0;
+stat.frame     = 1;
 % starts ticking once EA has been engaged
 stat.EAframe   = [1,1]; 
 % used to determine how often RUs makes decisions
@@ -137,7 +146,9 @@ stat.Tadv      = [0,0];
 stat.TTPC      = 0;
 % track the number of consecutive failed attempts at conflict resolution
 stat.CR_fails  = 0;
-                          
+stat.type      = 1;
+
+time_diff    = []; 
 D_enc_i      = inf*ones(1,500);           
 D_enc_i(1)   = norm(A0-B0)-2*RUprop.r;
 ttc_enc_i    = inf*ones(1,500);           % saves danger index associated with each timestep
@@ -201,7 +212,7 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             
             % update status of encounter
             stat.EAframe = stat.EAframe + 1;
-            enc.type(i) = -1;
+            stat.type = -1;
             plots.EAmode = 1;
 
             %%%% determine where they would want to move if not interacting
@@ -211,9 +222,9 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
             
             time_diff = temporal_sep(enc,RUprop,max_delta,stat,plots);
-            pause(plots.pred_pause)
+            
             % positive Tadv means that RU A has a time advantage
-            TTPO      = time_diff.TTPO; % Time To Path Overlap
+            T2        = time_diff.T2;   % Time To Path Overlap
             Tadv      = time_diff.Tadv; % Time advantage
             TTPC      = time_diff.TTPC; % Time To Potential Collision
             
@@ -229,12 +240,12 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
 %                 plots.pred_path = boolean(stat.decision_count(1)==1);
                 
                 if stat.decision_count(1) == 1
-                    % update decision
+                    % update decision and action
                     decisionA = make_decision(time_diff,RUprop,1);
-                    actionA = decis2action(1,decisionA, time_diff);
+                    actionA = decis2action(S,max_delta,1,decisionA);
                 end
                 
-                plots.col(1) = decision2color(decisionA);
+%                 plots.col(1) = decision2color(decisionA);
                 S(1) = take_step(S(1), S(1).speed+actionA(1), S(1).theta+actionA(2), max_delta(1));
             else
                 S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1));
@@ -245,22 +256,24 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
 
                 if stat.decision_count(2) == 1
                     decisionB = make_decision(time_diff, RUprop, 2);
-                    actionB = decis2action(2, decisionB, time_diff);
+                    actionB = decis2action(S,max_delta,2, decisionB);
                 end
                 
-                plots.col(2) = decision2color(decisionB);
+%                 plots.col(2) = decision2color(decisionB);
                 S(2) = take_step(S(2), S(2).speed + actionB(1), S(2).theta + actionB(2), max_delta(2));
             else
                 S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
             end
             
-            pause(0.0)
-           
             stat.first_int = 1; % set to 1 so that above loop only runs on first interaction
             plots.EAmode = 0;
             % plot drivers
-            plot_pos(S, plots, time_diff, decisionA)
-            pause(0.0)
+            plot_pos(S, plots, time_diff, [decisionA,decisionB])
+%             if (decisionA==4 || decisionA==5)&& (decisionB==4 || decisionB==5)
+%                 decisionA
+%                 decisionB
+%             pause(3)
+%             end
             
             % check to see if it is safe to end interaction
             stat.stop_int = end_interaction(S,max_delta,plots);
@@ -279,37 +292,44 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
             E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
             
+            change = coulumbs_desire(S);
+            delta_theta = change.theta(1);
+            
+%             S(1) = take_step(S(1),S(1).speed,S(1).theta+ change.theta(1), max_delta(1)); 
+%             S(2) = take_step(S(2),S(2).speed,S(2).theta+ change.theta(2), max_delta(2));
             % take step and update states
             S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1)); 
             S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
-%             pause(.5)
-
+            
             % plot drivers
-            plot_pos(S, plots)
-
+            plot_pos(S, plots, time_diff,[0,0])
+            
         end
         
+        % update frame
         stat.frame = stat.frame + 1;
+        
+        % update positions
         A0 = S(1).pos;
         B0 = S(2).pos;
         
-        % save data from frame i of encounter kk
-        D = norm(A0-B0) - 2*RUprop.r;
-        D_enc_i(stat.frame) = D;
-        ttc_enc_i(stat.frame) = calc_ttc(S,RUprop.r);
+        % save data from frame stat.frame of encounter kk
+        D                           = norm(A0-B0) - 2*RUprop.r;
+        D_enc_i(stat.frame)         = D;
+        ttc_enc_i(stat.frame)       = calc_ttc(S,RUprop.r);
+        enc.decisions(:,stat.frame) = [decisionA;decisionB]*(1-stat.stop_int);
+        enc.time_diff{stat.frame}   = time_diff;
         
         % save state
         enc.states{stat.frame} = S;
-
-
         
         if D<0 % collision has occurred!
-            if enc.type==-1
+            if stat.type==-1
                 % set to crash type EA
-                enc.type(i) = -2;
+                stat.type = -2;
             else
                 % set to crash type no EA
-                enc.type(i) = +2;
+                stat.type = +2;
             end
             % end encounter
             break
@@ -317,6 +337,10 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
         
     end
     
+    save_enc.time_diff{i} = enc.time_diff;
+    save_enc.states{i}    = enc.states;
+    save_enc.type(i)      = stat.type;
+    save_enc.decisions{i} = enc.decisions;
 
     enc.mindist(i) = min(D_enc_i);
     enc.minttc(i) = min(ttc_enc_i);
@@ -329,8 +353,10 @@ if disable_crash == 1
     historyA{3} = enc.thetaA;
 end
 end
+
+
 %%
-%plot_encounter(enc.posA, enc.posB,enc.int_stateA, enc.int_stateB, find(enc.type==-2), .15, xinit, RUprop.r)
+%plot_encounter(enc.posA, enc.posB,enc.int_stateA, enc.int_stateB, find(stat.type==-2), .15, xinit, RUprop.r)
 
 
 
@@ -339,17 +365,17 @@ end
 
 %%%% process data
 
-sum(enc.type==-2)
-sum(enc.type==2)
+sum(stat.type==-2)
+sum(stat.type==2)
 % remove all elements/rows corresponding to encounters with no EA
-fea.dist(enc.type==1,:) =[];
+fea.dist(stat.type==1,:) =[];
 X = fea.stoch_ttc;
-fea.stoch_ttc(enc.type==1,:) = [];
-ea.mindist(enc.type>0,:) = [];
+fea.stoch_ttc(stat.type==1,:) = [];
+ea.mindist(stat.type>0,:) = [];
 ea.mindist = min(ea.mindist,[],2);
-ea.minttc( enc.type > 0 ,:) = [];
+ea.minttc( stat.type > 0 ,:) = [];
 ea.minttc = min(ea.minttc,[],2);
-dist_min_nea = dist_min_nea( enc.type > 0 );
+dist_min_nea = dist_min_nea( stat.type > 0 );
 
 
 % save data from estimation set kk
@@ -371,9 +397,9 @@ all_data{kk,7} = ea.mindist;
 all_data{kk,8} = enc.mindist';
 
 % other information
-all_data{kk,9} = sum(enc.type==2);                                               % saves p_nea_coll
-all_data{kk,10} = sum(enc.type==-2);                                             % saves p_ea_coll
-all_data{kk,11} = (sum(enc.type==-1) + sum(enc.type==-2) + sum(enc.type==2))/N_enc;  % saves p_interactive
-all_data{kk,12} = (sum(enc.type==-1)+sum(enc.type==-2))/N_enc;                       % saves p_ea
+all_data{kk,9} = sum(stat.type==2);                                               % saves p_nea_coll
+all_data{kk,10} = sum(stat.type==-2);                                             % saves p_ea_coll
+all_data{kk,11} = (sum(stat.type==-1) + sum(stat.type==-2) + sum(stat.type==2))/N_enc;  % saves p_interactive
+all_data{kk,12} = (sum(stat.type==-1)+sum(stat.type==-2))/N_enc;                       % saves p_ea
 
 

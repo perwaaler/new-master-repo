@@ -1,7 +1,9 @@
-function decision = make_decision(time_diff,RUprop,driver_id)
+function decision = make_decision(time_diff, RUprop, driver_id)
+% function that simulates a attempt at conflict resolution
+% based on Tadv and TTPC.
 
 % extract nessecary variables
-Tadv = (-1)^(driver_id+1) * time_diff.Tadv;
+Tadv = (-1)^(driver_id+1) * time_diff.Tadv;% becomes negated if driver_id==2
 TTPC = time_diff.TTPC;
 aggr = RUprop.aggression(driver_id);
 
@@ -20,6 +22,25 @@ z(1,1,:) = [0,1,0,0];
 % simulate sample
 z = mrf_sim(z,0,alpha,0,4);
 [~,decision] = max(z,[],3);
+
+if decision==4
+    if     driver_id==1
+        if Tadv<0
+            decision=4;
+        else
+            decision=5;
+        end
+        
+    elseif driver_id==2
+        if Tadv<0
+            decision=4;
+        else
+            decision=5;
+        end
+    end
+    
+end
+            
 
 end 
 

@@ -8,7 +8,7 @@ elseif decision == 2
     out = 'wait';
 elseif decision == 3
     out = 'go first';
-elseif decision == 4
+elseif decision == 4 || decision==5
     out = 'swerve and brake';
 end
 

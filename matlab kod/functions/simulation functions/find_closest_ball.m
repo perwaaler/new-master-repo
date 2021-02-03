@@ -11,7 +11,8 @@ function candidates = find_closest_ball(candidates,...
 % returns field that contains:
 % index    = cell array with indeces for the closest candidates
 % min_dist = vector with minimum distances for each set of candidates
-% closest  = vecotr with indeces of closest candidates
+% closest  = vector with indeces of closest candidates. closest{1} is the 
+%            ball in pathA that lies closest to the current position of B.
 
 candidatesA = candidates.index{1};
 candidatesB = candidates.index{2};
@@ -25,7 +26,7 @@ candidatesB = candidatesB(candidatesB <= k);
 diffA = pathA(k) - pathB(candidatesB);
 diffA = sqrt(diffA.*conj(diffA));
 
-% update closest position in B
+% update closest position in path of B
 [min_distA,closest{2}] = min(diffA);
 closest{2} = candidatesB(closest{2});
 

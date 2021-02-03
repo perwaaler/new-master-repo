@@ -52,9 +52,9 @@ elseif driver_id == 2
     elseif decision == 5
             delta_theta = -deg2rad(20);
             delta_speed = -1;
-%             change = coulumbs_desire(S);
-%             delta_speed = -1;
-%             delta_theta = change.theta(2);
+            change = coulumbs_desire(S);
+            delta_speed = -1;
+            delta_theta = change.theta(2);
     end
 
 end

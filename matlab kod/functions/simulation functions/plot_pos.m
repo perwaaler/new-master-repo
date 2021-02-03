@@ -16,16 +16,34 @@ if nargin == 2
     title_str = sprintf("reactA = %d, reactB = %d", reactA, reactB);
     
 elseif nargin == 3
+    if isempty(time_diff)
+        Tadv = nan;
+        TTPC = nan;
+    else
+        Tadv = time_diff.Tadv;
+        TTPC = time_diff.TTPC;
+    end
+    
     title_str = sprintf("reactA = %d, reactB = %d, Tadv=%d, TTPC=%d", ...
-        reactA, reactB, time_diff.Tadv, time_diff.TTPC);
+        reactA, reactB, Tadv, TTPC);
     
 elseif nargin == 4
-    title_str = sprintf("reactA = %d, reactB = %d, TTPC=%.1f, Tadv=%.1f, decision=%s", ...
-        reactA, reactB, time_diff.TTPC, time_diff.Tadv, dec2str(decision));
+    if isempty(time_diff)
+        Tadv = nan;
+        TTPC = nan;
+    else
+        Tadv = time_diff.Tadv;
+        TTPC = time_diff.TTPC;
+    end
+    
+    col = decision2color(decision);
+    title_str = sprintf("reactA = %d, reactB = %d, TTPC=%.0f, Tadv=%.1f, decision=%s", ...
+        reactA, reactB, TTPC, Tadv, dec2str(decision(1)));
 end
 
 xlimit = [-init_x, init_x];
 ylimit = [-7,7];
+
 
 if plots.enc == 1
     

@@ -10,3 +10,5 @@
 
 % need to assign Tadv even to predicitions for which there is no collision
 % of predicted trajectories.
+
+% The algorithm
