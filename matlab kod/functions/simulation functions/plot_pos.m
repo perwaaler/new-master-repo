@@ -36,7 +36,7 @@ elseif nargin == 4
         TTPC = time_diff.TTPC;
     end
     
-    col = decision2color(decision);
+    col = decision2color(decision,plots);
     title_str = sprintf("reactA = %d, reactB = %d, TTPC=%.0f, Tadv=%.1f, decision=%s", ...
         reactA, reactB, TTPC, Tadv, dec2str(decision(1)));
 end

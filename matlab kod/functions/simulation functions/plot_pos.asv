@@ -8,6 +8,7 @@ reactA = S(1).EA;
 reactB = S(2).EA;
 r = S(1).RUprop.r;
 init_x = plots.xinit;
+col = plots.col;
 
 % Tadv = -1*-1^time_diff.RU1*time_diff.Tadv;
 
@@ -22,6 +23,7 @@ elseif nargin == 3
         Tadv = time_diff.Tadv;
         TTPC = time_diff.TTPC;
     end
+    
     title_str = sprintf("reactA = %d, reactB = %d, Tadv=%d, TTPC=%d", ...
         reactA, reactB, Tadv, TTPC);
     
@@ -33,8 +35,8 @@ elseif nargin == 4
         Tadv = time_diff.Tadv;
         TTPC = time_diff.TTPC;
     end
-    col = decision2col(decision);
     
+    col = decision2color(decision,plot);
     title_str = sprintf("reactA = %d, reactB = %d, TTPC=%.0f, Tadv=%.1f, decision=%s", ...
         reactA, reactB, TTPC, Tadv, dec2str(decision(1)));
 end

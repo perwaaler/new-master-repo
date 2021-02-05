@@ -4,8 +4,9 @@ all_data = cell(n_est_sets, 12);       % collects data from each encounter-sampl
 NTTC = 30;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 0;                           % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 0;
+
 % plot settings
-plots.enc        = 0;
+plots.enc        = 1;
 plots.predpath   = 0;
 plots.overlap    = 1;
 plots.pause      = 2^-5;
@@ -13,6 +14,7 @@ plots.pred_pause = 2^-5;
 plots.radius     = 0.3;
 plots.xinit      = 6;
 plots.EAmode     = 0;
+plots.dec_cols   = ["black", "green", "cyan", "red", "yellow", "magenta"];
 
 disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
 use_history = 0;
@@ -58,8 +60,7 @@ B_im = normrnd(0,   0.5);
 A0 = A_real + 1i*A_im;
 B0 = B_real + 1i*B_im;
 % set initial decision states
-decisionA = 0;
-decisionB = 0;
+decision = [0,0];
 
 % choose how similar a trajectory has to be in order to be "similar"
 tolerance = 0.4*[0.16*0.1, 0.03, 0.08]; 
@@ -68,7 +69,7 @@ tolerance = 0.4*[0.16*0.1, 0.03, 0.08];
 % set regression parameters for probability to engage in Evasive Action(EA)
 beta_EA.int   = -2.8;
 beta_EA.dist  = .8;
-beta_EA.speed = -.4;
+beta_EA.speed = -1;
 
 %%%% set driver properties %%%%
 % radius of Road Users
@@ -94,7 +95,7 @@ RUprop.turnend   =  RUprop.turnstart + gam_rnd(5,0.5);
 % determine how alert each driver is
 RUprop.alert = beta_rnd(.8,.08,2);
 % determine how often RU assesses success of decision
-RUprop.decision_freq = [3,3];
+RUprop.decision_freq = [2,2];
 RUprop.aggression = beta_rnd(0.5,0.02,2);
 
 
@@ -146,7 +147,7 @@ stat.Tadv      = [0,0];
 stat.TTPC      = 0;
 % track the number of consecutive failed attempts at conflict resolution
 stat.CR_fails  = 0;
-stat.type      = 1;
+stat.type      = 1; 
 
 time_diff    = []; 
 D_enc_i      = inf*ones(1,500);           
@@ -157,12 +158,12 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
     while continue_simulation(S,init_x)==1
         
         % compute probability of A or B reacting
-        pea = p_interact(S,beta_EA);
+        pea = p_interact(S,beta_EA,RUprop);
   
         if min(S.EA)==0 % if one of them has not engaged EA
             
             % roll to decide if EA gets engaged
-            pea = p_interact(S,beta_EA);
+            pea = p_interact(S,beta_EA,RUprop);
             
             % update EA status and interaction status
             S(1).EA = max(rand(1)<pea(1)*RUprop.alert(1), S(1).EA);
@@ -236,16 +237,16 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             % take step and update states            
             
             if S(1).EA==1 % if RU1 has engaged EA
-                stat.decision_count(1) = mod(stat.decision_count(1) + 1,2);
+                stat.decision_count(1) = mod(stat.decision_count(1) + 1,RUprop.decision_freq(1));
 %                 plots.pred_path = boolean(stat.decision_count(1)==1);
                 
                 if stat.decision_count(1) == 1
                     % update decision and action
-                    decisionA = make_decision(time_diff,RUprop,1);
-                    actionA = decis2action(S,max_delta,1,decisionA);
+                    decision(1) = make_decision(time_diff,RUprop,1);
+                    actionA = decis2action(S,max_delta,1,decision(1));
                 end
                 
-%                 plots.col(1) = decision2color(decisionA);
+%                 plots.col(1) = decision2color(decision(1));
                 S(1) = take_step(S(1), S(1).speed+actionA(1), S(1).theta+actionA(2), max_delta(1));
             else
                 S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1));
@@ -255,11 +256,11 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
                 stat.decision_count(2) = mod(stat.decision_count(2) + 1,2);
 
                 if stat.decision_count(2) == 1
-                    decisionB = make_decision(time_diff, RUprop, 2);
-                    actionB = decis2action(S,max_delta,2, decisionB);
+                    decision(2) = make_decision(time_diff, RUprop, 2);
+                    actionB = decis2action(S,max_delta,2, decision(2));
                 end
                 
-%                 plots.col(2) = decision2color(decisionB);
+%                 plots.col(2) = decision2color(decision(2));
                 S(2) = take_step(S(2), S(2).speed + actionB(1), S(2).theta + actionB(2), max_delta(2));
             else
                 S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));
@@ -268,10 +269,10 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             stat.first_int = 1; % set to 1 so that above loop only runs on first interaction
             plots.EAmode = 0;
             % plot drivers
-            plot_pos(S, plots, time_diff, [decisionA,decisionB])
-%             if (decisionA==4 || decisionA==5)&& (decisionB==4 || decisionB==5)
-%                 decisionA
-%                 decisionB
+            plot_pos(S, plots, time_diff, [decision(1),decision(2)])
+%             if (decision(1)==4 || decision(1)==5)&& (decision(2)==4 || decision(2)==5)
+%                 decision(1)
+%                 decision(2)
 %             pause(3)
 %             end
             
@@ -317,7 +318,7 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
         D                           = norm(A0-B0) - 2*RUprop.r;
         D_enc_i(stat.frame)         = D;
         ttc_enc_i(stat.frame)       = calc_ttc(S,RUprop.r);
-        enc.decisions(:,stat.frame) = [decisionA;decisionB]*(1-stat.stop_int);
+        enc.decisions(:,stat.frame) = [decision(1);decision(2)]*(1-stat.stop_int);
         enc.time_diff{stat.frame}   = time_diff;
         
         % save state
