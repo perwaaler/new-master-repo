@@ -4,6 +4,7 @@ all_data = cell(n_est_sets, 12);       % collects data from each encounter-sampl
 NTTC = 30;                             % Number of TTC to sample at first evasive action for each encounter
 est_ttc = 0;                           % tells the algorithm whether or not you want to estimate ttc distribution for each encounter
 compute_X = 0;
+
 % plot settings
 plots.enc        = 1;
 plots.predpath   = 0;
@@ -13,6 +14,7 @@ plots.pred_pause = 2^-5;
 plots.radius     = 0.3;
 plots.xinit      = 6;
 plots.EAmode     = 0;
+plots.dec_cols   = ["black", "green", "cyan", "red", "yellow", "magenta"];
 
 disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
 use_history = 0;
@@ -58,8 +60,7 @@ B_im = normrnd(0,   0.5);
 A0 = A_real + 1i*A_im;
 B0 = B_real + 1i*B_im;
 % set initial decision states
-decisionA = 0;
-decisionB = 0;
+decision = [0,0];
 
 % choose how similar a trajectory has to be in order to be "similar"
 tolerance = 0.4*[0.16*0.1, 0.03, 0.08]; 
@@ -94,7 +95,7 @@ RUprop.turnend   =  RUprop.turnstart + gam_rnd(5,0.5);
 % determine how alert each driver is
 RUprop.alert = beta_rnd(.8,.08,2);
 % determine how often RU assesses success of decision
-RUprop.decision_freq = [3,3];
+RUprop.decision_freq = [2,2];
 RUprop.aggression = beta_rnd(0.5,0.02,2);
 
 
@@ -157,12 +158,12 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
     while continue_simulation(S,init_x)==1
         
         % compute probability of A or B reacting
-        pea = p_interact(S,beta_EA);
+        pea = p_interact(S,beta_EA,RUprop);
   
         if min(S.EA)==0 % if one of them has not engaged EA
             
             % roll to decide if EA gets engaged
-            pea = p_interact(S,beta_EA);
+            pea = p_interact(S,beta_EA,RUprop);
             
             % update EA status and interaction status
             S(1).EA = max(rand(1)<pea(1)*RUprop.alert(1), S(1).EA);
@@ -236,7 +237,7 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             % take step and update states            
             
             if S(1).EA==1 % if RU1 has engaged EA
-                stat.decision_count(1) = mod(stat.decision_count(1) + 1,2);
+                stat.decision_count(1) = mod(stat.decision_count(1) + 1,RUprop.decision_freq(1));
 %                 plots.pred_path = boolean(stat.decision_count(1)==1);
                 
                 if stat.decision_count(1) == 1
