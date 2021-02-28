@@ -3,7 +3,7 @@ function new_state = take_step(S, desired_speed, desired_angle, max_delta)
 
 % if only S is given, predict next step using constant dtheta and dspeed
 if nargin == 1
-    new_state = momentum_step(S);
+    new_state = momentum_step(S,max_delta);
     
 else
 % discrepency between desired and current angle:

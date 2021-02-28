@@ -11,4 +11,17 @@
 % need to assign Tadv even to predicitions for which there is no collision
 % of predicted trajectories.
 
-% The algorithm
+
+% plan for tomorrow:
+% I have noticed that there is a much easier way to check which side of
+% eachother the road users are. I can simply draw a line through two
+% neighbouring points and then compare whether the ball is above or below
+% the line. Tomorrow my plan is to implement this way of cheking
+% orientation.
+
+% plan for tomorrow: The code for figuring out orientation mostly works
+% well now, both for the case where there is path overlap, and the case
+% when the paths diverge. The only remaining problem seems to be the case
+% when RU A stops entirely, because then method for determining orientation
+% does not work properly, since it needs movement to determine the tangent
+% line. Will fix this tomorrow...

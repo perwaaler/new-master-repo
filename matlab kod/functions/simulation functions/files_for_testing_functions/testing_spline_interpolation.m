@@ -1,0 +1,309 @@
+
+% example of spline interpolation. the y-points contains two more points
+% than the x-vector, so spline takes the first and last columns of y as
+% endpoint slopes
+x = pi*(0:.5:2); 
+y = [0  1  0 -1  0  1  0; 
+     1  0  1  0 -1  0  1];
+pp = spline(x,y);
+yy = ppval(pp, linspace(0,2*pi,101));
+plot(yy(1,:),yy(2,:),'-b',y(1,2:5),y(2,2:5),'or')
+axis equal
+
+% same example, but now we have now condition on the endpoints
+y = [ 1  0 -1  0  1 ; 
+      0  1  0 -1  0 ];
+pp = spline(x,y);
+yy = ppval(pp, linspace(0,2*pi,101));
+plot(yy(1,:),yy(2,:),'-b',y(1,2:5),y(2,2:5),'or')
+axis equal
+
+%%
+% spline interpolation using generated path:
+state.pos = 1 + 2*1i;
+state.theta = 0.1;
+state.dtheta = deg2rad(5);
+state.speed = 0.3;
+state.dspeed = 0.003;
+k = 3;
+
+path = gener_pred_path_iter(state,k);
+clf
+plot_circle(1+2i,0.3,"green")
+for i=1:k
+plot_circle(path(i),0.3)
+end
+
+% u = state.pos - path(1);
+% v = path(end) - path(end-1);
+% line1 = [real(u);imag(u)];
+% line2 = [real(v);imag(v)];
+% 
+% slope_u = imag(u)/real(u);
+% slope_v = imag(v)/real(v);
+% 
+% x = angle(path); 
+% y = zeros(2,k+1);
+% theta = angle(path)';
+% r = abs(path)';
+% y(1,:) = real(path); 
+% y(2,:) = imag(path); 
+% y = [line1,y,line2];
+% y = [[0;.1],y,[0;0]]
+
+
+theta = angle(path)';
+r = abs(path)';
+[x,y] = pol2cart(theta,r);
+
+% interpolate with parameter t
+t = (1:k);
+v = [x,y];
+% points to evaluate function
+
+tt = linspace(0,4*k,100);
+X = interp1(t,v,tt,'spline');
+% plot
+
+pp = spline(t,v');
+V = ppval(pp, linspace(1,k*2,100));
+plot(V(1,:),V(2,:),'-')
+hold on
+plot_circle(state.pos,.3)
+
+f_spline =@(x) ppval(pp,x) 
+
+%% Interpolation using interpl
+
+% initial values
+state.pos = 1 + 2*1i;
+state.theta = 0.1;
+state.dtheta = deg2rad(6);
+state.speed = 0.1;
+state.dspeed = +0.01;
+
+k = 10;
+% clf
+
+
+% generate path
+path = gener_pred_path_iter(state,k);
+path = path(1:end);
+
+n = length(path);
+
+% plot positions
+for i=1:length(path)
+plot_circle(path(i),0.3)
+end
+
+theta = angle(path)';
+r = abs(path)';
+[x,y] = pol2cart(theta,r);
+
+% interpolate with parameter t
+t = (1:n);
+v = [x,y];
+% points to evaluate function
+
+tt = linspace(0,4*n,100);
+X = interp1(t,v,tt,'spline');
+% plot
+
+
+plot(x,y,'o');
+hold on
+plot(X(:,1),X(:,2));
+
+for i=1:100
+plot_circle(X(i,1) + 1i*X(i,2),0.3,"black")
+title(sprintf("time=%0.01f",tt(i)))
+pause(0.1)
+end
+
+% for t=1:100-n
+%     A = X(t+n,1) + 1i*X(t+n,2);
+%     plot_circle(A,0.3,"green")
+% end
+
+
+
+% plot_circle(X(100,1) + 1i*X(100,2),.3,"green")
+
+%% Generating paths and doing trajectory and path-analysis
+
+for j=1:30
+% generate 2 paths:
+stateA.pos = normrnd(-2,1) + normrnd(-2.5,3)*1i;
+stateA.theta = normrnd(deg2rad(10),deg2rad(7));
+stateA.dtheta = normrnd(deg2rad(10),deg2rad(6));
+stateA.speed = gam_rnd(0.16,0.02);
+stateA.dspeed = normrnd(-0.01,0.03);  
+stateA.RUprop = RUprop;
+stateA.id     = 1;
+
+stateB.pos = normrnd(2,1) + normrnd(1,1)*1i;
+stateB.theta = normrnd(pi,deg2rad(10));
+stateB.dtheta = normrnd(0,deg2rad(3));
+stateB.speed = normrnd(0.16,0.01);
+stateB.dspeed = gam_rnd(0.01,0.001);
+stateB.RUprop = RUprop;
+stateB.id = 2;
+pauseL = 1;
+
+% ind = floor((1:k) + ((1:k)/5).^2 + ((1:k)/10).^3);
+% ind = ind(ind<k);
+% path2.pos = path2.pos(ind);
+
+% k is the total path length. k is number of steps taken, or how far into
+% the future the path is generated.
+k = 80; 
+path1 = gener_pred_path_iter(stateA,max_delta(1),k,ind);
+path2 = gener_pred_path_iter(stateB,max_delta(2),k,ind);
+k1     = path1.length;
+k2     = path2.length;
+tstop1 = path1.tstop;
+tstop2 = path2.tstop;
+
+clf
+hold on
+for i=1:length(path1.ind)
+%     plot_circle(path1.pos(i),0.3,"green");
+    plot(path1.pos(i),'o','color','green');
+end
+for i=1:length(path2.ind)
+    plot_circle(path2.pos(i),0.3,"cyan");
+end
+% color starting points red
+a=plot_circle(path1.pos(1),0.3,"red");
+a.LineWidth=1;
+b=plot_circle(path2.pos(1),0.3,"red");
+b.LineWidth=1;
+
+%%% translate complex coordinates to cartesian coordinates
+x1 = real(path1.pos);
+y1 = imag(path1.pos);
+
+x2 = real(path2.pos);
+y2 = imag(path2.pos);
+
+% parameter values (time)
+t1 = path1.ind - 1;
+t2 = path2.ind - 1;
+% corresponding output values (2d-positions)
+v1 = [x1;y1];
+v2 = [x2;y2];
+
+% fit splines
+splineA = pchip(t1,v1);
+splineB = pchip(t2,v2);
+ppA =@(t) ppval(splineA,t);
+ppB =@(t) ppval(splineB,t);
+
+% create piecewise fcn which ensures no crazy behviour for RUs that have
+% stopped
+ppA =@(t) pw_fcn(ppA,t,tstop1);
+ppB =@(t) pw_fcn(ppB,t,tstop2);
+
+
+% prevent algorithm from selecting times outside of the generated path if
+% the acceleration is negative
+tstop1 = min(k1,tstop1);
+tstop2 = min(k2,tstop2);
+
+
+%%%% functions that determines search range of fminsearch:
+% discourage optimum after RU stops
+bound_stop = @(t) (1+exp((t(1)-tstop1)/0.001))*...
+                  (1+exp((t(2)-tstop2)/0.001));
+% fcn that discourages fmin to search for negative minima
+bound_noneg = @(t) (1+exp(-t/0.001));
+
+% define distance functions
+d_prox_t =@(t) norm(ppA(t(1)) - ppB(t(2)))*...
+                bound_noneg(t(1))*bound_noneg(t(2))*...
+                bound_stop(t);
+d_min_t  =@(t) norm(ppA(t) - ppB(t))*...
+                bound_noneg(t);
+
+%%%% optimization %%%%
+% find proximity points, minimum sep. points, and corresponding times
+tic
+options = optimset('TolX',1);
+[t_prox,d_prox] = fminsearch(d_prox_t, [1,1],    options);
+[t_min,d_min]   = fminsearch(d_min_t, t_prox(1), options);
+toc
+
+% find tangent lines at proximity and minimum points
+h = 0.0001;
+if k1-1 < t_prox(1)
+    slope_proxA = path1.slope;
+else
+    slope_proxA = differentiate(ppA, t_prox(1),h);
+    slope_proxA = slope_proxA(2)/slope_proxA(1);
+end
+if k1-1 < t_min
+    slope_minA  = path1.slope;
+else
+    slope_minA = differentiate(ppA,t_min,h);
+    slope_minA = slope_minA(2)/slope_minA(1);
+end
+slope_proxB = differentiate(ppB, t_prox(2), h);
+slope_minB  = differentiate(ppB, t_min,     h);
+ 
+
+% compute proximity points and minimality points
+Aprox = cart2complex(ppA(t_prox(1)));
+Bprox = cart2complex(ppB(t_prox(2)));
+Amin  = cart2complex(ppA(t_min));
+Bmin  = cart2complex(ppB(t_min));
+
+Aprox_pert = Aprox + 1 + 1i*slope_proxA;
+Bprox_pert = Bprox + slope_proxB(1) + 1i*slope_proxB(2);
+Amin_pert  = Amin + 1 + 1i*slope_minA;
+Bmin_pert  = Bmin  + slope_minB(1)  + 1i*slope_minB(2);
+
+ta = t_prox(1);
+tb = t_prox(2);
+Tadv = ta - tb;
+
+orient(1) = find_side(1 + 1i*slope_minA,Bmin-Amin);
+orient(2) = find_side(slope_minB(1) + 1i*slope_minB(2),Amin-Bmin);
+
+
+%%%% plotting %%%%
+% points to evaluate function (for plotting only)
+tt1 = linspace(0,path1.ind(end),200);
+tt2 = linspace(0,path2.ind(end),200);
+V1 = ppval(splineA, tt1);
+V2 = ppval(splineB, tt2);
+
+% plot spline curve fits
+a=plot(V1(1,:),V1(2,:),'-','color','green');
+a.LineWidth=1;
+a=plot(V2(1,:),V2(2,:),'-','color','blue');
+a.LineWidth=1;
+
+% plot proximity points
+a=plot_circle(Amin,.3,"black");
+a.LineWidth=1;
+b=plot_circle(Bmin,.3,"black");
+b.LineWidth=1;
+drawline([Amin, Amin_pert],'black');
+drawline([Bmin, Bmin_pert],'black');
+title(sprintf("(%s,%s), t_{min} = %0.01f, t_{prox}=(%0.01f,%0.01f)",...
+                            orient(1),orient(2),t_min,ta,tb))
+
+xlim([-10,10])
+
+a = plot_circle(Aprox,.3,"magenta");
+a.LineWidth = 1;
+b = plot_circle(Bprox,.3,"magenta");
+b.LineWidth = 1;
+
+pause(pauseL)
+end
+
+
+
+

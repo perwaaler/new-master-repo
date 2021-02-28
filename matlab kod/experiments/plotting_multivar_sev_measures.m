@@ -37,7 +37,7 @@ ttr = linspace(0,6,50);
 Pcoll = exp(-(X/2+Y/3));
 
 surf(Tadv,ttr,Pcoll)
-
+    
 xlabel('T_{adv}')
 ylabel('TTR')
 zlabel('P(fail resolve)')  

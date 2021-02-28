@@ -2,6 +2,7 @@ function action = decis2action(S,max_delta,driver_id,decision)
 % function that maps decision (integer) to action 
 
 if driver_id == 1
+    
     if     decision == 1 % let other pass
         delta_theta = -deg2rad(8);
         delta_speed = -0.1;
@@ -17,16 +18,10 @@ if driver_id == 1
     elseif decision == 4
             delta_theta = -deg2rad(20);
             delta_speed = -1;
-%             change = coulumbs_desire(S);
-%             delta_speed = -1;
-%             delta_theta = change.theta(1);
             
     elseif decision == 5
             delta_theta = +deg2rad(20);
             delta_speed = -1;
-%             change = coulumbs_desire(S);
-%             delta_speed = -1;
-%             delta_theta = change.theta(1);
     end
     
 elseif driver_id == 2
@@ -45,19 +40,15 @@ elseif driver_id == 2
     elseif decision == 4
             delta_theta = +deg2rad(20);
             delta_speed = -1;
-%             change = coulumbs_desire(S);
-%             delta_speed = -1;
-%             delta_theta = change.theta(2);
             
     elseif decision == 5
             delta_theta = -deg2rad(20);
             delta_speed = -1;
-%             change = coulumbs_desire(S);
-%             delta_speed = -1;
-%             delta_theta = change.theta(2);
     end
 
 end
+
+
 
 action = [delta_speed, delta_theta];
 end
