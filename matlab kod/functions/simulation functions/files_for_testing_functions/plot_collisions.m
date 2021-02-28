@@ -1,5 +1,5 @@
 plots.enc = 1;
-plots.pred_pause = 0.2;
+plots.pred_pause = 2;
 plots.pause=0.0;
 sum(save_enc.type==-2)
 ind = find(save_enc.type==-2);
@@ -22,3 +22,7 @@ for i=1:length(ind)
     end
         
 end
+
+plots.enc = 1;
+plots.pred_pause = 0;
+plots.pause=0.0;

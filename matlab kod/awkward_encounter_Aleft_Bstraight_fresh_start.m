@@ -73,7 +73,7 @@ beta_EA.speed = -1;
 
 %%%% set driver properties %%%%
 % radius of Road Users
-RUprop.r         = plots.radius;
+RUprop.r         = 0.3;
 % determine how jerky the RU are in their movements
 RUprop.Etheta_std      = beta_rnd(deg2rad(3),deg2rad(.5),2); 
 RUprop.Espeed_std      = beta_rnd(0.05, 0.01,2);
@@ -98,7 +98,6 @@ RUprop.alert = beta_rnd(.8,.08,2);
 RUprop.decision_freq = [2,2];
 RUprop.aggression = beta_rnd(0.5,0.02,2);
 
-
 %%%% set laws of movement / laws of momentum %%%%
 max_delta(1).dspeed = beta_rnd(0.01*RUprop.weight(1)^-1, 1e-4);
 max_delta(2).dspeed = beta_rnd(0.01*RUprop.weight(2)^-1, 1e-4);
@@ -106,6 +105,8 @@ max_delta(1).dtheta = beta_rnd(0.3*RUprop.weight(1)^-1, 8e-4);
 max_delta(2).dtheta = beta_rnd(0.3*RUprop.weight(2)^-1, 8e-4);
 max_delta(1).d2theta = deg2rad(15);
 max_delta(2).d2theta = deg2rad(15);
+% for convenience set laws of physics as a driver property
+RUprop.max_delta = max_delta;
 
 
 %%%% set state of each Road User (RU) %%%%
@@ -222,7 +223,7 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
             E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
             
-            time_diff = temporal_sep(enc,RUprop,max_delta,stat,plots);
+            time_diff = temporal_sep(enc,RUprop,stat,plots);
             
             % positive Tadv means that RU A has a time advantage
             T2        = time_diff.T2;   % Time To Path Overlap
@@ -292,12 +293,7 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             E_thetaA = normrnd(E_theta_A(S, RUprop), RUprop.Etheta_std(1));
             E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
             E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
-            
-            change = coulumbs_desire(S);
-            delta_theta = change.theta(1);
-            
-%             S(1) = take_step(S(1),S(1).speed,S(1).theta+ change.theta(1), max_delta(1)); 
-%             S(2) = take_step(S(2),S(2).speed,S(2).theta+ change.theta(2), max_delta(2));
+                        
             % take step and update states
             S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1)); 
             S(2) = take_step(S(2), E_speedB, E_thetaB, max_delta(2));

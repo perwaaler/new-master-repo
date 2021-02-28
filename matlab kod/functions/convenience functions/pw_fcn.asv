@@ -1,0 +1,11 @@
+function out = pw_fcn(pp,x,t0,tend)
+% function used in 
+if x<=t0
+    out = pp(t0);
+elseif t0<x && x<=tend
+    out = pp(x);
+else
+    out = pp(tend)
+end
+end
+    
