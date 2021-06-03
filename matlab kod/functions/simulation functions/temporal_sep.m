@@ -85,6 +85,7 @@ for k=1:max_iter
 
     candidates = find_closest_ball(candidates,...
                                             pathA, pathB, k, w);
+                                        
     % RU2 is the RU that arrives latest to the collision point
     [D,RU2] = min(candidates.min_dist);
     
@@ -196,7 +197,7 @@ for k=1:max_iter
             % take NEA step
             E_speedA = normrnd(E_speed_A(Z, RUprop), RUprop.Espeed_std(1));
             E_thetaA = normrnd(E_theta_A(Z, RUprop), RUprop.Etheta_std(1));
-            Z(1) = take_step(Z(1), E_speedA, E_thetaA, max_delta(1)); 
+            Z(1) = take_step(Z(1), E_speedA, E_thetaA); 
         else
             % straighten out to prevent going in circles
             if abs(Z(1).theta - state0(1).theta) > pi
@@ -211,7 +212,7 @@ for k=1:max_iter
             % take NEA step
             E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
             E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
-            Z(2) = take_step(Z(2), E_speedB, E_thetaB, max_delta(2));
+            Z(2) = take_step(Z(2), E_speedB, E_thetaB);
         else
             % straighten out to prevent going in circles
             if abs(Z(2).theta - state0(2).theta) > pi

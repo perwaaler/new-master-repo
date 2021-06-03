@@ -153,3 +153,13 @@ mean(bsave)/mean(asave)
 
 [path1,slopes1,K1] = gener_pred_path_iter(state1,max_delta(1),k);
 
+
+
+%% testing the new step algorithm
+% states = gen_random_states();
+% stateA = states{1};
+% stateB = states{2};
+
+
+
+

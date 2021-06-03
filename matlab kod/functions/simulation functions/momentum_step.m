@@ -1,11 +1,12 @@
-function new_state = momentum_step(S,max_delta,free_theta)
+function new_state = momentum_step(S,free_theta)
 % computes next position based on current position, speed and
 % angle. Shows where driver is in next frame if no changes to behaviour are
 % made, i.e. steering wheel and amount of braking are held constant.
 
 RUprop = S.RUprop;
-    
-if nargin==2
+max_delta = RUprop.max_delta(S.id);
+
+if nargin==1
     % allow theta to vary
     free_theta=1;
 end

@@ -1,6 +1,5 @@
 function candidates = find_closest_ball(candidates,...
                                             pathA,pathB,k,w)
-
 % find index of closest neighbours in the other RUs trajectory.
 % Arguments:
 % candidates = set of neighbours that are closest in previous iteration
@@ -27,7 +26,7 @@ candidatesB = candidatesB(candidatesB <= k);
 
 % find distance between last position of A and candidates of B
 diffA = pathA(k) - pathB(candidatesB);
-diffA = sqrt(diffA.*conj(diffA));
+diffA = abs(diffA);
 
 % update closest position in path of B
 [min_distA,closest{2}] = min(diffA);
