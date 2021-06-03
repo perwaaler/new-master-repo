@@ -16,7 +16,7 @@ plots.xinit      = 6;
 plots.EAmode     = 0;
 plots.dec_cols   = ["black", "green", "cyan", "red", "yellow", "magenta"];
 
-disable_crash = 0;                       % disable collision and EA mode to record free movement patterns
+disable_crash = 1;                       % disable collision and EA mode to record free movement patterns
 use_history = 0;
 use_dp_model = 0;                        % set to 1 if you want to use estimated reaction model
 
@@ -97,6 +97,7 @@ RUprop.alert = beta_rnd(.8,.08,2);
 % determine how often RU assesses success of decision
 RUprop.decision_freq = [2,2];
 RUprop.aggression = beta_rnd(0.5,0.02,2);
+RUprop.id = [1,2];
 
 %%%% set laws of movement / laws of momentum %%%%
 max_delta(1).dspeed = beta_rnd(0.01*RUprop.weight(1)^-1, 1e-4);
@@ -223,7 +224,8 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
             E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
             E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
             
-            time_diff = temporal_sep(enc,RUprop,stat,plots);
+%             time_diff = temporal_sep(enc,RUprop,stat,plots);
+            Tsep = spline_pred_path(stateA,stateB,k,sparse_ind,genInfo)
             
             % positive Tadv means that RU A has a time advantage
             T2        = time_diff.T2;   % Time To Path Overlap
@@ -248,7 +250,7 @@ ttc_enc_i(1) = calc_ttc(S,RUprop.r);
                 end
                 
 %                 plots.col(1) = decision2color(decision(1));
-                S(1) = take_step(S(1), S(1).speed+actionA(1), S(1).theta+actionA(2), max_delta(1));
+                S(1) = take_step(S(1), S(1).speed + actionA(1), S(1).theta+actionA(2), max_delta(1));
             else
                 S(1) = take_step(S(1), E_speedA, E_thetaA, max_delta(1));
             end

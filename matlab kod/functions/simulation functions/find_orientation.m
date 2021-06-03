@@ -4,7 +4,6 @@ function side = find_orientation(RUinfo,ZZ,RUprop)
 % dataframes for the whole encounter.
 % RUinfo = [RU1, RU1_pos, RU2_pos].
 
-max_delta = RUprop.max_delta;
 % extract information
 RU1   = RUinfo(1);
 idRU1 = RUinfo(2);
@@ -21,7 +20,7 @@ stateB = states{2};
 if stateA.speed==0
     E_speedA = normrnd(E_speed_A(stateA, RUprop), RUprop.Espeed_std(1));
     E_thetaA = normrnd(E_theta_A(stateA, RUprop), RUprop.Etheta_std(1));
-    stateAdesired = take_step(stateA, E_speedA, E_thetaA, max_delta(1));
+    stateAdesired = take_step(stateA, E_speedA, E_thetaA);
     A0 = stateA.pos;
     A1 = stateAdesired.pos;
 else
@@ -33,7 +32,7 @@ if stateB.speed==0
     E_speedB = normrnd(RUprop.avg_speed(2),  RUprop.Espeed_std(2));
     E_thetaB = normrnd(pi,                   RUprop.Etheta_std(2));
     % take step and update states
-    stateBdesired = take_step(stateB, E_speedB, E_thetaB, max_delta(2));
+    stateBdesired = take_step(stateB, E_speedB, E_thetaB);
     B0 = stateB.pos;
     B1 = stateBdesired.pos;
 else

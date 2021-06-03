@@ -1,4 +1,4 @@
-function path = gener_pred_path_iter(state,max_delta,k,sparse_ind)
+function path = gener_pred_path_iter(state, k, sparse_ind)
 % iteratively computes the k next positions assuming constant 
 % change of speed and angle. tstop is the predicted time untill RU is
 % standing still. If he is accelarating this time is inf.
@@ -25,7 +25,7 @@ for i=1:k
         free_theta = 0;
     end
     
-    state = momentum_step(state,max_delta(1),free_theta);
+    state = momentum_step(state,free_theta);
     
     if state.speed==0
         % RU has stopped. return length of path
@@ -37,13 +37,18 @@ for i=1:k
     
 end
 
+
+n1 = length(sparse_ind);
 sparse_ind = sparse_ind(sparse_ind<=k);
+n2 = length(sparse_ind);
 
 path.pos = pos(sparse_ind);
+path.padded_pos = [path.pos,ones(1,n1-n2)*path.pos(end)];
 path.ind = sparse_ind;
 path.slope = tan(state.theta);
 path.length = k;
 path.tstop = tstop;
+path.n_predpos = length(path.ind);
 
 % startslope = complex2cart(exp(1i*theta0));
 % endslope   = complex2cart(exp(1i*state.theta));

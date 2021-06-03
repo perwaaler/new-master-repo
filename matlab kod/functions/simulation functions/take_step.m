@@ -1,10 +1,13 @@
-function new_state = take_step(S, desired_speed, desired_angle, max_delta)
+function new_state = take_step(S, desired_speed, desired_angle, free_theta)
 % Takes a step given current state and desired state.
 
+max_delta = S.RUprop.max_delta(S.id);
+
 % if only S is given, predict next step using constant dtheta and dspeed
-if nargin == 1
-    new_state = momentum_step(S,max_delta);
-    
+if     nargin==1
+    new_state = momentum_step(S);
+elseif nargin==2
+    new_state = momentum_step(S,free_theta); 
 else
 % discrepency between desired and current angle:
 des_delta_theta = desired_angle - S.theta;

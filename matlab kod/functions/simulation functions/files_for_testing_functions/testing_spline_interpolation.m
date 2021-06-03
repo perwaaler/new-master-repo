@@ -131,80 +131,134 @@ end
 % plot_circle(X(100,1) + 1i*X(100,2),.3,"green")
 
 %% Generating paths and doing trajectory and path-analysis
+n = 50;
 
-for j=1:30
+time.genp  = zeros(1,n);
+time.ppfit = zeros(1,n);
+time.minim1 = zeros(1,n);
+time.minim2 = zeros(1,n);
+time.minim2 = zeros(1,n);
+time.minim2 = zeros(1,n);
+time.pathanal = zeros(1,n);
+time.fcn = zeros(1,n);
+time.sep = zeros(1,n);
+
 % generate 2 paths:
-stateA.pos = normrnd(-2,1) + normrnd(-2.5,3)*1i;
-stateA.theta = normrnd(deg2rad(10),deg2rad(7));
-stateA.dtheta = normrnd(deg2rad(10),deg2rad(6));
-stateA.speed = gam_rnd(0.16,0.02);
-stateA.dspeed = normrnd(-0.01,0.03);  
+stateA.pos    = normrnd(-2,1) + normrnd(-2.5,2)*1i;
+stateA.theta  = normrnd(deg2rad(10),deg2rad(7));
+stateA.dtheta = normrnd(deg2rad(10), deg2rad(6));
+stateA.speed  = max([0,gam_rnd(0.3,0.02)-0.05]);
+stateA.dspeed = normrnd(0,0.03);  
 stateA.RUprop = RUprop;
 stateA.id     = 1;
 
-stateB.pos = normrnd(2,1) + normrnd(1,1)*1i;
-stateB.theta = normrnd(pi,deg2rad(10));
+stateB.pos    = normrnd(2,1) + normrnd(1,1)*1i;
+stateB.theta  = normrnd(pi,deg2rad(10));
 stateB.dtheta = normrnd(0,deg2rad(3));
-stateB.speed = normrnd(0.16,0.01);
+stateB.speed  = max([0,gam_rnd(0.3,0.02)-0.1]);
 stateB.dspeed = gam_rnd(0.01,0.001);
 stateB.RUprop = RUprop;
-stateB.id = 2;
-pauseL = 1;
+stateB.id     = 2;
+plotit        = 1;
+pauseL        = 2;
 
-% ind = floor((1:k) + ((1:k)/5).^2 + ((1:k)/10).^3);
-% ind = ind(ind<k);
-% path2.pos = path2.pos(ind);
+for j=1:n
+
+% stateA = enc.states{stat.frame}(1);
+% stateB = enc.states{stat.frame}(2);
+states = gen_random_states();
+stateA = states{1};
+stateB = states{2};
+
+tic
+temporal_sep(enc,RUprop,stat,plots);
+time.sep(j) = toc;
+
+tic
+% path_analysis(ind,stateA,stateB,opt,r,0);
+time.fcn(j) = toc;
+
 
 % k is the total path length. k is number of steps taken, or how far into
 % the future the path is generated.
-k = 80; 
-path1 = gener_pred_path_iter(stateA,max_delta(1),k,ind);
-path2 = gener_pred_path_iter(stateB,max_delta(2),k,ind);
-k1     = path1.length;
-k2     = path2.length;
-tstop1 = path1.tstop;
-tstop2 = path2.tstop;
+tic
 
+tic
+k   = 80;
+% ind = floor((1:k) + ((1:k)/4.5).^2 + ((1:k)/9).^3);
+% ind = ind(ind<k);
+% path2.pos = path2.pos(ind);
+paths = gener_pred_path_iter_test(stateA,stateB, k, sparse_ind);
+pathA = paths{1};
+pathB = paths{2};
+
+% pathA  = gener_pred_path_iter(stateA, k,ind);
+% pathB  = gener_pred_path_iter(stateB, k,ind);
+k1     = pathA.length;
+k2     = pathB.length;
+tstop1 = pathA.tstop;
+tstop2 = pathB.tstop;
+time.genp(j) = toc;
+
+% dists = abs(pathA.padded - pathB.padded);
+% loc_extr = find_vector_min(dists);
+
+if plotit==1
 clf
-hold on
-for i=1:length(path1.ind)
-%     plot_circle(path1.pos(i),0.3,"green");
-    plot(path1.pos(i),'o','color','green');
-end
-for i=1:length(path2.ind)
-    plot_circle(path2.pos(i),0.3,"cyan");
+for i=1:length(pathA.padded)
+    a = plot_circle(pathA.padded(i),0.3,"green");
+    if i==length(pathA.s_ind)
+        a.Color = "yellow";
+    end
+    a = plot_circle(pathB.padded(i),0.3,"cyan");
+    if i==length(pathB.s_ind)
+        a.Color = "yellow";
+    end
 end
 % color starting points red
-a=plot_circle(path1.pos(1),0.3,"red");
-a.LineWidth=1;
-b=plot_circle(path2.pos(1),0.3,"red");
-b.LineWidth=1;
+plot_circle(pathA.pos_dyn(1), 0.3, col2trip("grey"),2);
+plot_circle(pathB.pos_dyn(1), 0.3, col2trip("grey"),2);
+plot_circle(pathA.padded(pathA.t_proxA), 0.3, col2trip("orange"),2);
+plot_circle(pathB.padded(pathB.t_proxB), 0.3, col2trip("orange"),2);
+end
+tic
 
 %%% translate complex coordinates to cartesian coordinates
-x1 = real(path1.pos);
-y1 = imag(path1.pos);
+x1 = real(pathA.pos_dyn);
+y1 = imag(pathA.pos_dyn);
 
-x2 = real(path2.pos);
-y2 = imag(path2.pos);
+x2 = real(pathB.pos_dyn);
+y2 = imag(pathB.pos_dyn);
 
 % parameter values (time)
-t1 = path1.ind - 1;
-t2 = path2.ind - 1;
+t1 = pathA.s_ind - 1;
+t2 = pathB.s_ind - 1;
+
 % corresponding output values (2d-positions)
 v1 = [x1;y1];
 v2 = [x2;y2];
 
+% special case when the RU is standing still
+if size(v1,2)==1
+    v1 = [v1,v1]; %#ok<*AGROW>
+    t1 = [0,1];
+end
+if size(v2,2)==1
+    v2 = [v2,v2];
+    t2 = [0,1];
+end
+
+
 % fit splines
-splineA = pchip(t1,v1);
-splineB = pchip(t2,v2);
+splineA = makima(t1,v1);
+splineB = makima(t2,v2);
 ppA =@(t) ppval(splineA,t);
 ppB =@(t) ppval(splineB,t);
-
+time.ppfit(j) = toc;
 % create piecewise fcn which ensures no crazy behviour for RUs that have
 % stopped
 ppA =@(t) pw_fcn(ppA,t,tstop1);
 ppB =@(t) pw_fcn(ppB,t,tstop2);
-
 
 % prevent algorithm from selecting times outside of the generated path if
 % the acceleration is negative
@@ -228,29 +282,67 @@ d_min_t  =@(t) norm(ppA(t) - ppB(t))*...
 
 %%%% optimization %%%%
 % find proximity points, minimum sep. points, and corresponding times
+opt = optimset('TolX',0.01,'MaxIter',10,'Display','off');
+% t0 = min(t0_cand);
+% t0_l = max([0,t0 - 6]);
+% t0_r = min([k,t0 + 1]);
 tic
-options = optimset('TolX',1);
-[t_prox,d_prox] = fminsearch(d_prox_t, [1,1],    options);
-[t_min,d_min]   = fminsearch(d_min_t, t_prox(1), options);
-toc
+% [lbnd,rbnd] = search_range_dmin(loc_extr, ind);
+tmin0 = pathA.t_min;
+lbnd = tmin0 - 1;
+ubnd = tmin0 + 1;
+[t_min,d_min] = fminbnd(d_min_t, lbnd, rbnd, opt);
+time.minin1(j) = toc;
 
+tic
+t_prox = [pathA.t_proxA, pathB.t_proxB];
+[t_prox,d_prox] = fminsearch(d_prox_t, t_prox, opt);
+
+[t_prox(1), dproxA] = findTTO(d_prox_t, t_prox, r, 1,[k1,k2],opt);
+[t_prox(2), dproxB] = findTTO(d_prox_t, t_prox, r, 2,[k1,k2],opt);
+
+% [t_prox(1,:),d_prox(1)] = fminsearch(d_prox_t, [t_min,t_min], opt);
+% t_prox = t_prox(1,:);
+% [t_prox(2,:),d_prox(2)] = fminsearch(d_prox_t, flip(t_prox(1,:)), opt);
+% [d_prox, I_global] = min(d_prox);
+% t_prox = t_prox(I_global,:);
+time.minim21(j) = toc; 
+
+tic
+% if d_prox < 0.6
+%     [t_prox(1), dproxA] = findTTO(d_prox_t, t_prox, r, 1,[k1,k2],opt);
+%     [t_prox(2), dproxB] = findTTO(d_prox_t, t_prox, r, 2,[k1,k2],opt);
+% end
+time.minim22(j) = toc;
+
+
+% for i=1:2
+%     for j=1:2
+%     [t_prox,d_prox] = fminsearch(d_prox_t,[] , options);
+%     pause(1)
+%     end
+% end
+% 
+% 
+% a=plot_circle(cart2complex(ppA(t_prox(1))),.3,"black")
+% a.LineWidth=2
+% a=plot_circle(cart2complex(ppB(t_prox(2))),.3,"black")
+% a.LineWidth=2
+
+tic
 % find tangent lines at proximity and minimum points
 h = 0.0001;
-if k1-1 < t_prox(1)
-    slope_proxA = path1.slope;
-else
-    slope_proxA = differentiate(ppA, t_prox(1),h);
-    slope_proxA = slope_proxA(2)/slope_proxA(1);
-end
-if k1-1 < t_min
-    slope_minA  = path1.slope;
-else
-    slope_minA = differentiate(ppA,t_min,h);
-    slope_minA = slope_minA(2)/slope_minA(1);
-end
-slope_proxB = differentiate(ppB, t_prox(2), h);
-slope_minB  = differentiate(ppB, t_min,     h);
- 
+% if k1-1 < t_prox(1)
+%     slope_proxA = pathA.slope;
+% else
+%     slope_proxA = differentiate(ppA, t_prox(1),h);
+%     slope_proxA = slope_proxA(2)/slope_proxA(1);
+% end
+
+slope_proxA = find_slope(pathA,t_prox(1),ppA,h);
+slope_proxB = find_slope(pathB,t_prox(2),ppB,h);
+slope_minA  = find_slope(pathA,t_min,ppA,h); 
+slope_minB  = find_slope(pathB,t_min,ppB,h); 
 
 % compute proximity points and minimality points
 Aprox = cart2complex(ppA(t_prox(1)));
@@ -259,22 +351,42 @@ Amin  = cart2complex(ppA(t_min));
 Bmin  = cart2complex(ppB(t_min));
 
 Aprox_pert = Aprox + 1 + 1i*slope_proxA;
-Bprox_pert = Bprox + slope_proxB(1) + 1i*slope_proxB(2);
+Bprox_pert = Bprox + 1 + 1i*slope_proxB;
 Amin_pert  = Amin + 1 + 1i*slope_minA;
-Bmin_pert  = Bmin  + slope_minB(1)  + 1i*slope_minB(2);
-
-ta = t_prox(1);
-tb = t_prox(2);
-Tadv = ta - tb;
+Bmin_pert  = Bmin + 1 + 1i*slope_minB;
 
 orient(1) = find_side(1 + 1i*slope_minA,Bmin-Amin);
-orient(2) = find_side(slope_minB(1) + 1i*slope_minB(2),Amin-Bmin);
-
+orient(2) = find_side(1 + 1i*slope_minB,Amin-Bmin);
+time.pathanal(j) = toc;
 
 %%%% plotting %%%%
 % points to evaluate function (for plotting only)
-tt1 = linspace(0,path1.ind(end),200);
-tt2 = linspace(0,path2.ind(end),200);
+if plotit==1
+    
+clf
+subplot(121)
+plot(dists)
+
+subplot(122)
+hold on
+for i=1:length(ind)
+    a = plot_circle(pathA.padded(i),0.3,"green");
+    if i==length(pathA.s_ind)
+        a.Color = "yellow";
+    end
+    a = plot_circle(pathB.padded(i),0.3,"cyan");
+    if i==length(ind)
+        a.Color = "yellow";
+    end
+end
+% color starting points red
+a = plot_circle(pathA.pos_dyn(1), 0.3, col2trip("grey"));
+a.LineWidth = 2;
+b = plot_circle(pathB.pos_dyn(1), 0.3, col2trip("grey"));
+b.LineWidth = 2;
+
+tt1 = linspace(0,k1,200);
+tt2 = linspace(0,k2,200);
 V1 = ppval(splineA, tt1);
 V2 = ppval(splineB, tt2);
 
@@ -286,9 +398,9 @@ a.LineWidth=1;
 
 % plot proximity points
 a=plot_circle(Amin,.3,"black");
-a.LineWidth=1;
+a.LineWidth=2;
 b=plot_circle(Bmin,.3,"black");
-b.LineWidth=1;
+b.LineWidth=2;
 drawline([Amin, Amin_pert],'black');
 drawline([Bmin, Bmin_pert],'black');
 title(sprintf("(%s,%s), t_{min} = %0.01f, t_{prox}=(%0.01f,%0.01f)",...
@@ -296,14 +408,85 @@ title(sprintf("(%s,%s), t_{min} = %0.01f, t_{prox}=(%0.01f,%0.01f)",...
 
 xlim([-10,10])
 
-a = plot_circle(Aprox,.3,"magenta");
-a.LineWidth = 1;
-b = plot_circle(Bprox,.3,"magenta");
-b.LineWidth = 1;
+a = plot_circle(Aprox,.3,col2trip("darkgreen"));
+a.LineWidth = 2;
+b = plot_circle(Bprox,.3,col2trip("darkblue"));
+b.LineWidth = 2;
 
 pause(pauseL)
 end
 
+time.total(j) = toc;
 
+end
+
+
+m.gnp   = median(time.genp);    
+m.ppfit = median(time.ppfit);
+m.minim1 = median(time.minim1);
+m.minim21 = median(time.minim21);
+m.minim22 = median(time.minim22);
+m.anal  = median(time.pathanal);
+m.fcn = median(time.fcn);
+m.sep = median(time.sep);
+m.tot = sum([m.gnp,m.ppfit,m.minim1,m.minim21,m.minim22,m.anal]);
+m
+
+clf
+subplot(121)
+plot(1:5,[m.gnp, m.ppfit, m.minim1, m.minim21, m.minim22],'o','Color','green');
+hold on
+plot(6, m.tot,'x','Color',col2trip('darkblue'));
+plot(7, m.fcn,'x','Color',col2trip('purple'));
+plot(8, m.sep,'x','Color',col2trip('red'));
+xlim([0,10])
+
+subplot(122)
+hold on
+for i=1:length(ind)
+    a = plot_circle(pathA.padded_pos(i),0.3,"green");
+    if i==length(pathA.s_ind)
+        a.Color = "yellow";
+    end
+    a = plot_circle(pathB.padded_pos(i),0.3,"cyan");
+    if i==length(ind)
+        a.Color = "yellow";
+    end
+end
+% color starting points red
+a = plot_circle(pathA.pos_dyn(1), 0.3, col2trip("grey"));
+a.LineWidth = 2;
+b = plot_circle(pathB.pos_dyn(1), 0.3, col2trip("grey"));
+b.LineWidth = 2;
+
+tt1 = linspace(0,k1,200);
+tt2 = linspace(0,k2,200);
+V1 = ppval(splineA, tt1);
+V2 = ppval(splineB, tt2);
+
+% plot spline curve fits
+a=plot(V1(1,:),V1(2,:),'-','color','green');
+a.LineWidth=1;
+a=plot(V2(1,:),V2(2,:),'-','color','blue');
+a.LineWidth=1;
+
+% plot proximity points
+a=plot_circle(Amin,.3,"black");
+a.LineWidth=2;
+b=plot_circle(Bmin,.3,"black");
+b.LineWidth=2;
+drawline([Amin, Amin_pert],'black');
+drawline([Bmin, Bmin_pert],'black');
+title(sprintf("(%s,%s), t_{min} = %0.01f, t_{prox}=(%0.01f,%0.01f)",...
+                            orient(1),orient(2),t_min,ta,tb))
+
+xlim([-10,10])
+
+a = plot_circle(Aprox,.3,col2trip("darkgreen"));
+a.LineWidth = 2;
+b = plot_circle(Bprox,.3,col2trip("darkblue"));
+b.LineWidth = 2;
+
+pause(pauseL)
 
 
